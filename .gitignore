@@ -1,0 +1,11 @@
+**.nc
+**.png
+**.mp4
+**.pdf
+**.tar.gz
+**.tar
+
+**/BLD/**
+**/WORK/**
+**.DS_STORE
+**.svn
