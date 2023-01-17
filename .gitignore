@@ -9,3 +9,4 @@
 **/WORK/**
 **.DS_STORE
 **.svn
+/mk/**
