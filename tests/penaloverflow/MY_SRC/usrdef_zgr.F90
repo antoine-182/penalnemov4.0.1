@@ -146,7 +146,7 @@ CONTAINS
       !------------------------ smoothing along x ---------------------!
       !------------------------ ----------------- ---------------------!
       z3d (:,:,:) = rpot(:,:,:)
-      DO jx = 0, nn_bvpsmg
+      DO jx = 1, nn_bvpsmg
         IF(lwp) WRITE(numout,*) ' smooth  zer ',jx
         DO jk = 1,jpk
             DO jj = 1,jpj
@@ -183,35 +183,27 @@ CONTAINS
       !
       ! CALL lbc_lnk( 'usrdef_zgr', rpot, 'T', 1._wp)
       !
-      !!! ainsi rn_abp est la premiere cellule ocean
-      z3d(:,:,:) = rpot(:,:,:)
-      DO jk = 1, jpk
-        DO jj = 1, jpj
-          DO ji = 1, jpim1
-            IF ( rpot(ji+1,jj,jk) <= rn_abp) z3d(ji,jj,jk) = rn_abp * 0.1_wp
-          END DO
-        END DO
-      END DO
-      rpot(:,:,:) = z3d(:,:,:)
       !!------------------------ broadcast to U ---------------------!
       !------------------------ --------------- ---------------------!
       rpou(:,:,:) = 1._wp ; rpow(:,:,:) = 1._wp
-      ! demisomme
-      DO jk = 2, jpk
-         rpow(:,:,jk) = 0.5_wp * ( rpot(:,:,jk) + rpot(:,:,jk-1) )   ! sens z > 0
-      END DO
-      DO ji = 1, jpim1
-         rpou(ji,:,:) = 0.5_wp * ( rpot(ji,:,:) + rpot(ji+1,:,:) )
-      END DO
-      ! mininmum
-      ! DO jk = 2, jpk
-      !   DO jj= 1, jpj
-      !     DO ji = 1, jpim1
-      !       rpow(ji,jj,jk) = MIN( rpot(ji,jj,jk), rpot(ji,jj,jk-1) )   ! sens z > 0
-      !       rpou(ji,jj,jk) = MIN( rpot(ji,jj,jk), rpot(ji+1,jj,jk) )
-      !     END DO
-      !   END DO
-      ! END DO
+
+      IF (nn_cnp == 0) THEN   ! demisomme
+        DO jk = 2, jpk
+           rpow(:,:,jk) = 0.5_wp * ( rpot(:,:,jk) + rpot(:,:,jk-1) )   ! sens z > 0
+        END DO
+        DO ji = 1, jpim1
+           rpou(ji,:,:) = 0.5_wp * ( rpot(ji,:,:) + rpot(ji+1,:,:) )
+        END DO
+      ELSE IF (nn_cnp == 1) THEN ! mininmum
+        DO jk = 2, jpk
+          DO jj= 1, jpj
+            DO ji = 1, jpim1
+              rpow(ji,jj,jk) = MIN( rpot(ji,jj,jk), rpot(ji,jj,jk-1) )   ! sens z > 0
+              rpou(ji,jj,jk) = MIN( rpot(ji,jj,jk), rpot(ji+1,jj,jk) )
+            END DO
+          END DO
+        END DO
+      ENDIF
       !
       !!------------------------ inverse ---------------------!
       DO jk = 1, jpk
@@ -320,9 +312,9 @@ CONTAINS
 #if defined key_bvp
        !
        ! 2) definition mask
-        k_bot(:,:) = jpkm1 ! avant dernier niveau (defini au point T)
+        k_bot(:,:) = jpkm1 ! last wet cell
         DO jk = jpkm1, 1, -1
-           WHERE( rpot(:,:,jk) < rn_abp )   k_bot(:,:) = jk-1
+           WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk,jpkm1)
         END DO
        ! 3) penalisation of the vertical scale factors (done in domain.F90)
         DO jk = 1, jpk                      ! initialization to the reference z-coordinate

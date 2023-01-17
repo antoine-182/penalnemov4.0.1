@@ -28,13 +28,13 @@
    rn_T1       =     20.   !  surrounding water (default 20)
    rn_T0       =     10.   !  dense water (default 10)
   !
-   rn_abp = 0.01      ! alpha boundary parameter                                        [-]
-   nn_cnp = 100         ! number of bins for integration /or/ width of the tanh function [-]
-   rn_fsp = 0.        ! friction parameter 1/epsilon of the permeability                [1/s]
-       nn_fsp = 12        ! 0 - explicit
-                         ! 1 - implicit - 12 in matrix
-                         ! 2 - splitted
-   nn_bvpsmg = 3        ! smoothing of porosity /z (-1 min)
+   rn_abp = 0.0001      ! alpha boundary parameter                                        [-]
+   nn_cnp = 1           ! =0/1 rpou,rpow halfsum / minimum [-]
+   rn_fsp = 500.        ! friction parameter 1/epsilon of the permeability                [1/s]
+       nn_fsp = 12          ! 0 - explicit
+                            ! 1 - implicit - 12 in matrix
+                            ! 2 - splitted
+   nn_bvpsmg = 0        ! smoothing of porosity /z
 /
 !
 !-----------------------------------------------------------------------
@@ -43,11 +43,8 @@
    nn_no       =       0   !  job number (no more used...)
    cn_exp      =   "OVF"  !  experience name
    nn_it000    =       1   !  first time step
-   !nn_itend    =   510   ! here 17h of simulation  (dt= 120s)
-   !nn_itend    =   1020   ! here 17h of simulation  (dt= 60s)
-   !nn_itend    =   2040   ! here 17h of simulation  (dt= 30s)
    nn_itend    =   6120   ! here 17h of simulation  (dt=10s)
-   !nn_itend    =   61200   ! here 17h of simulation  (dt=1s)
+   !nn_itend    =   1   ! here 17h of simulation  (dt=1s)
    nn_istate   =       1   !  output the initial state (1) or not (0)
    nn_stock    =    6120   !  frequency of creation of a restart file (modulo referenced to 1)
    nn_write    =      60   !  frequency of write in the output file   (modulo referenced to nn_it000)
@@ -64,7 +61,7 @@
 !-----------------------------------------------------------------------
    rn_rdt      =   10.     !  time step for the dynamics (and tracer if nn_acc=0)
    !                        ! 120s is okay in UP3 and FCT33 (but a bit noisy)
-  !                         ! 60s is better
+   !                         ! 60s is better
    rn_atfp     =    0.1    !  asselin time filter parameter
    !
    ln_linssh   = .true.   !  =T  linear free surface  ==>>  model level are fixed in time
@@ -190,8 +187,8 @@
 &namtra_adv    !   advection scheme for tracer                          (default: NO selection)
 !-----------------------------------------------------------------------
    ln_traadv_cen = .false. !  2nd order centered scheme
-      nn_cen_h   =  4            !  =2/4, horizontal 2nd order CEN / 4th order CEN
-      nn_cen_v   =  4            !  =2/4, vertical   2nd order CEN / 4th order COMPACT
+      nn_cen_h   =  2            !  =2/4, horizontal 2nd order CEN / 4th order CEN
+      nn_cen_v   =  2            !  =2/4, vertical   2nd order CEN / 4th order COMPACT
    ln_traadv_fct = .true. !  FCT scheme
       nn_fct_h   =  3            !  =2/4, horizontal 2nd / 4th order
       nn_fct_v   =  3            !  =2/4, vertical   2nd / COMPACT 4th order
