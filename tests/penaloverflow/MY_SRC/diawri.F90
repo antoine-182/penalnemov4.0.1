@@ -1018,6 +1018,9 @@ CONTAINS
       !!      File 'output.abort.nc' is created in case of abnormal job end
       !!----------------------------------------------------------------------
       CHARACTER (len=* ), INTENT( in ) ::   cdfile_name      ! name of the file created
+      INTEGER ::   ji, jj, jk       ! dummy loop indices
+      REAL(wp), DIMENSION(jpi,jpj)     ::   z2d   ! 2D workspace
+      REAL(wp), DIMENSION(jpi,jpj,jpk) ::   z3d, z3d_Cu   ! 3D workspace
       !!
       INTEGER :: inum
       !!----------------------------------------------------------------------
