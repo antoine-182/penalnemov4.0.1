@@ -373,9 +373,9 @@ CONTAINS
       CALL lbc_lnk( 'sshwzv', Cu_adv, 'T', 1. )
       ! CALL lbc_lnk( 'sshwzv', z3d,    'T', 1. )
       !
-      CALL iom_put("Courant"  ,Cu_adv)
-      CALL iom_put("Courant_u",Cu_adv-z3d)
-      CALL iom_put("Courant_w",z3d)
+      !CALL iom_put("Courant"  ,Cu_adv)
+      !CALL iom_put("Courant_u",Cu_adv-z3d)
+      !CALL iom_put("Courant_w",z3d)
       !
       IF( MAXVAL( Cu_adv(:,:,:) ) > Cu_min ) THEN       ! Quick check if any breaches anywhere
          DO jk = jpkm1, 2, -1                           ! or scan Courant criterion and partition
@@ -416,9 +416,9 @@ CONTAINS
          Cu_adv(:,:,:) = 0._wp                          ! Reuse array to output coefficient below and in stp_ctl
          wi    (:,:,:) = 0._wp
       ENDIF
-      CALL iom_put("wimp",wi)
-      CALL iom_put("wi_cff",Cu_adv)
-      CALL iom_put("wexp",wn)
+      !CALL iom_put("wimp",wi)
+      !CALL iom_put("wi_cff",Cu_adv)
+      !CALL iom_put("wexp",wn)
       !
       IF( ln_timing )   CALL timing_stop('wAimp')
       !
