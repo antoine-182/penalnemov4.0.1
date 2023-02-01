@@ -350,9 +350,9 @@ CONTAINS
                      &                                 MIN( e1v(ji,jj-1)*e3v_n(ji,jj-1,jk)*vn(ji,jj-1,jk), 0._wp ) )   &
                      &                               * r1_e1e2t(ji,jj)                                                 &
                      &                             ) * z1_e3t
-                  ! z3d(ji,jj,jk) = 2._wp * rdt *   ( MAX( rpow(ji,jj,jk  )*wn(ji,jj,jk  ) , 0._wp )              -   &
-                  !    &                              MIN( rpow(ji,jj,jk+1)*wn(ji,jj,jk+1) , 0._wp ) )                &
-                  !    &                             * z1_e3t
+                  z3d(ji,jj,jk) = 2._wp * rdt *   ( MAX( rpow(ji,jj,jk  )*wn(ji,jj,jk  ) , 0._wp )              -   &
+                     &                              MIN( rpow(ji,jj,jk+1)*wn(ji,jj,jk+1) , 0._wp ) )                &
+                     &                             * z1_e3t
 #else
                   Cu_adv(ji,jj,jk) = 2._wp * rdt * ( ( MAX( wn(ji,jj,jk) , 0._wp ) - MIN( wn(ji,jj,jk+1) , 0._wp ) )   &
                      &                             + ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk)*un(ji  ,jj,jk), 0._wp ) -   &
@@ -362,9 +362,9 @@ CONTAINS
                      &                                 MIN( e1v(ji,jj-1)*e3v_n(ji,jj-1,jk)*vn(ji,jj-1,jk), 0._wp ) )   &
                      &                               * r1_e1e2t(ji,jj)                                                 &
                      &                             ) * z1_e3t
-                 ! z3d(ji,jj,jk) = 2._wp * rdt *   ( MAX( wn(ji,jj,jk  ) , 0._wp )              -   &
-                 !    &                              MIN( wn(ji,jj,jk+1) , 0._wp ) )                &
-                 !    &                             * z1_e3t
+                  z3d(ji,jj,jk) = 2._wp * rdt *   ( MAX( wn(ji,jj,jk  ) , 0._wp )              -   &
+                     &                              MIN( wn(ji,jj,jk+1) , 0._wp ) )                &
+                     &                             * z1_e3t
 #endif
                END DO
             END DO
@@ -373,9 +373,9 @@ CONTAINS
       CALL lbc_lnk( 'sshwzv', Cu_adv, 'T', 1. )
       ! CALL lbc_lnk( 'sshwzv', z3d,    'T', 1. )
       !
-      ! CALL iom_put("Courant"  ,Cu_adv)
-      ! CALL iom_put("Courant_u",Cu_adv-z3d)
-      ! CALL iom_put("Courant_w",z3d)
+      CALL iom_put("Courant"  ,Cu_adv)
+      CALL iom_put("Courant_u",Cu_adv-z3d)
+      CALL iom_put("Courant_w",z3d)
       !
       IF( MAXVAL( Cu_adv(:,:,:) ) > Cu_min ) THEN       ! Quick check if any breaches anywhere
          DO jk = jpkm1, 2, -1                           ! or scan Courant criterion and partition
