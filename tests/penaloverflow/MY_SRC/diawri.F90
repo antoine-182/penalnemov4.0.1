@@ -112,7 +112,7 @@ CONTAINS
       REAL(wp)::   zztmp , zztmpx   ! local scalar
       REAL(wp)::   zztmp2, zztmpy   !   -      -
       REAL(wp), DIMENSION(jpi,jpj)     ::   z2d   ! 2D workspace
-      REAL(wp), DIMENSION(jpi,jpj,jpk) ::   z3d, z2d1, z3d2,z3d3   ! 3D workspace
+      REAL(wp), DIMENSION(jpi,jpj,jpk) ::   z3d, z3d1, z3d2,z3d3   ! 3D workspace
       !!----------------------------------------------------------------------
       !
       IF( ln_timing )   CALL timing_start('dia_wri')
