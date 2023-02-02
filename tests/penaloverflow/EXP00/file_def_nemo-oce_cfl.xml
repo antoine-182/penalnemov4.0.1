@@ -16,8 +16,8 @@
     <field field_ref="ssh"          name="ssh_inst"     long_name="instantaneous sea surface height above geoid"  operation="instant" />
     <field field_ref="rpot"          name="rpot"     long_name="porosity"  operation="instant" />
 	<field field_ref="cflu"          name="cflu"     long_name="porosity"  operation="instant" />
+    <field field_ref="lipz"          name="lipz"     long_name="porosity"  operation="instant" />
     <field field_ref="lipzU"          name="lipzU"     long_name="porosity"  operation="instant" />
-    <field field_ref="lipzW"          name="lipzW"     long_name="porosity"  operation="instant" />
     <field field_ref="Courant"          name="Courant"     long_name="porosity"  operation="instant" />
     <field field_ref="Courant_u"          name="Courant_u"     long_name="porosity"  operation="instant" />
     <field field_ref="Courant_w"          name="Courant_w"     long_name="porosity"  operation="instant" />
