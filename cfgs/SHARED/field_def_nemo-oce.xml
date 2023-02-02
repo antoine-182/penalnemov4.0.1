@@ -19,9 +19,14 @@
       <!-- T grid BVP -->
       <field_group id="grid_T" grid_ref="grid_T_2D">
         <field id="rpot"         long_name="porosity parameter T"      standard_name="porosity_phi" grid_ref="grid_T_3D"         unit=""    />
-        <field id="lipz"         long_name="Lipschitz criteria T"      standard_name="lipz" grid_ref="grid_T_3D"         unit=""    />
-        <field id="lipzU"         long_name="Lipschitz criteria U"      standard_name="lipzU" grid_ref="grid_T_3D"         unit=""    />
-      </field_group>
+        <field id="lipst"         long_name="Lipschitz criteria T"      standard_name="lipz" grid_ref="grid_T_3D"         unit=""    />
+        <field id="rlipst"         long_name="ratio Lipschitz criteria U"      standard_name="lipzU" grid_ref="grid_T_3D"         unit=""    />
+        <field id="rphiu_t"      long_name="rphiu_t number"                                                                 unit="#"   grid_ref="grid_T_3D" />
+        <field id="rphiw_t"      long_name="rphiw_t number"                                                                 unit="#"   grid_ref="grid_T_3D" />
+        <field id="cflt"      long_name="Courant number tracer "                                                                 unit="#"   grid_ref="grid_T_3D" />
+        <field id="cfltu"      long_name="Courant number tracer horizontal"                                                                 unit="#"   grid_ref="grid_T_3D" />
+        <field id="cfltw"      long_name="Courant number tracer vertical"                                                                 unit="#"   grid_ref="grid_T_3D" />
+        </field_group>
 
       <!-- U grid BVP -->
       <field_group id="grid_U" grid_ref="grid_U_2D">
@@ -33,6 +38,8 @@
         <field id="cfluw"         long_name="cfluw"      standard_name="cfluw"    grid_ref="grid_U_3D"     unit="m3/s"    />
         <field id="rphiu_u"         long_name="rphiu_u"      standard_name="rphiu_u"    grid_ref="grid_U_3D"     unit="m3/s"    />
         <field id="rphiw_u"         long_name="rphiw_u"      standard_name="rphiw_u"    grid_ref="grid_U_3D"     unit="m3/s"    />
+        <field id="rlipsu"         long_name="rlipsu"      standard_name="rlipsu"    grid_ref="grid_U_3D"     unit="m3/s"    />
+        <field id="lipsu"         long_name="lipsu"      standard_name="lipsu"    grid_ref="grid_U_3D"     unit="m3/s"    />
       </field_group>
 
       <!-- W grid BVP -->
@@ -103,11 +110,6 @@
         <field id="Lf_NHpf"      long_name="MLE: Lf = N H / f"   unit="m" />
 
         <!-- next variables available with ln_zad_Aimp=.true. -->
-        <field id="Courant"      long_name="Courant number"                                                                 unit="#"   grid_ref="grid_T_3D" />
-        <field id="rphiu_t"      long_name="rphiu_t number"                                                                 unit="#"   grid_ref="grid_T_3D" />
-        <field id="rphiw_t"      long_name="rphiw_t number"                                                                 unit="#"   grid_ref="grid_T_3D" />
-        <field id="Courant_u"      long_name="Courant number horizontal"                                                                 unit="#"   grid_ref="grid_T_3D" />
-        <field id="Courant_w"      long_name="Courant number vertical"                                                                 unit="#"   grid_ref="grid_T_3D" />
         <field id="wimp"         long_name="Implicit vertical velocity"                                                     unit="m/s" grid_ref="grid_T_3D" />
         <field id="wexp"         long_name="Explicit vertical velocity"                                                     unit="m/s" grid_ref="grid_T_3D" />
         <field id="wi_cff"       long_name="Fraction of implicit vertical velocity"                                         unit="#"   grid_ref="grid_T_3D" />

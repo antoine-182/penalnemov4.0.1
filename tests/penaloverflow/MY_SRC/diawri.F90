@@ -112,7 +112,7 @@ CONTAINS
       REAL(wp)::   zztmp , zztmpx   ! local scalar
       REAL(wp)::   zztmp2, zztmpy   !   -      -
       REAL(wp), DIMENSION(jpi,jpj)     ::   z2d   ! 2D workspace
-      REAL(wp), DIMENSION(jpi,jpj,jpk) ::   z3d, z3d_Cu   ! 3D workspace
+      REAL(wp), DIMENSION(jpi,jpj,jpk) ::   z3d, z2d1, z3d2,z3d3   ! 3D workspace
       !!----------------------------------------------------------------------
       !
       IF( ln_timing )   CALL timing_start('dia_wri')
@@ -225,122 +225,176 @@ CONTAINS
       ENDIF
       !
       ! Lipschitz, inversion de la matrice implicite
-      IF( iom_use("lipz") .AND. ln_zad_Aimp ) THEN
-        z3d(:,:,:) = 0._wp
-        DO jk = 1, jpkm1
-          z3d(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ABS( rpow(:,:,jk+1) - rpow(:,:,jk) )
-        END DO
-        CALL iom_put( "lipz", z3d(:,:,:) )
-      ENDIF
-      !
-      IF( iom_use("lipzU") .AND. ln_zad_Aimp ) THEN
-        z3d(:,:,:) = 0._wp
-        DO jk = 1, jpkm1
-          DO jj = 1, jpj
-            DO ji = 1,jpim1
-          z3d(ji,jj,jk) = ( 2._wp * rdt / e3u_n(ji,jj,jk) ) * ABS( 0.5_wp*(rpow(ji+1,jj,jk+1)+rpow(ji,jj,jk+1))    &
-          &                                                      - 0.5_wp*(rpow(ji+1,jj,jk  )+rpow(ji,jj,jk  ))    )
-            END DO
-          END DO
-        END DO
-        CALL iom_put( "lipzU", z3d(:,:,:) )
-      ENDIF
-      !
-      IF( iom_use("cflu") .OR. iom_use("cfluu") .OR. iom_use("cfluw") ) THEN
-        !! prendre en compte les volumes
-        z3d_Cu(:,:,:) = 0._wp ; z3d(:,:,:) = 0._wp
-        DO jk = 1, jpk
-          DO jj = 1, jpj
-            DO ji = 2,jpim1
-              ! flux sortant
-              z3d_Cu(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*20.) ) &
-              &            * ( - MIN( 0.5* (rpow(ji,jj,jk+1) * wn(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) * wn(ji+1,jj,jk+1)), 0._wp  )   &
-              &                + MAX( 0.5* (rpow(ji,jj,jk  ) * wn(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) * wn(ji+1,jj,jk  )), 0._wp  )   )
-              z3d(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*1000.) ) &
-              &            * ( - MIN( 0.5* (rpou(ji,jj,jk  ) * un(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) * un(ji-1,jj,jk  )), 0._wp  )   &
-              &                + MAX( 0.5* (rpou(ji,jj,jk  ) * un(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) * un(ji+1,jj,jk  )), 0._wp  )   )
-            END DO
-          END DO
-        END DO
-        CALL iom_put( "cflu", z3d_Cu + z3d )
-        CALL iom_put( "cfluu", z3d   )
-        CALL iom_put( "cfluw", z3d_Cu)
-      ENDIF
-      !
-      IF( iom_use("rphiu_u") .OR. iom_use("rphiw_u") ) THEN
-        z3d_Cu(:,:,:) = 0._wp ; z3d(:,:,:) = 0._wp
-        DO jk = 1, jpk
-          DO jj = 1, jpj
-            DO ji = 2,jpim1
-              ! flux sortant
-              z3d_Cu(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*20.) ) &
-              &            * MAX( 0.5 * (rpow(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) ), &
-              &                   0.5 * (rpow(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) )  )   
-              z3d(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*1000.) ) &
-              &            * MAX( 0.5* (rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) ), &
-              &                   0.5* (rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) 
-            END DO
-          END DO
-        END DO
-        CALL iom_put( "rphiw_u", z3d_Cu(:,:,:) )
-        CALL iom_put( "rphiu_u", z3d(:,:,:) )
-      ENDIF
-      !
-      IF( iom_use("Courant") .OR. iom_use("Courant_u") .OR. iom_use("Courant_w")) THEN
-        z3d_Cu(:,:,:) = 0._wp ; z3d(:,:,:) = 0._wp
-        DO jk = 1, jpkm1
-           DO jj = 2, jpjm1
-              DO ji = 2, jpim1   ! vector opt.
-                 ! 2*rdt and not r2dt (for restartability)
-#if defined key_bvp && key_w_bvp
-                 z3d_Cu(ji,jj,jk) = 2._wp * rdt * ( ( MAX( rpow(ji,jj,jk  )*wn(ji,jj,jk  ) , 0._wp )              -   &
-                    &                                 MIN( rpow(ji,jj,jk+1)*wn(ji,jj,jk+1) , 0._wp ) )                &
-                    &                             + ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk)*un(ji  ,jj,jk), 0._wp ) -   &
-                    &                                 MIN( e2u(ji-1,jj)*e3u_n(ji-1,jj,jk)*un(ji-1,jj,jk), 0._wp ) )   &
-                    &                               * r1_e1e2t(ji,jj)                                                 &
-                    &                             + ( MAX( e1v(ji,jj  )*e3v_n(ji,jj  ,jk)*vn(ji,jj  ,jk), 0._wp ) -   &
-                    &                                 MIN( e1v(ji,jj-1)*e3v_n(ji,jj-1,jk)*vn(ji,jj-1,jk), 0._wp ) )   &
-                    &                               * r1_e1e2t(ji,jj)                                                 &
-                    &                             ) /e3t_n(ji,jj,jk)
-                 z3d(ji,jj,jk) = 2._wp * rdt *   ( MAX( rpow(ji,jj,jk  )*wn(ji,jj,jk  ) , 0._wp )              -   &
-                    &                              MIN( rpow(ji,jj,jk+1)*wn(ji,jj,jk+1) , 0._wp ) )                &
-                    &                             / e3t_n(ji,jj,jk)
-#else
-                 z3d_Cu(ji,jj,jk) = 2._wp * rdt * ( ( MAX( wn(ji,jj,jk) , 0._wp ) - MIN( wn(ji,jj,jk+1) , 0._wp ) )   &
-                    &                             + ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk)*un(ji  ,jj,jk), 0._wp ) -   &
-                    &                                 MIN( e2u(ji-1,jj)*e3u_n(ji-1,jj,jk)*un(ji-1,jj,jk), 0._wp ) )   &
-                    &                               * r1_e1e2t(ji,jj)                                                 &
-                    &                             + ( MAX( e1v(ji,jj  )*e3v_n(ji,jj  ,jk)*vn(ji,jj  ,jk), 0._wp ) -   &
-                    &                                 MIN( e1v(ji,jj-1)*e3v_n(ji,jj-1,jk)*vn(ji,jj-1,jk), 0._wp ) )   &
-                    &                               * r1_e1e2t(ji,jj)                                                 &
-                    &                             ) /e3t_n(ji,jj,jk)
-                z3d(ji,jj,jk) = 2._wp * rdt *   ( MAX( wn(ji,jj,jk  ) , 0._wp )              -   &
-                   &                              MIN( wn(ji,jj,jk+1) , 0._wp ) )                &
-                   &                             /e3t_n(ji,jj,jk)
-#endif
-              END DO
-           END DO
-        END DO
-        CALL iom_put("Courant"  ,z3d_Cu)
-        CALL iom_put("Courant_u",z3d_Cu-z3d)
-        CALL iom_put("Courant_w",z3d)
-      ENDIF
-      !
-      IF( iom_use("rphiu_t") .OR. iom_use("rphiw_t") ) THEN
-         z3d_Cu(:,:,:) = 0._wp ; z3d(:,:,:) = 0._wp
+      ! r2dt = 2*rdt
+#if defined key_bvp 
+      IF( iom_use("rlipst") .OR. iom_use("lipst") .OR. iom_use("rlipsu") .OR. iom_use("lipsu") ) THEN
+         z3d(:,:,:) = 0._wp ; z3d1(:,:,:) = 0._wp ; z3d2(:,:,:) = 0._wp ; z3d3(:,:,:) = 0._wp
          DO jk = 1, jpkm1
-            DO jj = 2, jpjm1
-               DO ji = 2, jpim1   ! vector opt.
-                  ! 2*rdt and not r2dt (for restartability)
-                  z3d_Cu(ji,jj,jk) = 2._wp * rdt * MAX( rpow(ji,jj,jk), rpow(ji,jj,jk+1) ) / ( rpot(ji,jj,jk)*20.   )                         
-                  z3d   (ji,jj,jk) = 2._wp * rdt * MAX( rpou(ji,jj,jk), rpou(ji+1,jj,jk) ) / ( rpot(ji,jj,jk)*1000. ) 
+            z3d (:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ABS( rpow(:,:,jk+1) - rpow(:,:,jk) )
+            !
+            z3d2(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) *    ( rpow(:,:,jk+1) * wi(:,:,jk+1)   &
+            &                                                   - rpow(:,:,jk  ) * wi(:,:,jk  )   )
+            DO ji = 1,jpim1
+               z3d1(ji,:,jk) = ( 2._wp * rdt / e3u_n(ji,:,jk) ) * ABS( 0.5_wp*(rpow(ji+1,:,jk+1)+rpow(ji,:,jk+1))   &
+               &                                                     - 0.5_wp*(rpow(ji+1,:,jk  )+rpow(ji,:,jk  ))   )
+               !
+               z3d3(ji,:,jk) = ( 2._wp * rdt / e3u_n(ji,:,jk) ) *    ( 0.5_wp*(rpow(ji+1,:,jk+1) * wi(ji+1,:,jk+1)    &
+               &                                                              +rpow(ji  ,:,jk+1) * wi(ji  ,:,jk+1))   &
+               &                                                     - 0.5_wp*(rpow(ji+1,:,jk  ) * wi(ji+1,:,jk  )    &
+               &                                                              +rpow(ji  ,:,jk  ) * wi(ji  ,:,jk  ))   ) 
+            END DO
+         END DO
+         CALL iom_put( "rlipst" , z3d (:,:,:) )
+         CALL iom_put(  "lipst" , z3d2(:,:,:) )
+         CALL iom_put( "rlipsu" , z3d1(:,:,:) )
+         CALL iom_put(  "lipsu" , z3d3(:,:,:) )
+      ENDIF
+#else 
+      IF( iom_use("lipst") .OR. iom_use("lipsu") ) THEN
+            z3d2(:,:,:) = 0._wp ; z3d3(:,:,:) = 0._wp
+            DO jk = 1, jpkm1
+            z3d2(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ( wi(:,:,jk+1) - wi(:,:,jk  ) )
+            DO ji = 1,jpim1
+               z3d3(ji,:,jk) = ( 2._wp * rdt / e3u_n(ji,:,jk) ) * ( 0.5_wp*(wi(ji+1,:,jk+1) + wi(ji  ,:,jk+1))   &
+               &                                                  - 0.5_wp*(wi(ji+1,:,jk  ) + wi(ji  ,:,jk  ))   ) 
+            END DO
+         END DO
+         CALL iom_put(  "lipst" , z3d2(:,:,:) )
+         CALL iom_put(  "lipsu" , z3d3(:,:,:) )
+      ENDIF
+#endif
+      !
+      ! CFL conditions on momentum
+      ! r2dt = 2*rdt
+#if defined key_bvp 
+      IF( iom_use("cflu") .OR. iom_use("cfluu") .OR. iom_use("cfluw") .OR. iom_use("rphiu_u") .OR. iom_use("rphiw_u")) THEN
+        z3d(:,:,:) = 0._wp ; z3d1(:,:,:) = 0._wp ; z3d2(:,:,:) = 0._wp ; z3d3(:,:,:) = 0._wp 
+        ! cfluw
+         DO jk = 1, jpkm1
+            DO jj = 1, jpj
+               DO ji = 1,jpim1
+                  z3d (ji,jj,jk) = 2._wp * rdt * (   MAX( 0.5 * (rpow(ji,jj,jk  ) * wn(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) * wn(ji+1,jj,jk  )), 0._wp  )   & 
+                  &                                - MIN( 0.5 * (rpow(ji,jj,jk+1) * wn(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) * wn(ji+1,jj,jk+1)), 0._wp  ) ) &
+                  &                                / e3u_n(ji,jj,jk)
+                  z3d2(ji,jj,jk) = 2._wp * rdt * MAX( 0.5 * (rpow(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) ) , &
+                  &                                   0.5 * (rpow(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) ) ) / e3u_n(ji,jj,jk)  
                END DO
             END DO
          END DO
-         CALL iom_put("rphiu_t",z3d   )
-         CALL iom_put("rphiw_t",z3d_Cu)
-       ENDIF
+         ! cfluu
+         DO jk = 1, jpk
+            DO jj = 1, jpj
+               DO ji = 2,jpim1
+               z3d1(ji,jj,jk) = 2._wp * rdt * (   MAX( 0.5 * ( e2u(ji,jj)*e3u_n(ji,jj,jk) * un(ji,jj,jk) + e2u(ji+1,jj)*e3u_n(ji+1,jj,jk) * un(ji+1,jj,jk)), 0._wp )   &
+               &                                - MIN( 0.5 * ( e2u(ji,jj)*e3u_n(ji,jj,jk) * un(ji,jj,jk) + e2u(ji-1,jj)*e3u_n(ji-1,jj,jk) * un(ji-1,jj,jk)), 0._wp ) ) &
+               &                                / ( rpou(ji,jj,jk) * e1u(ji,jj) )
+               z3d3(ji,jj,jk) = 2._wp * rdt * MAX( 0.5 * ( rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) )  , &
+               &                                   0.5 * ( rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) / ( rpou(ji,jj,jk)*e1u(ji,jj,jk) )
+               END DO
+            END DO
+         END DO
+         !
+         CALL iom_put( "cflu" , z3d + z3d1 )
+         CALL iom_put( "cfluu", z3d1 )
+         CALL iom_put( "cfluw", z3d  )
+         !
+         CALL iom_put( "rphiw_u", z3d2 )
+         CALL iom_put( "rphiu_u", z3d3 )
+      ENDIF
+#else
+      IF( iom_use("cflu") .OR. iom_use("cfluu") .OR. iom_use("cfluw") ) THEN
+        z3d(:,:,:) = 0._wp ; z3d1(:,:,:) = 0._wp 
+        ! cfluw
+        DO jk = 1, jpkm1
+          DO jj = 1, jpj
+            DO ji = 1,jpim1
+               z3d (ji,jj,jk) = 2._wp * rdt * (   MAX( 0.5 * ( wn(ji,jj,jk  ) + wn(ji+1,jj,jk  )), 0._wp  )   & 
+               &                                - MIN( 0.5 * ( wn(ji,jj,jk+1) + wn(ji+1,jj,jk+1)), 0._wp  ) ) &
+               &                                / e3u_n(ji,jj,jk)
+            END DO
+         END DO
+      END DO
+      ! cfluu
+      DO jk = 1, jpk
+          DO jj = 1, jpj
+            DO ji = 2,jpim1
+              z3d1(ji,jj,jk) = 2._wp * rdt * (   MAX( 0.5 * ( e2u(ji,jj)*e3u_n(ji,jj,jk) * un(ji,jj,jk) + e2u(ji+1,jj)*e3u_n(ji+1,jj,jk) * un(ji+1,jj,jk)), 0._wp )   &
+              &                                - MIN( 0.5 * ( e2u(ji,jj)*e3u_n(ji,jj,jk) * un(ji,jj,jk) + e2u(ji-1,jj)*e3u_n(ji-1,jj,jk) * un(ji-1,jj,jk)), 0._wp ) ) &
+              &                                / e1u(ji,jj) 
+            END DO
+          END DO
+        END DO
+        !
+        CALL iom_put( "cflu" , z3d + z3d1 )
+        CALL iom_put( "cfluu", z3d1 )
+        CALL iom_put( "cfluw", z3d  )
+      ENDIF
+#endif
       !
+      ! CFL conditions on tracers
+      ! r2dt = 2*rdt
+#if defined key_bvp
+      IF( iom_use("cflt") .OR. iom_use("cfltu") .OR. iom_use("cfltw") .OR. iom_use("rphiu_t") .OR. iom_use("rphiw_t") ) THEN
+        z3d(:,:,:) = 0._wp ; z3d1(:,:,:) = 0._wp ; z3d2(:,:,:) = 0._wp ; z3d3(:,:,:) = 0._wp
+        ! cfl u
+         DO jk = 1, jpk
+            DO jj = 1, jpj
+               DO ji = 2, jpi   ! no optimisaiton because not the same dimension
+                  z3d (ji,jj,jk) = 2._wp * rdt * ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk)*un(ji  ,jj,jk), 0._wp ) -   &
+                     &                             MIN( e2u(ji-1,jj)*e3u_n(ji-1,jj,jk)*un(ji-1,jj,jk), 0._wp ) )   &
+                     &                           * r1_e1e2t(ji,jj)  /e3t_n(ji,jj,jk)
+                  z3d2(ji,jj,jk) = 2._wp * rdt * MAX( rpou(ji,jj,jk), rpou(ji+1,jj,jk) ) / ( rpot(ji,jj,jk) * e1t(ii,jj) ) 
+               END DO
+            END DO
+         END DO
+         ! cfl w
+         DO jk = 1, jpkm1
+            DO jj = 1, jpj
+               DO ji = 1, jpi  ! e1e2t simplified
+                  z3d1(ji,jj,jk) = 2._wp * rdt * ( MAX( rpow(ji,jj,jk  )*wn(ji,jj,jk  ) , 0._wp ) -   &
+                  &                                MIN( rpow(ji,jj,jk+1)*wn(ji,jj,jk+1) , 0._wp ) )   &
+                  &                              / e3t_n(ji,jj,jk)
+                  z3d3(ji,jj,jk) = 2._wp * rdt * MAX( rpow(ji,jj,jk), rpow(ji,jj,jk+1) ) / ( e3t_n(ji,jj,jk) )
+               END DO
+            END DO
+         END DO
+         !
+         CALL iom_put("cflt" ,z3d + z3d1 )
+         CALL iom_put("cfltu",z3d )
+         CALL iom_put("cfltw",z3d1)
+         !
+         CALL iom_put("rphiu_t",z3d2 )
+         CALL iom_put("rphiw_t",z3d3 )
+      ENDIF
+#else
+       IF( iom_use("cflt") .OR. iom_use("cfltu") .OR. iom_use("cfltw") ) THEN
+        z3d(:,:,:) = 0._wp ; z3d1(:,:,:) = 0._wp 
+        ! cfl u
+         DO jk = 1, jpk
+            DO jj = 1, jpj
+               DO ji = 2, jpi   ! no optimisation because not the same dimension
+                  z3d (ji,jj,jk) = 2._wp * rdt * ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk)*un(ji  ,jj,jk), 0._wp ) -   &
+                     &                             MIN( e2u(ji-1,jj)*e3u_n(ji-1,jj,jk)*un(ji-1,jj,jk), 0._wp ) )   &
+                     &                           * r1_e1e2t(ji,jj)  /e3t_n(ji,jj,jk)
+               END DO
+            END DO
+         END DO
+         ! cfl w
+         DO jk = 1, jpkm1
+            DO jj = 1, jpj
+               DO ji = 1, jpi  ! e1e2t simplified
+                  z3d1(ji,jj,jk) = 2._wp * rdt * ( MAX( wn(ji,jj,jk  ) , 0._wp ) - MIN( wn(ji,jj,jk+1) , 0._wp ) )   &
+                  &                              / e3t_n(ji,jj,jk)
+               END DO
+            END DO
+         END DO
+         !
+         CALL iom_put("cflt" ,z3d + z3d1 )
+         CALL iom_put("cfltu",z3d )
+         CALL iom_put("cfltw",z3d1)
+      ENDIF
+#endif
+      !!an berk berk
        IF( ln_zad_Aimp ) wn = wn + wi               ! Recombine explicit and implicit parts of vertical velocity for diagnostic output
       !
       CALL iom_put( "woce", wn )                   ! vertical velocity
@@ -1096,100 +1150,7 @@ CONTAINS
       CALL iom_rstput( 0, 0, inum, "bmpu", bmpu )    ! porotisity T
       CALL iom_rstput( 0, 0, inum, "rpow", rpow )    ! porotisity T
 #endif
-      ! Lipschitz, inversion de la matrice implicite
-IF( ln_zad_Aimp ) THEN
-   z3d(:,:,:) = 0._wp
-   DO jk = 1, jpkm1
-#if defined key_bvp && key_w_bvp
-     z3d(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ( rpow(:,:,jk+1)*wi(:,:,jk+1) - rpow(:,:,jk)*wi(:,:,jk) )
-#else
-     z3d(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ( wi(:,:,jk+1) - wi(:,:,jk) )
-#endif
-   END DO
-   CALL iom_rstput( 0, 0, inum, "lipz", z3d(:,:,:) )
- ENDIF
- !
- IF( ln_zad_Aimp ) THEN
-   z3d(:,:,:) = 0._wp
-   DO jk = 1, jpkm1
-     DO jj = 1, jpj
-       DO ji = 1,jpim1
-#if defined key_bvp && key_w_bvp
-     z3d(ji,jj,jk) = ( 2._wp * rdt / e3u_n(ji,jj,jk) ) * ( 0.5_wp*(rpow(ji,jj,jk+1)*wi(ji,jj,jk+1)+rpow(ji,jj,jk+1)*wi(ji+1,jj,jk+1))    &
-     &                                                   - 0.5_wp*(rpow(ji,jj,jk  )*wi(ji,jj,jk  )+rpow(ji,jj,jk  )*wi(ji+1,jj,jk  ))    )
-#else
-     z3d(ji,jj,jk) = ( 2._wp * rdt / e3u_n(ji,jj,jk) ) * ( 0.5_wp*(wi(ji,jj,jk+1)+wi(ji+1,jj,jk+1))    &
-     &                                                   - 0.5_wp*(wi(ji,jj,jk  )+wi(ji+1,jj,jk  ))    )
-#endif
-       END DO
-     END DO
-   END DO
-   CALL iom_rstput( 0, 0, inum, "lipzU", z3d(:,:,:) )
- ENDIF
- !
-   !! prendre en compte les volumes
-   z3d(:,:,:) = 0._wp
-   DO jk = 1, jpk
-     DO jj = 1, jpj
-       DO ji = 2,jpim1
-#if defined key_bvp
-         ! flux rentrant
-         ! z3d(ji,jj,jk) = ( 2._wp * rdt / rpou(ji,jj,jk)*1000. ) &
-         ! &            * (  MAX( 0.5* (rpou(ji,jj,jk) * un(ji,jj,jk) + rpou(ji-1,jj,jk) * un(ji-1,jj,jk)), 0._wp  )   &
-         ! &               - MIN( 0.5* (rpou(ji,jj,jk) * un(ji,jj,jk) + rpou(ji+1,jj,jk) * un(ji+1,jj,jk)), 0._wp  )   )
-         ! flux sortant
-         z3d(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*1000.) ) &
-         &            * ( - MIN( 0.5* (rpou(ji,jj,jk) * un(ji,jj,jk) + rpou(ji-1,jj,jk) * un(ji-1,jj,jk)), 0._wp  )   &
-         &                + MAX( 0.5* (rpou(ji,jj,jk) * un(ji,jj,jk) + rpou(ji+1,jj,jk) * un(ji+1,jj,jk)), 0._wp  )   )
-#else
-         z3d(ji,jj,jk) = ( 2._wp * rdt / (1000.) ) &
-         &            * ( - MIN( 0.5* (un(ji,jj,jk) +un(ji-1,jj,jk)), 0._wp  )   &
-         &                + MAX( 0.5* (un(ji,jj,jk) +un(ji+1,jj,jk)), 0._wp  )   )
-#endif
-       END DO
-     END DO
-   END DO
-   CALL iom_rstput( 0, 0, inum, "cflu", z3d(:,:,:) )
- !
-   z3d_Cu(:,:,:) = 0._wp ; z3d(:,:,:) = 0._wp
-   DO jk = 1, jpkm1
-      DO jj = 2, jpjm1
-         DO ji = 2, jpim1   ! vector opt.
-            ! 2*rdt and not r2dt (for restartability)
-#if defined key_bvp && key_w_bvp
-            z3d_Cu(ji,jj,jk) = 2._wp * rdt * ( ( MAX( rpow(ji,jj,jk  )*wn(ji,jj,jk  ) , 0._wp )              -   &
-               &                                 MIN( rpow(ji,jj,jk+1)*wn(ji,jj,jk+1) , 0._wp ) )                &
-               &                             + ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk)*un(ji  ,jj,jk), 0._wp ) -   &
-               &                                 MIN( e2u(ji-1,jj)*e3u_n(ji-1,jj,jk)*un(ji-1,jj,jk), 0._wp ) )   &
-               &                               * r1_e1e2t(ji,jj)                                                 &
-               &                             + ( MAX( e1v(ji,jj  )*e3v_n(ji,jj  ,jk)*vn(ji,jj  ,jk), 0._wp ) -   &
-               &                                 MIN( e1v(ji,jj-1)*e3v_n(ji,jj-1,jk)*vn(ji,jj-1,jk), 0._wp ) )   &
-               &                               * r1_e1e2t(ji,jj)                                                 &
-               &                             ) /e3t_n(ji,jj,jk)
-            z3d(ji,jj,jk) = 2._wp * rdt *   ( MAX( rpow(ji,jj,jk  )*wn(ji,jj,jk  ) , 0._wp )              -   &
-               &                              MIN( rpow(ji,jj,jk+1)*wn(ji,jj,jk+1) , 0._wp ) )                &
-               &                             / e3t_n(ji,jj,jk)
-#else
-            z3d_Cu(ji,jj,jk) = 2._wp * rdt * ( ( MAX( wn(ji,jj,jk) , 0._wp ) - MIN( wn(ji,jj,jk+1) , 0._wp ) )   &
-               &                             + ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk)*un(ji  ,jj,jk), 0._wp ) -   &
-               &                                 MIN( e2u(ji-1,jj)*e3u_n(ji-1,jj,jk)*un(ji-1,jj,jk), 0._wp ) )   &
-               &                               * r1_e1e2t(ji,jj)                                                 &
-               &                             + ( MAX( e1v(ji,jj  )*e3v_n(ji,jj  ,jk)*vn(ji,jj  ,jk), 0._wp ) -   &
-               &                                 MIN( e1v(ji,jj-1)*e3v_n(ji,jj-1,jk)*vn(ji,jj-1,jk), 0._wp ) )   &
-               &                               * r1_e1e2t(ji,jj)                                                 &
-               &                             ) /e3t_n(ji,jj,jk)
-           z3d(ji,jj,jk) = 2._wp * rdt *   ( MAX( wn(ji,jj,jk  ) , 0._wp )              -   &
-              &                              MIN( wn(ji,jj,jk+1) , 0._wp ) )                &
-              &                             /e3t_n(ji,jj,jk)
-#endif
-         END DO
-      END DO
-   END DO
-   CALL iom_rstput( 0, 0, inum, "Courant"  , z3d_Cu )
-   CALL iom_rstput( 0, 0, inum, "Courant_u", z3d_Cu-z3d )
-   CALL iom_rstput( 0, 0, inum, "Courant_w", z3d )
 !!an
-
 #if defined key_si3
       IF( nn_ice == 2 ) THEN   ! condition needed in case agrif + ice-model but no-ice in child grid
          CALL ice_wri_state( inum )
