@@ -285,11 +285,11 @@ CONTAINS
             DO ji = 2,jpim1
               ! flux sortant
               z3d_Cu(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*20.) ) &
-              &            * ( - MIN( 0.5* (rpow(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) ), 0._wp  )   &
-              &                + MAX( 0.5* (rpow(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) ), 0._wp  )   )
+              &            * MAX( 0.5 * (rpow(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) ), &
+              &                   0.5 * (rpow(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) )  )   
               z3d(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*1000.) ) &
-              &            * ( - MIN( 0.5* (rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) ), 0._wp  )   &
-              &                + MAX( 0.5* (rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) ), 0._wp  )   )
+              &            * MAX( 0.5* (rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) ), &
+              &                   0.5* (rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) 
             END DO
           END DO
         END DO
@@ -343,20 +343,13 @@ CONTAINS
             DO jj = 2, jpjm1
                DO ji = 2, jpim1   ! vector opt.
                   ! 2*rdt and not r2dt (for restartability)
-                  z3d_Cu(ji,jj,jk) = 2._wp * rdt * ( ( MAX( rpow(ji,jj,jk  ) , 0._wp )              -   &
-                     &                                 MIN( rpow(ji,jj,jk+1) , 0._wp ) )                &
-                     &                             + ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk), 0._wp ) -   &
-                     &                                 MIN( e2u(ji-1,jj)*e3u_n(ji-1,jj,jk), 0._wp ) )   &
-                     &                               * r1_e1e2t(ji,jj) )                                &
-                     &                              /e3t_n(ji,jj,jk)                                    
-                  z3d(ji,jj,jk) = 2._wp * rdt *   ( MAX( rpow(ji,jj,jk  ), 0._wp )              -   &
-                     &                              MIN( rpow(ji,jj,jk+1), 0._wp ) )                &
-                     &                             / e3t_n(ji,jj,jk)
+                  z3d_Cu(ji,jj,jk) = 2._wp * rdt * MAX( rpow(ji,jj,jk), rpow(ji,jj,jk+1) ) / ( rpot(ji,jj,jk)*20.   )                         
+                  z3d   (ji,jj,jk) = 2._wp * rdt * MAX( rpou(ji,jj,jk), rpou(ji+1,jj,jk) ) / ( rpot(ji,jj,jk)*1000. ) 
                END DO
             END DO
          END DO
-         CALL iom_put("rphiu_t",z3d_Cu-z3d)
-         CALL iom_put("rphiw_t",z3d)
+         CALL iom_put("rphiu_t",z3d   )
+         CALL iom_put("rphiw_t",z3d_Cu)
        ENDIF
       !
        IF( ln_zad_Aimp ) wn = wn + wi               ! Recombine explicit and implicit parts of vertical velocity for diagnostic output
