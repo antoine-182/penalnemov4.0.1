@@ -238,8 +238,8 @@ CONTAINS
         DO jk = 1, jpkm1
           DO jj = 1, jpj
             DO ji = 1,jpim1
-          z3d(ji,jj,jk) = ( 2._wp * rdt / e3u_n(ji,jj,jk) ) * ( 0.5_wp*(rpow(ji+1,jj,jk+1)+rpow(ji,jj,jk+1))    &
-          &                                                   - 0.5_wp*(rpow(ji+1,jj,jk  )+rpow(ji,jj,jk  ))    )
+          z3d(ji,jj,jk) = ( 2._wp * rdt / e3u_n(ji,jj,jk) ) * ABS( 0.5_wp*(rpow(ji+1,jj,jk+1)+rpow(ji,jj,jk+1))    &
+          &                                                      - 0.5_wp*(rpow(ji+1,jj,jk  )+rpow(ji,jj,jk  ))    )
             END DO
           END DO
         END DO
