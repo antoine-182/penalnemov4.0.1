@@ -334,6 +334,27 @@ CONTAINS
         CALL iom_put("Courant_w",z3d)
       ENDIF
       !
+      IF( iom_use("rphiu_t") .OR. iom_use("rphiw_t") ) THEN
+         z3d_Cu(:,:,:) = 0._wp ; z3d(:,:,:) = 0._wp
+         DO jk = 1, jpkm1
+            DO jj = 2, jpjm1
+               DO ji = 2, jpim1   ! vector opt.
+                  ! 2*rdt and not r2dt (for restartability)
+                  z3d_Cu(ji,jj,jk) = 2._wp * rdt * ( ( MAX( rpow(ji,jj,jk  ) , 0._wp )              -   &
+                     &                                 MIN( rpow(ji,jj,jk+1) , 0._wp ) )                &
+                     &                             + ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk), 0._wp ) -   &
+                     &                                 MIN( e2u(ji-1,jj)*e3u_n(ji-1,jj,jk), 0._wp ) )   &
+                     &                               * r1_e1e2t(ji,jj) ) /e3t_n(ji,jj,jk)
+                  z3d(ji,jj,jk) = 2._wp * rdt *   ( MAX( rpow(ji,jj,jk  ), 0._wp )              -   &
+                     &                              MIN( rpow(ji,jj,jk+1), 0._wp ) )                &
+                     &                             / e3t_n(ji,jj,jk)
+               END DO
+            END DO
+         END DO
+         CALL iom_put("rphiu_t",z3d_Cu-z3d)
+         CALL iom_put("rphiw_t",z3d)
+       ENDIF
+      !
       IF( ln_zad_Aimp ) wn = wn - wi               ! Remove implicit part of vertical velocity that was added for diagnostic output
 
       CALL iom_put( "avt" , avt )                  ! T vert. eddy diff. coef.

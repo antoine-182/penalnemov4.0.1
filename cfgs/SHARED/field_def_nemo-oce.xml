@@ -100,6 +100,8 @@
 
         <!-- next variables available with ln_zad_Aimp=.true. -->
         <field id="Courant"      long_name="Courant number"                                                                 unit="#"   grid_ref="grid_T_3D" />
+        <field id="rphiu_t"      long_name="rphiu_t number"                                                                 unit="#"   grid_ref="grid_T_3D" />
+        <field id="rphiw_t"      long_name="rphiw_t number"                                                                 unit="#"   grid_ref="grid_T_3D" />
         <field id="Courant_u"      long_name="Courant number horizontal"                                                                 unit="#"   grid_ref="grid_T_3D" />
         <field id="Courant_w"      long_name="Courant number vertical"                                                                 unit="#"   grid_ref="grid_T_3D" />
         <field id="wimp"         long_name="Implicit vertical velocity"                                                     unit="m/s" grid_ref="grid_T_3D" />
