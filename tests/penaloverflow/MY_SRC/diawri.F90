@@ -365,7 +365,7 @@ CONTAINS
                      &                             + ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk), 0._wp ) -   &
                      &                                 MIN( e2u(ji-1,jj)*e3u_n(ji-1,jj,jk), 0._wp ) )   &
                      &                               * r1_e1e2t(ji,jj) )                                &
-                     &                              /e3t_n(ji,jj,jk)                                    &
+                     &                              /e3t_n(ji,jj,jk)                                    
                   z3d(ji,jj,jk) = 2._wp * rdt *   ( MAX( rpow(ji,jj,jk  ), 0._wp )              -   &
                      &                              MIN( rpow(ji,jj,jk+1), 0._wp ) )                &
                      &                             / e3t_n(ji,jj,jk)
