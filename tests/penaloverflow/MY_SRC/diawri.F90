@@ -294,7 +294,7 @@ CONTAINS
         CALL iom_put( "cflu", z3d(:,:,:) )
       ENDIF
       !
-      IF( iom_use("Courant") .OR. iom_use("Courant") .OR. iom_use("Courant_w")) THEN
+      IF( iom_use("Courant") .OR. iom_use("Courant_u") .OR. iom_use("Courant_w")) THEN
         z3d_Cu(:,:,:) = 0._wp ; z3d(:,:,:) = 0._wp
         DO jk = 1, jpkm1
            DO jj = 2, jpjm1
@@ -1086,7 +1086,7 @@ IF( ln_zad_Aimp ) THEN
      z3d(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ( wi(:,:,jk+1) - wi(:,:,jk) )
 #endif
    END DO
-   CALL iom_rstput( 0, 0, inum, "lipzW", z3d(:,:,:) )
+   CALL iom_rstput( 0, 0, inum, "lipz", z3d(:,:,:) )
  ENDIF
  !
  IF( ln_zad_Aimp ) THEN
