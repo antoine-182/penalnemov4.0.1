@@ -15,7 +15,8 @@
 	  <field field_ref="toce"         name="thetao_inst"  long_name="instantaneous sea water potential temperature" operation="instant" />
     <field field_ref="ssh"          name="ssh_inst"     long_name="instantaneous sea surface height above geoid"  operation="instant" />
     <field field_ref="rpot"          name="rpot"     long_name="porosity"  operation="instant" />
-    <field field_ref="lipz"          name="lipz"     long_name="porosity"  operation="instant" />
+    <field field_ref="lipst"          name="lipst"     long_name="porosity"  operation="instant" />
+    <field field_ref="rlipst"          name="rlipst"     long_name="porosity"  operation="instant" />
     <field field_ref="cflt"          name="Courant"     long_name="porosity"  operation="instant" />
     <field field_ref="cfltu"          name="Courant_u"     long_name="porosity"  operation="instant" />
     <field field_ref="cfltw"          name="Courant_w"     long_name="porosity"  operation="instant" />
@@ -28,7 +29,8 @@
 	  <field field_ref="uoce"         name="uo_inst"      long_name="instantaneous sea water x velocity"    operation="instant" />
     <field field_ref="rpou"          name="rpou"     long_name="porosity"  operation="instant" />
     <field field_ref="bmpu"          name="bmpu"     long_name="bmpu"  operation="instant" />
-    <field field_ref="lipzU"          name="lipzU"     long_name="porosity"  operation="instant" />
+    <field field_ref="lipsu"          name="lipsu"     long_name="porosity"  operation="instant" />
+    <field field_ref="rlipsu"          name="rlipsu"     long_name="porosity"  operation="instant" />
 	  <field field_ref="cflu"          name="cflu"     long_name="porosity"  operation="instant" />
 	  <field field_ref="cfluu"          name="cfluu"     long_name="porosity"  operation="instant" />
 	  <field field_ref="cfluw"          name="cfluw"     long_name="porosity"  operation="instant" />
