@@ -358,7 +358,7 @@ CONTAINS
                   z3d1(ji,jj,jk) = 2._wp * rdt * ( MAX( rpow(ji,jj,jk  )*wn(ji,jj,jk  ) , 0._wp ) -   &
                   &                                MIN( rpow(ji,jj,jk+1)*wn(ji,jj,jk+1) , 0._wp ) )   &
                   &                              / e3t_n(ji,jj,jk)
-                  z3d3(ji,jj,jk) = 2._wp * rdt * MAX( rpow(ji,jj,jk), rpow(ji,jj,jk+1) ) / ( e3t_n(ji,jj,jk) )
+                  z3d3(ji,jj,jk) = 2._wp * rdt * MAX( rpow(ji,jj,jk), rpow(ji,jj,jk+1) ) / e3t_n(ji,jj,jk)
                END DO
             END DO
          END DO
@@ -399,21 +399,21 @@ CONTAINS
       ENDIF
 #endif
       !!an berk berk
-       IF( ln_zad_Aimp ) wn = wn + wi               ! Recombine explicit and implicit parts of vertical velocity for diagnostic output
+       IF( ln_zad_Aimp ) z3d1(:,:,:) = wn + wi               ! Recombine explicit and implicit parts of vertical velocity for diagnostic output
       !
-      CALL iom_put( "woce", wn )                   ! vertical velocity
+      CALL iom_put( "wexp", wn )
+      CALL iom_put( "wimp", wi )
+      CALL iom_put( "woce", z3d1 )                   ! vertical velocity
       IF( iom_use('w_masstr') .OR. iom_use('w_masstr2') ) THEN   ! vertical mass transport & its square value
          ! Caution: in the VVL case, it only correponds to the baroclinic mass transport.
          z2d(:,:) = rau0 * e1e2t(:,:)
          DO jk = 1, jpk
-            z3d(:,:,jk) = wn(:,:,jk) * z2d(:,:)
+            z3d(:,:,jk) = z3d1(:,:,jk) * z2d(:,:)
          END DO
          CALL iom_put( "w_masstr" , z3d )
          IF( iom_use('w_masstr2') )   CALL iom_put( "w_masstr2", z3d(:,:,:) * z3d(:,:,:) )
       ENDIF
       !
-      IF( ln_zad_Aimp ) wn = wn - wi               ! Remove implicit part of vertical velocity that was added for diagnostic output
-
       CALL iom_put( "avt" , avt )                  ! T vert. eddy diff. coef.
       CALL iom_put( "avs" , avs )                  ! S vert. eddy diff. coef.
       CALL iom_put( "avm" , avm )                  ! T vert. eddy visc. coef.
