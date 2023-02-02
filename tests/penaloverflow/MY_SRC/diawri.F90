@@ -224,18 +224,7 @@ CONTAINS
          CALL iom_put( "sbv", z2d )                ! bottom j-current
       ENDIF
 
-      IF( ln_zad_Aimp ) wn = wn + wi               ! Recombine explicit and implicit parts of vertical velocity for diagnostic output
-      !
-      CALL iom_put( "woce", wn )                   ! vertical velocity
-      IF( iom_use('w_masstr') .OR. iom_use('w_masstr2') ) THEN   ! vertical mass transport & its square value
-         ! Caution: in the VVL case, it only correponds to the baroclinic mass transport.
-         z2d(:,:) = rau0 * e1e2t(:,:)
-         DO jk = 1, jpk
-            z3d(:,:,jk) = wn(:,:,jk) * z2d(:,:)
-         END DO
-         CALL iom_put( "w_masstr" , z3d )
-         IF( iom_use('w_masstr2') )   CALL iom_put( "w_masstr2", z3d(:,:,:) * z3d(:,:,:) )
-      ENDIF
+     
       !
       ! Lipschitz, inversion de la matrice implicite
       IF( iom_use("lipz") .AND. ln_zad_Aimp ) THEN
@@ -369,6 +358,19 @@ CONTAINS
          CALL iom_put("rphiu_t",z3d_Cu-z3d)
          CALL iom_put("rphiw_t",z3d)
        ENDIF
+      !
+       IF( ln_zad_Aimp ) wn = wn + wi               ! Recombine explicit and implicit parts of vertical velocity for diagnostic output
+      !
+      CALL iom_put( "woce", wn )                   ! vertical velocity
+      IF( iom_use('w_masstr') .OR. iom_use('w_masstr2') ) THEN   ! vertical mass transport & its square value
+         ! Caution: in the VVL case, it only correponds to the baroclinic mass transport.
+         z2d(:,:) = rau0 * e1e2t(:,:)
+         DO jk = 1, jpk
+            z3d(:,:,jk) = wn(:,:,jk) * z2d(:,:)
+         END DO
+         CALL iom_put( "w_masstr" , z3d )
+         IF( iom_use('w_masstr2') )   CALL iom_put( "w_masstr2", z3d(:,:,:) * z3d(:,:,:) )
+      ENDIF
       !
       IF( ln_zad_Aimp ) wn = wn - wi               ! Remove implicit part of vertical velocity that was added for diagnostic output
 
