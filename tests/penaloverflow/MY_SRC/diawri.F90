@@ -345,8 +345,9 @@ CONTAINS
                DO ji = 2, jpi   ! no optimisaiton because not the same dimension
                   z3d (ji,jj,jk) = 2._wp * rdt * ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk)*un(ji  ,jj,jk), 0._wp ) -   &
                      &                             MIN( e2u(ji-1,jj)*e3u_n(ji-1,jj,jk)*un(ji-1,jj,jk), 0._wp ) )   &
-                     &                           * r1_e1e2t(ji,jj)  /e3t_n(ji,jj,jk)
-                  z3d2(ji,jj,jk) = 2._wp * rdt * MAX( rpou(ji,jj,jk), rpou(ji+1,jj,jk) ) / ( rpot(ji,jj,jk) * e1t(ii,jj) ) 
+                     &                           * r1_e1e2t(ji,jj) / e3t_n(ji,jj,jk)
+                  z3d2(ji,jj,jk) = 2._wp * rdt   * MAX( e2u(ji,jj)*e3u_n(ji,jj,jk), e2u(ji+1,jj)*e3u_n(ji+1,jj,jk) ) &
+                     &                           * r1_e1e2t(ji,jj) / e3t_n(ji,jj,jk)
                END DO
             END DO
          END DO
