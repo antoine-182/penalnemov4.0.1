@@ -223,18 +223,12 @@ CONTAINS
          END DO
          CALL iom_put( "sbv", z2d )                ! bottom j-current
       ENDIF
-
-     
       !
       ! Lipschitz, inversion de la matrice implicite
       IF( iom_use("lipz") .AND. ln_zad_Aimp ) THEN
         z3d(:,:,:) = 0._wp
         DO jk = 1, jpkm1
-#if defined key_bvp && key_w_bvp
-          z3d(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ( rpow(:,:,jk+1)*wi(:,:,jk+1) - rpow(:,:,jk)*wi(:,:,jk) )
-#else
-          z3d(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ( wi(:,:,jk+1) - wi(:,:,jk) )
-#endif
+          z3d(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ABS( rpow(:,:,jk+1) - rpow(:,:,jk) )
         END DO
         CALL iom_put( "lipz", z3d(:,:,:) )
       ENDIF
@@ -244,13 +238,8 @@ CONTAINS
         DO jk = 1, jpkm1
           DO jj = 1, jpj
             DO ji = 1,jpim1
-#if defined key_bvp && key_w_bvp
-          z3d(ji,jj,jk) = ( 2._wp * rdt / e3u_n(ji,jj,jk) ) * ( 0.5_wp*(rpow(ji,jj,jk+1)*wi(ji,jj,jk+1)+rpow(ji,jj,jk+1)*wi(ji+1,jj,jk+1))    &
-          &                                                   - 0.5_wp*(rpow(ji,jj,jk  )*wi(ji,jj,jk  )+rpow(ji,jj,jk  )*wi(ji+1,jj,jk  ))    )
-#else
-          z3d(ji,jj,jk) = ( 2._wp * rdt / e3u_n(ji,jj,jk) ) * ( 0.5_wp*(wi(ji,jj,jk+1)+wi(ji+1,jj,jk+1))    &
-          &                                                   - 0.5_wp*(wi(ji,jj,jk  )+wi(ji+1,jj,jk  ))    )
-#endif
+          z3d(ji,jj,jk) = ( 2._wp * rdt / e3u_n(ji,jj,jk) ) * ( 0.5_wp*(rpow(ji+1,jj,jk+1)+rpow(ji,jj,jk+1))    &
+          &                                                   - 0.5_wp*(rpow(ji+1,jj,jk  )+rpow(ji,jj,jk  ))    )
             END DO
           END DO
         END DO
