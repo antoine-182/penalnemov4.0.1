@@ -17,9 +17,9 @@
     <field field_ref="rpot"          name="rpot"     long_name="porosity"  operation="instant" />
     <field field_ref="lipst"          name="lipst"     long_name="porosity"  operation="instant" />
     <field field_ref="rlipst"          name="rlipst"     long_name="porosity"  operation="instant" />
-    <field field_ref="cflt"          name="Courant"     long_name="porosity"  operation="instant" />
-    <field field_ref="cfltu"          name="Courant_u"     long_name="porosity"  operation="instant" />
-    <field field_ref="cfltw"          name="Courant_w"     long_name="porosity"  operation="instant" />
+    <field field_ref="cflt"          name="cflt"     long_name="porosity"  operation="instant" />
+    <field field_ref="cfltu"          name="cfltu"     long_name="porosity"  operation="instant" />
+    <field field_ref="cfltw"          name="cfltw"     long_name="porosity"  operation="instant" />
     <field field_ref="rphiu_t"          name="rphiu_t"     long_name="porosity"  operation="instant" />
     <field field_ref="rphiw_t"          name="rphiw_t"     long_name="porosity"  operation="instant" />
 	</file>
