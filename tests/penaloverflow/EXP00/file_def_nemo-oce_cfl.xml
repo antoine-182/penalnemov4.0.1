@@ -30,6 +30,7 @@
     <field field_ref="rpou"          name="rpou"     long_name="porosity"  operation="instant" />
     <field field_ref="bmpu"          name="bmpu"     long_name="bmpu"  operation="instant" />
 	<field field_ref="cflu"          name="cflu"     long_name="porosity"  operation="instant" />
+	<field field_ref="rphiu_u"          name="rphiu_u"     long_name="porosity"  operation="instant" />
 	</file>
 
 	<file id="file4" name_suffix="_grid_V" description="ocean V grid variables" >

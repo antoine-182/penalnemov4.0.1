@@ -29,6 +29,7 @@
         <field id="bmpu"         long_name="impermeability parameter U"      standard_name="impermeability_sigma"    grid_ref="grid_U_3D"     unit=""    />
         <field id="u_vol"         long_name="volume transport U"      standard_name="volume_transport_i"    grid_ref="grid_U_3D"     unit="m3/s"    />
         <field id="cflu"         long_name="cflu"      standard_name="cflu"    grid_ref="grid_U_3D"     unit="m3/s"    />
+        <field id="rphiu_u"         long_name="rphiu_u"      standard_name="rphiu_u"    grid_ref="grid_U_3D"     unit="m3/s"    />
       </field_group>
 
       <!-- W grid BVP -->
