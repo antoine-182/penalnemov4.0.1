@@ -275,10 +275,8 @@ CONTAINS
           DO jj = 1, jpj
             DO ji = 2,jpim1
               ! flux sortant
-              z3d_Cu(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*1000.) ) &
-              &            * ( - MIN( 0.5* (rpou(ji,jj,jk  ) * un(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) * un(ji-1,jj,jk  )), 0._wp  )   &
-              &                + MAX( 0.5* (rpou(ji,jj,jk  ) * un(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) * un(ji+1,jj,jk  )), 0._wp  )   &
-              &                - MIN( 0.5* (rpow(ji,jj,jk+1) * wn(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) * wn(ji+1,jj,jk+1)), 0._wp  )   &
+              z3d_Cu(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*20.) ) &
+              &            * ( - MIN( 0.5* (rpow(ji,jj,jk+1) * wn(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) * wn(ji+1,jj,jk+1)), 0._wp  )   &
               &                + MAX( 0.5* (rpow(ji,jj,jk  ) * wn(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) * wn(ji+1,jj,jk  )), 0._wp  )   )
               z3d(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*1000.) ) &
               &            * ( - MIN( 0.5* (rpou(ji,jj,jk  ) * un(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) * un(ji-1,jj,jk  )), 0._wp  )   &
@@ -286,9 +284,9 @@ CONTAINS
             END DO
           END DO
         END DO
-        CALL iom_put( "cflu", z3d_Cu(:,:,:) )
-        CALL iom_put( "cfluu", z3d_Cu(:,:,:) - z3d(:,:,:))
-        CALL iom_put( "cfluw", z3d   (:,:,:))
+        CALL iom_put( "cflu", z3d_Cu + z3d )
+        CALL iom_put( "cfluu", z3d   )
+        CALL iom_put( "cfluw", z3d_Cu)
       ENDIF
       !
       IF( iom_use("rphiu_u") .OR. iom_use("rphiw_u") ) THEN
@@ -297,8 +295,7 @@ CONTAINS
           DO jj = 1, jpj
             DO ji = 2,jpim1
               ! flux sortant
-              ! flux sortant
-              z3d_Cu(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*1000.) ) &
+              z3d_Cu(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*20.) ) &
               &            * ( - MIN( 0.5* (rpow(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) ), 0._wp  )   &
               &                + MAX( 0.5* (rpow(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) ), 0._wp  )   )
               z3d(ji,jj,jk) = ( 2._wp * rdt / (rpou(ji,jj,jk)*1000.) ) &
