@@ -223,17 +223,18 @@ CONTAINS
    bmpu(:,:,:) = 0._wp
 
    ! inducator
-   IF      (modulo (nn_cnp, 10) == 0) WHERE( rpou(:,:,:) <= rn_abp ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
+   IF      (modulo (nn_cnp, 10) == 0) THEN 
+      WHERE( rpou(:,:,:) <= rn_abp ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
    ELSE IF (modulo (nn_cnp, 10) == 1) THEN
       DO jk = 1, jpk
          DO jj = 1, jpj
             DO ji = 2,jpim1
-            z3d3(ji,jj,jk) = 2._wp * rdt * r1_e1u(ji,jj) * MAX( 0.5 * ( rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) )  , &
-            &                                                   0.5 * ( rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) / rpou(ji,jj,jk) 
+            z3d3(ji,jj,jk) = MAX( 0.5 * ( rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) )  , &
+            &                     0.5 * ( rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) / rpou(ji,jj,jk) 
             END DO
          END DO
       END DO
-      WHERE( z3d3(:,:,:) > 0 ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
+      WHERE( z3d3(:,:,:) < 1 ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
    ENDIF
 
     ! WHERE( rpou(:,:,:) <= 0.1 ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
