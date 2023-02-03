@@ -234,7 +234,7 @@ CONTAINS
             END DO
          END DO
       END DO
-      WHERE( z3d3(:,:,:) < 1 ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
+      bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp / MAXVAL(ABS( 1._wp - z3d3 ))
    ENDIF
 
     ! WHERE( rpou(:,:,:) <= 0.1 ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
