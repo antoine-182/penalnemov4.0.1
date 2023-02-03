@@ -285,11 +285,11 @@ CONTAINS
          DO jk = 1, jpk
             DO jj = 1, jpj
                DO ji = 2,jpim1
-               z3d1(ji,jj,jk) = 2._wp * rdt * r1_e1u(ji,jj) * (   MAX( 0.5 * ( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk) * un(ji  ,jj,jk)             &
-               &                                                             + e2u(ji+1,jj)*e3u_n(ji+1,jj,jk) * un(ji+1,jj,jk)), 0._wp )   &
-               &                                                - MIN( 0.5 * ( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk) * un(ji  ,jj,jk)             &
-               &                                                             + e2u(ji-1,jj)*e3u_n(ji-1,jj,jk) * un(ji-1,jj,jk)), 0._wp ) ) &
-               &                                              / rpou(ji,jj,jk) 
+               z3d1(ji,jj,jk) = 2._wp * rdt * r1_e1e2u(ji,jj) * (   MAX( 0.5 * ( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk) * un(ji  ,jj,jk)             &
+               &                                                               + e2u(ji+1,jj)*e3u_n(ji+1,jj,jk) * un(ji+1,jj,jk)), 0._wp )   &
+               &                                                  - MIN( 0.5 * ( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk) * un(ji  ,jj,jk)             &
+               &                                                               + e2u(ji-1,jj)*e3u_n(ji-1,jj,jk) * un(ji-1,jj,jk)), 0._wp ) ) &
+               &                                               / e3u_n(ji,jj,jk) 
                z3d3(ji,jj,jk) = 2._wp * rdt * r1_e1u(ji,jj) * MAX( 0.5 * ( rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) )  , &
                &                                                   0.5 * ( rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) / rpou(ji,jj,jk) 
                END DO
@@ -320,10 +320,11 @@ CONTAINS
       DO jk = 1, jpk
           DO jj = 1, jpj
             DO ji = 2,jpim1
-              z3d1(ji,jj,jk) = 2._wp * rdt * r1_e1u(ji,jj) * (   MAX( 0.5 * ( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk) * un(ji  ,jj,jk)             &
-              &                                                             + e2u(ji+1,jj)*e3u_n(ji+1,jj,jk) * un(ji+1,jj,jk)), 0._wp )   &
-              &                                                - MIN( 0.5 * ( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk) * un(ji  ,jj,jk)             &
-              &                                                             + e2u(ji-1,jj)*e3u_n(ji-1,jj,jk) * un(ji-1,jj,jk)), 0._wp ) ) &
+              z3d1(ji,jj,jk) = 2._wp * rdt * r1_e1e2u(ji,jj) * (   MAX( 0.5 * ( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk) * un(ji  ,jj,jk)             &
+              &                                                               + e2u(ji+1,jj)*e3u_n(ji+1,jj,jk) * un(ji+1,jj,jk)), 0._wp )   &
+              &                                                  - MIN( 0.5 * ( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk) * un(ji  ,jj,jk)             &
+              &                                                               + e2u(ji-1,jj)*e3u_n(ji-1,jj,jk) * un(ji-1,jj,jk)), 0._wp ) ) &
+              &                                                 / e3u_n(ji,jj,jk) 
             END DO
           END DO
         END DO
