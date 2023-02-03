@@ -72,7 +72,7 @@ CONTAINS
       REAL(wp) ::   ze3min            ! local scalar
       REAL(wp) ::   z1d, zrpostar,zr1,zr2     ! local scalar
       REAL(wp), DIMENSION(jpi,jpj)      ::   zht, zhu, z2d   ! 2D workspace
-      REAL(wp), DIMENSION(jpi,jpj,jpk)  ::   z3d, z3du         ! 3D workspace
+      REAL(wp), DIMENSION(jpi,jpj,jpk)  ::   z3d, z3du,z3d3         ! 3D workspace
 
       !!----------------------------------------------------------------------
       !
@@ -187,14 +187,14 @@ CONTAINS
       !------------------------ --------------------- ---------------------!
       rpou(:,:,:) = rpot(:,:,:) ; rpow(:,:,:) = rpot(:,:,:)
 
-      IF (nn_cnp == 0) THEN   ! demisomme
+      IF (mod (nn_cnp, 10) == 0) THEN   ! demisomme
         DO jk = 2, jpk
            rpow(:,:,jk) = 0.5_wp * ( rpot(:,:,jk) + rpot(:,:,jk-1) )   ! sens z > 0
         END DO
         DO ji = 1, jpim1
            rpou(ji,:,:) = 0.5_wp * ( rpot(ji,:,:) + rpot(ji+1,:,:) )
         END DO
-      ELSE IF (nn_cnp == 1) THEN ! mininmum
+      ELSE IF (mod (nn_cnp, 10)  == 1) THEN ! mininmum
         DO jk = 2, jpk
           DO jj= 1, jpj
             DO ji = 1, jpim1
@@ -220,8 +220,22 @@ CONTAINS
     !!------------------------ impermeability ---------------------!
     !------------------------- -------------- ---------------------!
     !
-    bmpu(:,:,:) = 0._wp
-    WHERE( rpou(:,:,:) <= rn_abp ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
+   bmpu(:,:,:) = 0._wp
+
+   ! inducator
+   IF      (modulo (nn_cnp, 10) == 0) WHERE( rpou(:,:,:) <= rn_abp ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
+   ELSE IF (modulo (nn_cnp, 10) == 1) THEN
+      DO jk = 1, jpk
+         DO jj = 1, jpj
+            DO ji = 2,jpim1
+            z3d3(ji,jj,jk) = 2._wp * rdt * r1_e1u(ji,jj) * MAX( 0.5 * ( rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) )  , &
+            &                                                   0.5 * ( rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) / rpou(ji,jj,jk) 
+            END DO
+         END DO
+      END DO
+      WHERE( z3d3(:,:,:) > 0 ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
+   ENDIF
+
     ! WHERE( rpou(:,:,:) <= 0.1 ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
     ! bmpu(:,:,:) = rn_fsp * (1._wp - rpou(:,:,:))          ! frotte trop
     !
