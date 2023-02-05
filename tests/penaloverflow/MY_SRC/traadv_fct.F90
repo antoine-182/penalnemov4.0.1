@@ -544,8 +544,6 @@ CONTAINS
       INTEGER                              , INTENT(in   ) ::   kit000          ! first time step index
       CHARACTER(len=3)                     , INTENT(in   ) ::   cdtype          ! =TRA or TRC (tracer indicator)
       INTEGER                              , INTENT(in   ) ::   kjpt            ! number of tracers
-      INTEGER                              , INTENT(in   ) ::   kn_fct_h        ! order of the FCT scheme (=2 or 4)
-      INTEGER                              , INTENT(in   ) ::   kn_fct_v        ! order of the FCT scheme (=2 or 4)
       REAL(wp)                             , INTENT(in   ) ::   p2dt            ! tracer time-step
       REAL(wp), DIMENSION(jpi,jpj,jpk     ), INTENT(in   ) ::   pun, pvn, pwn   ! 3 ocean transport components
       REAL(wp), DIMENSION(jpi,jpj,jpk,kjpt), INTENT(in   ) ::   ptb, ptn        ! before and now tracer fields
