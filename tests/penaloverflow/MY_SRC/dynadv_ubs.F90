@@ -347,7 +347,6 @@ CONTAINS
       REAL(wp), DIMENSION(jpi,jpj,jpk)   ::   zfu_t, zfu_f, zfu_uw ! local - U,V,Wu fluxes
       REAL(wp), DIMENSION(jpi,jpj,jpk)   ::   zfv_t, zfv_f, zfv_vw ! local - U,V,Wv fluxes
       REAL(wp), DIMENSION(jpi,jpj,jpk)   ::   zfu, zfv, zfw        ! local - transports
-#endif
       !!----------------------------------------------------------------------
       !
       IF( kt == nit000 ) THEN
