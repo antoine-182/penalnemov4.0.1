@@ -426,7 +426,6 @@ CONTAINS
             zfv_vw(ji,jj, 1 ) = 0._wp
          END DO
       END DO
-      IF( ln_linssh ) THEN                         ! constant volume : advection through the surface
       !
 #if defined key_bvp && key_w_bvp
       DO jk = 1, jpk            ! vertical volume fluxes penalised !
