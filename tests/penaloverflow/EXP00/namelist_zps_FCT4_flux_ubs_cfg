@@ -187,6 +187,7 @@
 !-----------------------------------------------------------------------
 &namtra_adv    !   advection scheme for tracer                          (default: NO selection)
 !-----------------------------------------------------------------------
+   ln_traadv_up1 = .false. !  1st order upwind scheme
    ln_traadv_cen = .false. !  2nd order centered scheme
       nn_cen_h   =  2            !  =2/4, horizontal 2nd order CEN / 4th order CEN
       nn_cen_v   =  2            !  =2/4, vertical   2nd order CEN / 4th order COMPACT
@@ -227,11 +228,12 @@
 !-----------------------------------------------------------------------
 &namdyn_adv    !   formulation of the momentum advection                (default: NO selection)
 !-----------------------------------------------------------------------
-   ln_dynadv_OFF = .false. !  linear dynamics (no momentum advection)
-   ln_dynadv_vec = .false. !  vector form (T) or flux form (F)
-   nn_dynkeg     = 0       ! scheme for grad(KE): =0   C2  ;  =1   Hollingsworth correction
+   ln_dynadv_OFF  = .false. !  linear dynamics (no momentum advection)
+   ln_dynadv_vec  = .false. !  vector form (T) or flux form (F)
+   nn_dynkeg      = 0       ! scheme for grad(KE): =0   C2  ;  =1   Hollingsworth correction
+   ln_dynadv_up1  = .false. !  flux form - 1st order upwind scheme
    ln_dynadv_cen2 = .false. !  flux form - 2nd order centered scheme
-   ln_dynadv_ubs = .true.  !  flux form - 3rd order UBS      scheme
+   ln_dynadv_ubs  = .true.  !  flux form - 3rd order upwind (UBS) scheme
 /
 !-----------------------------------------------------------------------
 &namdyn_vor    !   Vorticity / Coriolis scheme                          (default: NO selection)

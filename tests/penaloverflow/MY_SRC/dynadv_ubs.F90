@@ -30,6 +30,7 @@ MODULE dynadv_ubs
    REAL(wp), PARAMETER :: gamma2 = 1._wp/32._wp ! =0   2nd order  ; =1/32 4th order centred
 
    PUBLIC   dyn_adv_ubs   ! routine called by step.F90
+   PUBLIC   dyn_adv_up1   ! routine called by step.F90
 
    !! * Substitutions
 #  include "vectopt_loop_substitute.h90"
@@ -159,7 +160,7 @@ CONTAINS
                !
                zfuj = ( zfu(ji,jj,jk) + zfu(ji  ,jj+1,jk) )
                zfvi = ( zfv(ji,jj,jk) + zfv(ji+1,jj  ,jk) )
-               IF( zfuj > 0 ) THEN   ;    zl_v = zlv_vu( ji  ,jj  ,jk,1)
+               IF( zfuj > 0 ) THEN   ;    zl_v = zlv_vu( ji  ,jj,jk,1)
                ELSE                  ;    zl_v = zlv_vu( ji+1,jj,jk,1)
                ENDIF
                IF( zfvi > 0 ) THEN   ;    zl_u = zlu_uv( ji,jj  ,jk,1)
@@ -323,5 +324,160 @@ CONTAINS
       !
    END SUBROUTINE dyn_adv_ubs
 
+
+
+   SUBROUTINE dyn_adv_up1( kt )
+      !!----------------------------------------------------------------------
+      !!                  ***  ROUTINE dyn_adv_up1  ***
+      !!
+      !! ** Purpose :   Compute the now momentum advection trend in flux form
+      !!              and the general trend of the momentum equation with an
+      !!              1st order upwind scheme (UP1).
+      !!
+      !! ** Method  :   
+      !!
+      !! ** Action : - (ua,va) updated with the 3D advective momentum trends
+      !!
+      !!----------------------------------------------------------------------
+      INTEGER, INTENT(in) ::   kt   ! ocean time-step index
+      !
+      INTEGER  ::   ji, jj, jk   ! dummy loop indices
+      REAL(wp) ::   zui, zuj, zvi, zvj, zuk, zvk          ! local - upwind moments
+      REAL(wp) ::   zfui, zfuj, zfvj, zfvi, zfuk, zfvk      ! local - mid sum
+      REAL(wp), DIMENSION(jpi,jpj,jpk)   ::   zfu_t, zfu_f, zfu_uw ! local - U,V,Wu fluxes
+      REAL(wp), DIMENSION(jpi,jpj,jpk)   ::   zfv_t, zfv_f, zfv_vw ! local - U,V,Wv fluxes
+      REAL(wp), DIMENSION(jpi,jpj,jpk)   ::   zfu, zfv, zfw        ! local - transports
+#endif
+      !!----------------------------------------------------------------------
+      !
+      IF( kt == nit000 ) THEN
+         IF(lwp) WRITE(numout,*)
+         IF(lwp) WRITE(numout,*) 'dyn_adv_up1 : UP1 flux form momentum advection'
+         IF(lwp) WRITE(numout,*) '~~~~~~~~~~~'
+      ENDIF
+      !
+      zfu_t(:,:,:) = 0._wp
+      zfv_t(:,:,:) = 0._wp
+      zfu_f(:,:,:) = 0._wp
+      zfv_f(:,:,:) = 0._wp
+      !
+      IF( l_trddyn ) THEN           ! trends: store the input trends
+         zfu_uw(:,:,:) = ua(:,:,:)
+         zfv_vw(:,:,:) = va(:,:,:)
+      ENDIF
+      !                                      ! ====================== !
+      !                                      !  Horizontal advection  !
+      DO jk = 1, jpkm1                       ! ====================== !
+         !                                         ! horizontal volume fluxes
+!!an bvp carried by e3u, e3v
+         zfu(:,:,jk) = 0.5_wp * e2u(:,:) * e3u_n(:,:,jk) * un(:,:,jk)
+         zfv(:,:,jk) = 0.5_wp * e1v(:,:) * e3v_n(:,:,jk) * vn(:,:,jk)
+         !
+         DO jj = 1, jpjm1                          ! horizontal momentum fluxes at T- and F-point
+            DO ji = 1, fs_jpim1   ! vector opt.
+               zfui = ( zfu(ji,jj,jk) + zfu(ji+1,jj  ,jk) )
+               zfvj = ( zfv(ji,jj,jk) + zfv(ji  ,jj+1,jk) )
+               IF( zfui > 0 ) THEN   ;   zui = ub(ji  ,jj,jk)
+               ELSE                  ;   zui = ub(ji+1,jj,jk)
+               ENDIF
+               IF( zfvj > 0 ) THEN   ;   zvj = vb(ji,jj  ,jk)
+               ELSE                  ;   zvj = vb(ji,jj+1,jk)
+               ENDIF
+               !
+               zfu_t(ji+1,jj  ,jk) = zfui * zui
+               zfv_t(ji  ,jj+1,jk) = zfvj * zvj
+               !
+               zfuj = ( zfu(ji,jj,jk) + zfu(ji  ,jj+1,jk) )
+               zfvi = ( zfv(ji,jj,jk) + zfv(ji+1,jj  ,jk) )
+               IF( zfuj > 0 ) THEN   ;    zuj = vb(ji  ,jj,jk)
+               ELSE                  ;    zuj = vb(ji+1,jj,jk)
+               ENDIF
+               IF( zfvi > 0 ) THEN   ;    zvi = ub(ji,jj  ,jk)
+               ELSE                  ;    zvi = ub(ji,jj+1,jk)
+               ENDIF
+               !
+               zfv_f(ji  ,jj  ,jk) = zfuj * zuj
+               zfu_f(ji  ,jj  ,jk) = zfvi * zvi
+            END DO
+         END DO
+         DO jj = 2, jpjm1                          ! divergence of horizontal momentum fluxes
+            DO ji = fs_2, fs_jpim1   ! vector opt.
+               ua(ji,jj,jk) = ua(ji,jj,jk) - (  zfu_t(ji+1,jj,jk) - zfu_t(ji,jj  ,jk)    &
+                  &                           + zfv_f(ji  ,jj,jk) - zfv_f(ji,jj-1,jk)  ) * r1_e1e2u(ji,jj) / e3u_n(ji,jj,jk)
+               va(ji,jj,jk) = va(ji,jj,jk) - (  zfu_f(ji,jj  ,jk) - zfu_f(ji-1,jj,jk)    &
+                  &                           + zfv_t(ji,jj+1,jk) - zfv_t(ji  ,jj,jk)  ) * r1_e1e2v(ji,jj) / e3v_n(ji,jj,jk)
+            END DO
+         END DO
+      END DO
+      IF( l_trddyn ) THEN                          ! trends: send trends to trddyn for diagnostic
+         zfu_uw(:,:,:) = ua(:,:,:) - zfu_uw(:,:,:)
+         zfv_vw(:,:,:) = va(:,:,:) - zfv_vw(:,:,:)
+         CALL trd_dyn( zfu_uw, zfv_vw, jpdyn_keg, kt )
+         zfu_t(:,:,:) = ua(:,:,:)
+         zfv_t(:,:,:) = va(:,:,:)
+      ENDIF
+      !                                      ! ==================== !
+      !                                      !  Vertical advection  !
+      !                                      ! ==================== !
+      DO jj = 2, jpjm1                             ! surface/bottom advective fluxes set to zero
+         DO ji = fs_2, fs_jpim1
+            zfu_uw(ji,jj,jpk) = 0._wp
+            zfv_vw(ji,jj,jpk) = 0._wp
+            zfu_uw(ji,jj, 1 ) = 0._wp
+            zfv_vw(ji,jj, 1 ) = 0._wp
+         END DO
+      END DO
+      IF( ln_linssh ) THEN                         ! constant volume : advection through the surface
+      !
+#if defined key_bvp && key_w_bvp
+      DO jk = 1, jpk            ! vertical volume fluxes penalised !
+         zfw(:,:,jk) = 0.5_wp * e1e2t(:,:) * wn(:,:,jk) * rpow(:,:,jk)
+      END DO
+#else
+      DO jk = 1, jpk            ! vertical volume fluxes
+         zfw(:,:,jk) = 0.5_wp * e1e2t(:,:) * wn(:,:,jk)
+      END DO
+#endif
+      !
+      DO jk = 2, jpk
+         DO jj = 1, jpjm1
+            DO ji = 1, fs_jpim1   ! vector opt.
+               !
+               zfuk = ( zfw(ji+1,jj,jk) + zfw(ji,jj,jk) )  ! vertical transport en ji+1/2,jj    ,jk+1/2 - UW
+               zfvk = ( zfw(ji,jj+1,jk) + zfw(ji,jj,jk) )  !                       ji    ,jj+1/2,jk+1/2 - VW
+               IF( zfuk > 0._wp ) THEN   ;    zuk = ub(ji,jj,jk  )
+               ELSE                      ;    zuk = ub(ji,jj,jk-1)
+               ENDIF
+               IF( zfvk > 0._wp ) THEN   ;    zvk = vb(ji,jj,jk  )
+               ELSE                      ;    zvk = vb(ji,jj,jk-1)
+               ENDIF
+               !
+               zfu_uw(ji,jj,jk) = zfuk * zuk
+               zfv_vw(ji,jj,jk) = zfvk * zvk
+               !
+            END DO
+         END DO
+      END DO
+      !
+      DO jk = 1, jpkm1                          ! divergence of vertical momentum flux divergence
+         DO jj = 2, jpjm1
+            DO ji = fs_2, fs_jpim1   ! vector opt.
+      !!an RHS ecrit en vector form, les e3u seront re-multiplie derriere pour avoir un transport
+               ua(ji,jj,jk) =  ua(ji,jj,jk) - ( zfu_uw(ji,jj,jk) - zfu_uw(ji,jj,jk+1) ) * r1_e1e2u(ji,jj) / e3u_n(ji,jj,jk)
+               va(ji,jj,jk) =  va(ji,jj,jk) - ( zfv_vw(ji,jj,jk) - zfv_vw(ji,jj,jk+1) ) * r1_e1e2v(ji,jj) / e3v_n(ji,jj,jk)
+            END DO
+         END DO
+      END DO
+      !
+      IF( l_trddyn ) THEN                       ! save the vertical advection trend for diagnostic
+         zfu_t(:,:,:) = ua(:,:,:) - zfu_t(:,:,:)
+         zfv_t(:,:,:) = va(:,:,:) - zfv_t(:,:,:)
+         CALL trd_dyn( zfu_t, zfv_t, jpdyn_zad, kt )
+      ENDIF
+      !                                         ! Control print
+      IF(ln_ctl)   CALL prt_ctl( tab3d_1=ua, clinfo1=' ubs2 adv - Ua: ', mask1=umask,   &
+         &                       tab3d_2=va, clinfo2=           ' Va: ', mask2=vmask, clinfo3='dyn' )
+      !
+   END SUBROUTINE dyn_adv_up1
    !!==============================================================================
 END MODULE dynadv_ubs
