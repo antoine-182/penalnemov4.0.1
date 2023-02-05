@@ -64,6 +64,7 @@ MODULE traadv
    INTEGER, PARAMETER ::   np_MUS     = 3   ! MUSCL scheme
    INTEGER, PARAMETER ::   np_UBS     = 4   ! 3rd order Upstream Biased Scheme
    INTEGER, PARAMETER ::   np_QCK     = 5   ! QUICK scheme
+   INTEGER, PARAMETER ::   np_UP1     = 6   ! Upwind scheme
 
    !! * Substitutions
 #  include "vectopt_loop_substitute.h90"
@@ -152,6 +153,9 @@ CONTAINS
       !
       SELECT CASE ( nadv )                      !==  compute advection trend and add it to general trend  ==!
       !
+!!an
+      CASE ( np_UP1 )                                 ! Upwind scheme
+         CALL tra_adv_up1    ( kt, nit000, 'TRA',         zun, zvn, zwn     , tsn, tsa, jpts                  )
       CASE ( np_CEN )                                 ! Centered scheme : 2nd / 4th order
          CALL tra_adv_cen    ( kt, nit000, 'TRA',         zun, zvn, zwn     , tsn, tsa, jpts, nn_cen_h, nn_cen_v )
       CASE ( np_FCT )                                 ! FCT scheme      : 2nd / 4th order
@@ -216,6 +220,8 @@ CONTAINS
          WRITE(numout,*) '~~~~~~~~~~~~'
          WRITE(numout,*) '   Namelist namtra_adv : chose a advection scheme for tracers'
          WRITE(numout,*) '      No advection on T & S                     ln_traadv_OFF = ', ln_traadv_OFF
+!!an
+         WRITE(numout,*) '      upwind scheme                             ln_traadv_up1 = ', ln_traadv_up1
          WRITE(numout,*) '      centered scheme                           ln_traadv_cen = ', ln_traadv_cen
          WRITE(numout,*) '            horizontal 2nd/4th order               nn_cen_h   = ', nn_fct_h
          WRITE(numout,*) '            vertical   2nd/4th order               nn_cen_v   = ', nn_fct_v
@@ -237,6 +243,8 @@ CONTAINS
       IF( ln_traadv_mus ) THEN   ;   ioptio = ioptio + 1   ;   nadv = np_MUS      ;   ENDIF
       IF( ln_traadv_ubs ) THEN   ;   ioptio = ioptio + 1   ;   nadv = np_UBS      ;   ENDIF
       IF( ln_traadv_qck ) THEN   ;   ioptio = ioptio + 1   ;   nadv = np_QCK      ;   ENDIF
+!!an
+      IF( ln_traadv_up1 ) THEN   ;   ioptio = ioptio + 1   ;   nadv = np_UP1      ;   ENDIF
       !
       IF( ioptio /= 1 )   CALL ctl_stop( 'tra_adv_init: Choose ONE advection option in namelist namtra_adv' )
       !
@@ -266,6 +274,7 @@ CONTAINS
          WRITE(numout,*)
          SELECT CASE ( nadv )
          CASE( np_NO_adv  )   ;   WRITE(numout,*) '   ==>>>   NO T-S advection'
+         CASE( np_UP1     )   ;   WRITE(numout,*) '   ==>>>   UP1      scheme is used'
          CASE( np_CEN     )   ;   WRITE(numout,*) '   ==>>>   CEN      scheme is used. Horizontal order: ', nn_cen_h,   &
             &                                                                        ' Vertical   order: ', nn_cen_v
          CASE( np_FCT     )   ;   WRITE(numout,*) '   ==>>>   FCT      scheme is used. Horizontal order: ', nn_fct_h,   &
