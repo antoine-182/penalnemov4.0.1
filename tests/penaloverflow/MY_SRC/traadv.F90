@@ -55,6 +55,7 @@ MODULE traadv
    LOGICAL ::   ln_traadv_ubs    ! UBS scheme flag
    INTEGER ::      nn_ubs_v             ! =2/4 : vertical choice of the order of UBS scheme
    LOGICAL ::   ln_traadv_qck    ! QUICKEST scheme flag
+   LOGICAL ::   ln_traadv_up1    ! 1st order upwind scheme flag
 
    INTEGER ::   nadv             ! choice of the type of advection scheme
    !                             ! associated indices:
@@ -202,6 +203,7 @@ CONTAINS
          &                 ln_traadv_mus , ln_mus_ups,           &   ! MUSCL
          &                 ln_traadv_ubs ,           nn_ubs_v,   &   ! UBS
          &                 ln_traadv_qck                             ! QCK
+         &                 ln_traadv_up1                             ! up1
       !!----------------------------------------------------------------------
       !
       !                                !==  Namelist  ==!
@@ -274,6 +276,7 @@ CONTAINS
          WRITE(numout,*)
          SELECT CASE ( nadv )
          CASE( np_NO_adv  )   ;   WRITE(numout,*) '   ==>>>   NO T-S advection'
+!!an
          CASE( np_UP1     )   ;   WRITE(numout,*) '   ==>>>   UP1      scheme is used'
          CASE( np_CEN     )   ;   WRITE(numout,*) '   ==>>>   CEN      scheme is used. Horizontal order: ', nn_cen_h,   &
             &                                                                        ' Vertical   order: ', nn_cen_v
