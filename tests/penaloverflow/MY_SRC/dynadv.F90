@@ -45,7 +45,7 @@ MODULE dynadv
    INTEGER, PUBLIC, PARAMETER ::   np_FLX_c2  = 2   ! flux   form : 2nd order centered scheme
 !!an
    INTEGER, PUBLIC, PARAMETER ::   np_FLX_ubs = 3   ! flux   form : 3rd order Upstream Biased Scheme
-   INTEGER, PUBLIC, PARAMETER ::   np_FLX_up1 = 1   ! flux   form : upwind 1 scheme
+   INTEGER, PUBLIC, PARAMETER ::   np_FLX_up1 = 4   ! flux   form : upwind 1 scheme
 
    !! * Substitutions
 #  include "vectopt_loop_substitute.h90"
