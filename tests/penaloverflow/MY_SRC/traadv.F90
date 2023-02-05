@@ -202,7 +202,7 @@ CONTAINS
          &                 ln_traadv_fct , nn_fct_h, nn_fct_v,   &   ! FCT
          &                 ln_traadv_mus , ln_mus_ups,           &   ! MUSCL
          &                 ln_traadv_ubs ,           nn_ubs_v,   &   ! UBS
-         &                 ln_traadv_qck                         &   ! QCK
+         &                 ln_traadv_qck ,                       &   ! QCK
          &                 ln_traadv_up1                             ! up1
       !!----------------------------------------------------------------------
       !
