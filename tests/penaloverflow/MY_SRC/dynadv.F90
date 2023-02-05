@@ -78,8 +78,6 @@ CONTAINS
       CASE( np_VEC_c2  )     
          CALL dyn_keg     ( kt, nn_dynkeg )    ! vector form : horizontal gradient of kinetic energy
          CALL dyn_zad     ( kt )               ! vector form : vertical advection
-      !CASE( np_FLX_up1  ) 
-      !   CALL dyn_adv_up1( kt )               ! Upwind scheme
        CASE( np_FLX_c2  ) 
          CALL dyn_adv_cen2( kt )               ! 2nd order centered scheme
 !!an

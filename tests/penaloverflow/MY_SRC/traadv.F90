@@ -155,7 +155,7 @@ CONTAINS
       !
 !!an
       CASE ( np_UP1 )                                 ! Upwind scheme
-         CALL tra_adv_up1    ( kt, nit000, 'TRA',         zun, zvn, zwn     , tsn, tsa, jpts                  )
+         CALL tra_adv_up1    ( kt, nit000, 'TRA', r2dt, zun, zvn, zwn, tsb, tsn, tsa, jpts                    )
       CASE ( np_CEN )                                 ! Centered scheme : 2nd / 4th order
          CALL tra_adv_cen    ( kt, nit000, 'TRA',         zun, zvn, zwn     , tsn, tsa, jpts, nn_cen_h, nn_cen_v )
       CASE ( np_FCT )                                 ! FCT scheme      : 2nd / 4th order
