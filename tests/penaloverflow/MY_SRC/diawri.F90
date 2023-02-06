@@ -112,7 +112,7 @@ CONTAINS
       REAL(wp)::   zztmp , zztmpx   ! local scalar
       REAL(wp)::   zztmp2, zztmpy   !   -      -
       REAL(wp), DIMENSION(jpi,jpj)     ::   z2d   ! 2D workspace
-      REAL(wp), DIMENSION(jpi,jpj,jpk) ::   z3d, z3d1, z3d2,z3d3   ! 3D workspace
+      REAL(wp), DIMENSION(jpi,jpj,jpk) ::   z3d, z3d1, z3d2,z3d3, z3dwi   ! 3D workspace
       !!----------------------------------------------------------------------
       !
       IF( ln_timing )   CALL timing_start('dia_wri')
@@ -224,24 +224,27 @@ CONTAINS
          CALL iom_put( "sbv", z2d )                ! bottom j-current
       ENDIF
       !
+      
       ! Lipschitz, inversion de la matrice implicite
       ! r2dt = 2*rdt
+      z3dwi(:,:,:) = 0._wp
+      IF ( ln_zad_Aimp ) z3dwi = z3dwi + wi
 #if defined key_bvp 
       IF( iom_use("rlipst") .OR. iom_use("lipst") .OR. iom_use("rlipsu") .OR. iom_use("lipsu") ) THEN
          z3d(:,:,:) = 0._wp ; z3d1(:,:,:) = 0._wp ; z3d2(:,:,:) = 0._wp ; z3d3(:,:,:) = 0._wp
          DO jk = 1, jpkm1
             z3d (:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ABS( rpow(:,:,jk+1) - rpow(:,:,jk) )
             !
-            z3d2(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) *    ( rpow(:,:,jk+1) * wi(:,:,jk+1)   &
-            &                                                   - rpow(:,:,jk  ) * wi(:,:,jk  )   )
+            z3d2(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) *    ( rpow(:,:,jk+1) * z3dwi(:,:,jk+1)   &
+            &                                                   - rpow(:,:,jk  ) * z3dwi(:,:,jk  )   )
             DO ji = 1,jpim1
                z3d1(ji,:,jk) = ( 2._wp * rdt / e3u_n(ji,:,jk) ) * ABS( 0.5_wp*(rpow(ji+1,:,jk+1)+rpow(ji,:,jk+1))   &
                &                                                     - 0.5_wp*(rpow(ji+1,:,jk  )+rpow(ji,:,jk  ))   )
                !
-               z3d3(ji,:,jk) = ( 2._wp * rdt / e3u_n(ji,:,jk) ) *    ( 0.5_wp*(rpow(ji+1,:,jk+1) * wi(ji+1,:,jk+1)    &
-               &                                                              +rpow(ji  ,:,jk+1) * wi(ji  ,:,jk+1))   &
-               &                                                     - 0.5_wp*(rpow(ji+1,:,jk  ) * wi(ji+1,:,jk  )    &
-               &                                                              +rpow(ji  ,:,jk  ) * wi(ji  ,:,jk  ))   ) 
+               z3d3(ji,:,jk) = ( 2._wp * rdt / e3u_n(ji,:,jk) ) *    ( 0.5_wp*(rpow(ji+1,:,jk+1) * z3dwi(ji+1,:,jk+1)    &
+               &                                                              +rpow(ji  ,:,jk+1) * z3dwi(ji  ,:,jk+1))   &
+               &                                                     - 0.5_wp*(rpow(ji+1,:,jk  ) * z3dwi(ji+1,:,jk  )    &
+               &                                                              +rpow(ji  ,:,jk  ) * z3dwi(ji  ,:,jk  ))   ) 
             END DO
          END DO
          CALL iom_put( "rlipst" , z3d (:,:,:) )
@@ -253,10 +256,10 @@ CONTAINS
       IF( iom_use("lipst") .OR. iom_use("lipsu") ) THEN
             z3d2(:,:,:) = 0._wp ; z3d3(:,:,:) = 0._wp
             DO jk = 1, jpkm1
-            z3d2(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ( wi(:,:,jk+1) - wi(:,:,jk  ) )
+            z3d2(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ( z3dwi(:,:,jk+1) - z3dwi(:,:,jk  ) )
             DO ji = 1,jpim1
-               z3d3(ji,:,jk) = ( 2._wp * rdt / e3u_n(ji,:,jk) ) * ( 0.5_wp*(wi(ji+1,:,jk+1) + wi(ji  ,:,jk+1))   &
-               &                                                  - 0.5_wp*(wi(ji+1,:,jk  ) + wi(ji  ,:,jk  ))   ) 
+               z3d3(ji,:,jk) = ( 2._wp * rdt / e3u_n(ji,:,jk) ) * ( 0.5_wp*(z3dwi(ji+1,:,jk+1) + z3dwi(ji  ,:,jk+1))   &
+               &                                                  - 0.5_wp*(z3dwi(ji+1,:,jk  ) + z3dwi(ji  ,:,jk  ))   ) 
             END DO
          END DO
          CALL iom_put(  "lipst" , z3d2(:,:,:) )
@@ -399,11 +402,11 @@ CONTAINS
          CALL iom_put("cfltw",z3d1)
       ENDIF
 #endif
-      !!an berk berk
-       IF( ln_zad_Aimp ) z3d1(:,:,:) = wn + wi               ! Recombine explicit and implicit parts of vertical velocity for diagnostic output
+      z3d1(:,:,:) = wn
+      IF( ln_zad_Aimp ) z3d1 = z3d1 + wi               ! Recombine explicit and implicit parts of vertical velocity for diagnostic output
       !
+      IF( ln_zad_Aimp ) CALL iom_put( "wimp", wi )
       CALL iom_put( "wexp", wn )
-      CALL iom_put( "wimp", wi )
       CALL iom_put( "woce", z3d1 )                   ! vertical velocity
       IF( iom_use('w_masstr') .OR. iom_use('w_masstr2') ) THEN   ! vertical mass transport & its square value
          ! Caution: in the VVL case, it only correponds to the baroclinic mass transport.
