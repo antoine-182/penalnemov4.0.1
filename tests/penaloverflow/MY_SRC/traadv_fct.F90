@@ -668,12 +668,13 @@ CONTAINS
                END DO
             END DO
          END DO
-!!an Upstream1 sur (u,v,wn) et pta+=trend(UP1) puis zwi first guess implicite (??) de pta
+!!an Upstream1 sur (u,v,w_e) et pta+=trend(UP1) 
+!! wi <- d_t T + adv(UT,VT,WeT) + adv(WiT) = 0 (implicit)
          IF ( ll_zAimp ) THEN
-            CALL tridia_solver( zwdia, zwsup, zwinf, zwi, zwi , 0 )
+            CALL tridia_solver( zwdia, zwsup, zwinf, zwi, zwi , 0 ) 
             !
             !!an différent du zps car pas de variation entièrement verticale
-            ztw(:,:,1) = 0._wp ; ztw(:,:,jpk) = 0._wp ;
+            ztw(:,:,1) = 0._wp ; ztw(:,:,jpk) = 0._wp 
             DO jk = 2, jpkm1        ! Interior value ( multiplied by wmask)
                DO jj = 2, jpjm1
                   DO ji = fs_2, fs_jpim1   ! vector opt.
@@ -689,7 +690,6 @@ CONTAINS
                      zfm_wk = wi(ji,jj,jk) - ABS( wi(ji,jj,jk) )
 #endif
                      ztw(ji,jj,jk) =  0.5 * e1e2t(ji,jj) * ( zfp_wk * zwi(ji,jj,jk) + zfm_wk * zwi(ji,jj,jk-1) ) * wmask(ji,jj,jk)
-                     zwz(ji,jj,jk) = zwz(ji,jj,jk) + ztw(ji,jj,jk) ! update vertical fluxes
                   END DO
                END DO
             END DO

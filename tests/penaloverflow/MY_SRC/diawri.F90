@@ -256,7 +256,7 @@ CONTAINS
       IF( iom_use("lipst") .OR. iom_use("lipsu") ) THEN
             z3d2(:,:,:) = 0._wp ; z3d3(:,:,:) = 0._wp
             DO jk = 1, jpkm1
-            z3d2(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ( z3dwi(:,:,jk+1) - z3dwi(:,:,jk  ) )
+               z3d2(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ( z3dwi(:,:,jk+1) - z3dwi(:,:,jk  ) )
             DO ji = 1,jpim1
                z3d3(ji,:,jk) = ( 2._wp * rdt / e3u_n(ji,:,jk) ) * ( 0.5_wp*(z3dwi(ji+1,:,jk+1) + z3dwi(ji  ,:,jk+1))   &
                &                                                  - 0.5_wp*(z3dwi(ji+1,:,jk  ) + z3dwi(ji  ,:,jk  ))   ) 

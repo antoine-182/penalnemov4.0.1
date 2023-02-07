@@ -222,7 +222,7 @@ CONTAINS
     !
    bmpu(:,:,:) = 0._wp
 
-   ! inducator
+   ! indicator
    IF      (modulo (nn_cnp, 10) == 0) THEN 
       WHERE( rpou(:,:,:) <= rn_abp ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
    ELSE IF (modulo (nn_cnp, 10) == 1) THEN
@@ -234,7 +234,19 @@ CONTAINS
             END DO
          END DO
       END DO
-      bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp / MAXVAL(ABS( 1._wp - z3d3 ))
+      bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp 
+   ELSE IF (modulo (nn_cnp, 10) == 2) THEN
+      z1d = 2._wp * rdt / rn_dx
+      DO jk = 1, jpk
+         DO jj = 1, jpj
+            DO ji = 2,jpim1
+            z3d3(ji,jj,jk) = MAX( 0.5 * ( rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) )  , &
+            &                     0.5 * ( rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) / rpou(ji,jj,jk) 
+            END DO
+         END DO
+      END DO
+      bmpu(:,:,:) = ABS( 1._wp - z1d * z3d3(:,:,:) ) * rn_fsp 
+      
    ENDIF
 
     ! WHERE( rpou(:,:,:) <= 0.1 ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
