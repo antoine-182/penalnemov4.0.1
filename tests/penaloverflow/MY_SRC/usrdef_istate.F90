@@ -74,12 +74,6 @@ CONTAINS
         DO jj = 1, jpj
           DO ji = 1, jpi
             IF ( glamt(ji,jj) <= zdam ) pts(ji,jj,jk,jp_tem) = rn_T0 * ptmask(ji,jj,jk)
-        !! dep de 10°C
-         ! WHERE( glamt(:,:) <= zdam )
-        !! dep de 18°C
-         ! WHERE( glamt(:,:) <= zdam )   pts(:,:,jk,jp_tem) = 18._wp * ptmask(:,:,jk)
-        !! dep de 10°C
-         ! WHERE( glamt(:,:) <= zdam )   pts(:,:,jk,jp_tem) = 10._wp * ptmask(:,:,jk)
           END DO
         END DO
       END DO
