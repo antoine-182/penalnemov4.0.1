@@ -146,7 +146,7 @@ CONTAINS
       !------------------------ smoothing along x ---------------------!
       !------------------------ ----------------- ---------------------!
       z3d (:,:,:) = rpot(:,:,:)
-      DO jx = 1, nn_bvpsmg
+      DO jx = 1, nn_smo
         IF(lwp) WRITE(numout,*) ' smooth  zer ',jx
         DO jk = 1,jpk
             DO jj = 1,jpj
@@ -169,17 +169,6 @@ CONTAINS
         END DO
         rpot(:,:,:) = z3d(:,:,:)
       END DO
-      !
-      ! IF(nn_bvpsmg>0)
-      ! DO jk = 1,jpk
-      !   DO jj = 1,jpj
-      !     DO ji = 2,jpi
-      !       zxx = profilx(zht(ji,jj))
-      !       z3d(ji,jj,jk) = ( 1._wp - rn_abp / (REAL(nn_bvpsmg,wp) * rn_dx) ) * ( glamt(ji,jj) - zxx) + ( 0.5 + 0.5_wp * rn_abp )
-      !     END DO
-      !   END DO
-      ! END DO
-      ! END IF
       !
       ! CALL lbc_lnk( 'usrdef_zgr', rpot, 'T', 1._wp)
       !
