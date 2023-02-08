@@ -13,6 +13,7 @@
 	<file id="file1" name_suffix="_grid_T" description="ocean T grid variables" >
 	  <field field_ref="e3t"          name="e3t_inst"     long_name="instantaneous T-cell thickness"                operation="instant" />
 	  <field field_ref="toce"         name="thetao_inst"  long_name="instantaneous sea water potential temperature" operation="instant" />
+    <field field_ref="soce"         name="soce   "  long_name="instantaneous sea water salinity" operation="instant" />
     <field field_ref="ssh"          name="ssh_inst"     long_name="instantaneous sea surface height above geoid"  operation="instant" />
     <field field_ref="rpot"          name="rpot"     long_name="porosity"  operation="instant" />
     <field field_ref="lipst"          name="lipst"     long_name="porosity"  operation="instant" />
