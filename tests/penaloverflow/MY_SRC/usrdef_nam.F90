@@ -36,7 +36,8 @@ MODULE usrdef_nam
    REAL(wp), PUBLIC ::   rn_abp             ! alpha boundary parameter                                       [-]
    INTEGER , PUBLIC ::   nn_cnp             ! number of cell on which is smoothed the porosity (phi)         [-]
    REAL(wp), PUBLIC ::   rn_fsp             ! friction parameter 1/epsilon of the permeability               [1/s]
-   INTEGER, PUBLIC ::   nn_fsp             ! friction parameter 1/epsilon of the permeability               [1/s]
+   INTEGER, PUBLIC  ::   nn_fsp             ! friction parameter 1/epsilon of the permeability               [1/s]
+   INTEGER, PUBLIC  ::   nn_wef             ! where friction is applied
    INTEGER , PUBLIC ::   nn_smo          ! number of cell on which is smoothed the porosity (phi)         [-]
 
    !!----------------------------------------------------------------------
@@ -66,7 +67,7 @@ CONTAINS
       INTEGER ::   ios   ! Local integer
       !!
       NAMELIST/namusr_def/ ln_zco, ln_zps, ln_sco, rn_dx, rn_dz, rn_T1, rn_T0,      &
-         &                 rn_abp, nn_cnp, rn_fsp, nn_fsp, nn_smo                   ! penalisation parameters
+         &                 rn_abp, nn_cnp, rn_fsp, nn_fsp, nn_wef, nn_smo           ! penalisation parameters
 
       !!----------------------------------------------------------------------
       !
@@ -128,6 +129,7 @@ CONTAINS
       WRITE(numout,*) '                                              nn_cnp = ', nn_cnp
       WRITE(numout,*) '                                              rn_fsp = ', rn_fsp
       WRITE(numout,*) '                                              nn_fsp = ', nn_fsp
+      WRITE(numout,*) '                                              nn_wef = ', nn_wef
       WRITE(numout,*) '                                              nn_smo = ', nn_smo
 
       !

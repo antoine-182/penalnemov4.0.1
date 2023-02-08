@@ -175,15 +175,14 @@ CONTAINS
       !!------------------------ broadcast to U and W ---------------------!
       !------------------------ --------------------- ---------------------!
       rpou(:,:,:) = rpot(:,:,:) ; rpow(:,:,:) = rpot(:,:,:)
-
-      IF (mod (nn_cnp, 10) == 0) THEN   ! demisomme
+      IF (nn_cnp == 0) THEN   ! demisomme
         DO jk = 2, jpk
            rpow(:,:,jk) = 0.5_wp * ( rpot(:,:,jk) + rpot(:,:,jk-1) )   ! sens z > 0
         END DO
         DO ji = 1, jpim1
            rpou(ji,:,:) = 0.5_wp * ( rpot(ji,:,:) + rpot(ji+1,:,:) )
         END DO
-      ELSE IF (mod (nn_cnp, 10)  == 1) THEN ! mininmum
+      ELSE IF (nn_cnp  == 1) THEN ! mininmum
         DO jk = 2, jpk
           DO jj= 1, jpj
             DO ji = 1, jpim1
@@ -193,7 +192,6 @@ CONTAINS
           END DO
         END DO
       ENDIF
-      !
       !!------------------------ inverse ---------------------!
       DO jk = 1, jpk
         DO jj = 1, jpj
@@ -210,11 +208,10 @@ CONTAINS
     !------------------------- -------------- ---------------------!
     !
    bmpu(:,:,:) = 0._wp
-
    ! indicator
-   IF      (modulo (nn_cnp, 10) == 0) THEN 
+   IF      (nn_wef == 0) THEN 
       WHERE( rpou(:,:,:) <= rn_abp ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
-   ELSE IF (modulo (nn_cnp, 10) == 1) THEN
+   ELSE IF (nn_wef == 1) THEN
       DO jk = 1, jpk
          DO jj = 1, jpj
             DO ji = 2,jpim1

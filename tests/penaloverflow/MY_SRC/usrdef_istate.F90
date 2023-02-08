@@ -78,7 +78,10 @@ CONTAINS
         END DO
       END DO
       !
-      pts(:,:,:,jp_sal) = 1._wp * ptmask(:,:,:)
+      !!an =1. highlight spurious oscillations (centered schemes) but
+      ! pts(:,:,:,jp_sal) = 1._wp * ptmask(:,:,:) !
+      !!an =T, really close to T
+      pts(:,:,:,jp_sal) = pts(:,:,:,jp_tem)
       !
    END SUBROUTINE usr_def_istate
 

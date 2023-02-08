@@ -29,12 +29,12 @@
    rn_T0       =     10.   !  dense water (default 10)
   !
    rn_abp = 0.0001  ! alpha boundary parameter                                        [-]
-   nn_cnp =  0      ! =XY ; X = 0/1 rpou,rpow halfsum / minimum [-]
-                    !       Y = 0/1 friction where < abp / rphiuu >0
+   nn_cnp =  0      ! 0/1 rpou,rpow halfsum / minimum [-]
    rn_fsp = 500.    ! friction parameter 1/epsilon of the permeability                [1/s]
-       nn_fsp = 12   ! 0 - explicit
+      nn_fsp = 12   ! 0 - explicit
                      ! 1 - implicit - 12 in matrix
                      ! 2 - splitted
+      nn_wef = 0    ! 0/1 friction applied where < abp / rphiuu >0
    nn_smo = 0    ! smoothing of porosity /z
 /
 !
