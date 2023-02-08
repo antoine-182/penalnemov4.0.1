@@ -551,13 +551,11 @@ CONTAINS
       !
       INTEGER  ::   ji, jj, jk, jn                           ! dummy loop indices
       REAL(wp) ::   ztra                                     ! local scalar
-      REAL(wp) ::   zfp_ui, zfp_vj, zfp_wk, zC2t_u, zC4t_u    !   -      -
-      REAL(wp) ::   zfm_ui, zfm_vj, zfm_wk, zC2t_v, zC4t_v           !   -      -
-      REAL(wp), DIMENSION(jpi,jpj)            ::   zfp_wi, zfm_wi, zC2t_w
-      REAL(wp), DIMENSION(jpi,jpj,jpk)        ::   zwi, zwx, zwy, zwz, ztu, ztv, z3d, zltu, zltv, zltw, ztw
+      REAL(wp) ::   zfp_ui, zfp_vj, zfp_wk   !   -      -
+      REAL(wp) ::   zfm_ui, zfm_vj, zfm_wk   !   -      -
+      REAL(wp), DIMENSION(jpi,jpj)            ::   zfp_wi, zfm_wi
+      REAL(wp), DIMENSION(jpi,jpj,jpk)        ::   zwx, zwy, zwz, ztu, ztv, z3d
       REAL(wp), DIMENSION(:,:,:), ALLOCATABLE ::   ztrdx, ztrdy, ztrdz, zptry
-      REAL(wp), DIMENSION(:,:,:), ALLOCATABLE ::   zwinf, zwdia, zwsup
-      LOGICAL  ::   ll_zAimp                                 ! flag to apply adaptive implicit vertical advection
       !!----------------------------------------------------------------------
       !
       IF( kt == kit000 )  THEN
@@ -569,7 +567,6 @@ CONTAINS
       l_trd = .FALSE.            ! set local switches
       l_hst = .FALSE.
       l_ptr = .FALSE.
-      ll_zAimp = .FALSE.
       IF( ( cdtype =='TRA' .AND. l_trdtra  ) .OR. ( cdtype =='TRC' .AND. l_trdtrc ) )       l_trd = .TRUE.
       IF(   cdtype =='TRA' .AND. ln_diaptr )                                                l_ptr = .TRUE.
       IF(   cdtype =='TRA' .AND. ( iom_use("uadv_heattr") .OR. iom_use("vadv_heattr") .OR.  &
@@ -586,35 +583,9 @@ CONTAINS
       ENDIF
       !                          ! surface & bottom value : flux set to zero one for all
       zwz(:,:, 1 ) = 0._wp
-      zwx(:,:,jpk) = 0._wp   ;   zwy(:,:,jpk) = 0._wp    ;    zwz(:,:,jpk) = 0._wp
+      zwz(:,:,jpk) = 0._wp   ;   zwx(:,:,jpk) = 0._wp   ;   zwy(:,:,jpk) = 0._wp      
       !
-      zwi(:,:,:) = 0._wp
       !
-      ! If adaptive vertical advection, check if it is needed on this PE at this time
-      IF( ln_zad_Aimp ) THEN
-         IF( MAXVAL( ABS( wi(:,:,:) ) ) > 0._wp ) ll_zAimp = .TRUE.
-      END IF
-      ! If active adaptive vertical advection, build tridiagonal matrix
-      IF( ll_zAimp ) THEN
-         ALLOCATE(zwdia(jpi,jpj,jpk), zwinf(jpi,jpj,jpk),zwsup(jpi,jpj,jpk))
-         DO jk = 1, jpkm1
-            DO jj = 2, jpjm1
-               DO ji = fs_2, fs_jpim1   ! vector opt. (ensure same order of calculation as below if wi=0.)
-               !! Resolution implicite de la partie implicite pour le first guess
-#if defined key_bvp && key_w_bvp
-                  zwdia(ji,jj,jk) =  1._wp + p2dt * ( MAX( wi(ji,jj,jk  ) * rpow(ji,jj,jk  ), 0._wp )    &
-                        &                           - MIN( wi(ji,jj,jk+1) * rpow(ji,jj,jk+1), 0._wp ) ) / e3t_a(ji,jj,jk)
-                  zwinf(ji,jj,jk) =  p2dt * MIN( rpow(ji,jj,jk  ) * wi(ji,jj,jk  ) , 0._wp ) / e3t_a(ji,jj,jk)
-                  zwsup(ji,jj,jk) = -p2dt * MAX( rpow(ji,jj,jk+1) * wi(ji,jj,jk+1) , 0._wp ) / e3t_a(ji,jj,jk)
-#else
-                  zwdia(ji,jj,jk) =  1._wp + p2dt * ( MAX( wi(ji,jj,jk  ) , 0._wp ) - MIN( wi(ji,jj,jk+1) , 0._wp ) ) / e3t_a(ji,jj,jk)
-                  zwinf(ji,jj,jk) =  p2dt * MIN( wi(ji,jj,jk  ) , 0._wp ) / e3t_a(ji,jj,jk)
-                  zwsup(ji,jj,jk) = -p2dt * MAX( wi(ji,jj,jk+1) , 0._wp ) / e3t_a(ji,jj,jk)
-#endif
-               END DO
-            END DO
-         END DO
-      END IF
       !
       DO jn = 1, kjpt            !==  loop over the tracers  ==!
          !
@@ -643,17 +614,6 @@ CONTAINS
                END DO
             END DO
          END DO
-         IF( ln_linssh ) THEN    ! top ocean value (only in linear free surface as zwz has been w-masked)
-            IF( ln_isfcav ) THEN             ! top of the ice-shelf cavities and at the ocean surface
-               DO jj = 1, jpj
-                  DO ji = 1, jpi
-                     zwz(ji,jj, mikt(ji,jj) ) = pwn(ji,jj,mikt(ji,jj)) * ptb(ji,jj,mikt(ji,jj),jn)   ! linear free surface
-                  END DO
-               END DO
-            ELSE                             ! no cavities: only at the ocean surface
-               zwz(:,:,1) = pwn(:,:,1) * ptb(:,:,1,jn)
-            ENDIF
-         ENDIF
          !
          DO jk = 1, jpkm1     !* trend and after field with monotonic scheme
             DO jj = 2, jpjm1
@@ -663,46 +623,10 @@ CONTAINS
                      &      + zwy(ji,jj,jk) - zwy(ji  ,jj-1,jk  )   &
                      &      + zwz(ji,jj,jk) - zwz(ji  ,jj  ,jk+1) ) * r1_e1e2t(ji,jj)
                   !                             ! update and guess with monotonic sheme
-                  pta(ji,jj,jk,jn) =                     pta(ji,jj,jk,jn) +        ztra   / e3t_n(ji,jj,jk) * tmask(ji,jj,jk)
-                  zwi(ji,jj,jk)    = ( e3t_b(ji,jj,jk) * ptb(ji,jj,jk,jn) + p2dt * ztra ) / e3t_a(ji,jj,jk) * tmask(ji,jj,jk)
+                  pta(ji,jj,jk,jn) = pta(ji,jj,jk,jn) + ztra   / e3t_n(ji,jj,jk) * tmask(ji,jj,jk)
                END DO
             END DO
          END DO
-!!an Upstream1 sur (u,v,w_e) et pta+=trend(UP1) 
-!! wi <- d_t T + adv(UT,VT,WeT) + adv(WiT) = 0 (implicit)
-         IF ( ll_zAimp ) THEN
-            CALL tridia_solver( zwdia, zwsup, zwinf, zwi, zwi , 0 ) 
-            !
-            !!an différent du zps car pas de variation entièrement verticale
-            ztw(:,:,1) = 0._wp ; ztw(:,:,jpk) = 0._wp 
-            DO jk = 2, jpkm1        ! Interior value ( multiplied by wmask)
-               DO jj = 2, jpjm1
-                  DO ji = fs_2, fs_jpim1   ! vector opt.
-                      !!an ztw contribution implicite a zwz
-                      !!an zwi first guess avec UP1, necessaire pour implicit
-                      !!   car il faut la temperature deja advecte avec lexplicit
-                      !!   limplicit se repose sur la partie deja advecte explicitement
-#if defined key_bvp && key_w_bvp
-                     zfp_wk = ( wi(ji,jj,jk) + ABS( wi(ji,jj,jk) ) ) * rpow(ji,jj,jk)
-                     zfm_wk = ( wi(ji,jj,jk) - ABS( wi(ji,jj,jk) ) ) * rpow(ji,jj,jk)
-#else
-                     zfp_wk = wi(ji,jj,jk) + ABS( wi(ji,jj,jk) )
-                     zfm_wk = wi(ji,jj,jk) - ABS( wi(ji,jj,jk) )
-#endif
-                     ztw(ji,jj,jk) =  0.5 * e1e2t(ji,jj) * ( zfp_wk * zwi(ji,jj,jk) + zfm_wk * zwi(ji,jj,jk-1) ) * wmask(ji,jj,jk)
-                  END DO
-               END DO
-            END DO
-            DO jk = 1, jpkm1
-               DO jj = 2, jpjm1
-                  DO ji = fs_2, fs_jpim1   ! vector opt.
-                     pta(ji,jj,jk,jn) = pta(ji,jj,jk,jn) - ( ztw(ji,jj,jk) - ztw(ji  ,jj  ,jk+1) ) &
-                        &                                  * r1_e1e2t(ji,jj) / e3t_n(ji,jj,jk)
-                  END DO
-               END DO
-            END DO
-            !
-         END IF
          !
          IF( l_trd .OR. l_hst )  THEN             ! trend diagnostics (contribution of upstream fluxes)
             ztrdx(:,:,:) = zwx(:,:,:)   ;   ztrdy(:,:,:) = zwy(:,:,:)   ;   ztrdz(:,:,:) = zwz(:,:,:)
@@ -733,9 +657,6 @@ CONTAINS
          !
       END DO                     ! end of tracer loop
       !
-      IF ( ll_zAimp ) THEN
-         DEALLOCATE( zwdia, zwinf, zwsup )
-      ENDIF
       IF( l_trd .OR. l_hst ) THEN
          DEALLOCATE( ztrdx, ztrdy, ztrdz )
       ENDIF
