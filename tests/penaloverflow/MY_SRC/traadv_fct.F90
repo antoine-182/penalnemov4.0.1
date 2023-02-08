@@ -585,7 +585,9 @@ CONTAINS
       zwz(:,:, 1 ) = 0._wp
       zwz(:,:,jpk) = 0._wp   ;   zwx(:,:,jpk) = 0._wp   ;   zwy(:,:,jpk) = 0._wp      
       !
-      !
+#if defined key_bvp && key_w_bvp
+      !!an pun, pvn, pwn are transports and therefore already penalised (in traadv for pwn)
+#endif
       !
       DO jn = 1, kjpt            !==  loop over the tracers  ==!
          !
@@ -614,6 +616,17 @@ CONTAINS
                END DO
             END DO
          END DO
+         IF( ln_linssh ) THEN    ! top ocean value (only in linear free surface as zwz has been w-masked)
+            IF( ln_isfcav ) THEN             ! top of the ice-shelf cavities and at the ocean surface
+               DO jj = 1, jpj
+                  DO ji = 1, jpi
+                     zwz(ji,jj, mikt(ji,jj) ) = pwn(ji,jj,mikt(ji,jj)) * ptb(ji,jj,mikt(ji,jj),jn)   ! linear free surface
+                  END DO
+               END DO
+            ELSE                             ! no cavities: only at the ocean surface
+               zwz(:,:,1) = pwn(:,:,1) * ptb(:,:,1,jn)
+            ENDIF
+         ENDIF
          !
          DO jk = 1, jpkm1     !* trend and after field with monotonic scheme
             DO jj = 2, jpjm1
