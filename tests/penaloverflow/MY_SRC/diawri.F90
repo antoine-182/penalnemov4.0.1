@@ -339,7 +339,7 @@ CONTAINS
 #endif
       !
       ! CFL conditions on tracers
-      ! r2dt = 2*rdt
+      ! rdt = r2dt/2 = rn_rdt = 10s
 #if defined key_bvp
       IF( iom_use("cflt") .OR. iom_use("cfltu") .OR. iom_use("cfltw") .OR. iom_use("rphiu_t") .OR. iom_use("rphiw_t") ) THEN
         z3d(:,:,:) = 0._wp ; z3d1(:,:,:) = 0._wp ; z3d2(:,:,:) = 0._wp ; z3d3(:,:,:) = 0._wp
@@ -350,7 +350,7 @@ CONTAINS
                   z3d (ji,jj,jk) = 2._wp * rdt * ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk)*un(ji  ,jj,jk), 0._wp ) -   &
                      &                             MIN( e2u(ji-1,jj)*e3u_n(ji-1,jj,jk)*un(ji-1,jj,jk), 0._wp ) )   &
                      &                           * r1_e1e2t(ji,jj) / e3t_n(ji,jj,jk)
-                  z3d2(ji,jj,jk) = 2._wp * rdt   * MAX( e2u(ji,jj)*e3u_n(ji,jj,jk), e2u(ji+1,jj)*e3u_n(ji+1,jj,jk) ) &
+                  z3d2(ji,jj,jk) = 2._wp * rdt   * MAX( e2u(ji,jj)*e3u_n(ji,jj,jk), e2u(ji-1,jj)*e3u_n(ji-1,jj,jk) ) &
                      &                           * r1_e1e2t(ji,jj) / e3t_n(ji,jj,jk)
                END DO
             END DO

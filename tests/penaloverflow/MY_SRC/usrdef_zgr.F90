@@ -182,7 +182,7 @@ CONTAINS
         DO ji = 1, jpim1
            rpou(ji,:,:) = 0.5_wp * ( rpot(ji,:,:) + rpot(ji+1,:,:) )
         END DO
-      ELSE IF (nn_cnp  == 1) THEN ! mininmum
+      ELSE IF (nn_cnp  == 1) THEN ! minimum
         DO jk = 2, jpk
           DO jj= 1, jpj
             DO ji = 1, jpim1
