@@ -233,13 +233,13 @@ CONTAINS
       IF( iom_use("rlipst") .OR. iom_use("lipst") .OR. iom_use("rlipsu") .OR. iom_use("lipsu") ) THEN
          z3d(:,:,:) = 0._wp ; z3d1(:,:,:) = 0._wp ; z3d2(:,:,:) = 0._wp ; z3d3(:,:,:) = 0._wp
          DO jk = 1, jpkm1
-            z3d (:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) * ABS( rpow(:,:,jk+1) - rpow(:,:,jk) )
+            z3d (:,:,jk) = ABS( rpow(:,:,jk+1) - rpow(:,:,jk) ) * r1_rpot(:,:,jk)
             !
             z3d2(:,:,jk) = ( 2._wp * rdt / e3t_n(:,:,jk) ) *    ( rpow(:,:,jk+1) * z3dwi(:,:,jk+1)   &
             &                                                   - rpow(:,:,jk  ) * z3dwi(:,:,jk  )   )
             DO ji = 1,jpim1
-               z3d1(ji,:,jk) = ( 2._wp * rdt / e3u_n(ji,:,jk) ) * ABS( 0.5_wp*(rpow(ji+1,:,jk+1)+rpow(ji,:,jk+1))   &
-               &                                                     - 0.5_wp*(rpow(ji+1,:,jk  )+rpow(ji,:,jk  ))   )
+               z3d1(ji,:,jk) = 0.5 * ABS( ( rpow(ji+1,:,jk+1)+rpow(ji,:,jk+1) ) &
+               &                        - ( rpow(ji+1,:,jk  )+rpow(ji,:,jk  ) ) ) * r1_rpou(ji,:,jk)
                !
                z3d3(ji,:,jk) = ( 2._wp * rdt / e3u_n(ji,:,jk) ) *    ( 0.5_wp*(rpow(ji+1,:,jk+1) * z3dwi(ji+1,:,jk+1)    &
                &                                                              +rpow(ji  ,:,jk+1) * z3dwi(ji  ,:,jk+1))   &
@@ -279,8 +279,8 @@ CONTAINS
                   z3d (ji,jj,jk) = 2._wp * rdt * (   MAX( 0.5 * (rpow(ji,jj,jk  ) * wn(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) * wn(ji+1,jj,jk  )), 0._wp  )   & 
                   &                                - MIN( 0.5 * (rpow(ji,jj,jk+1) * wn(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) * wn(ji+1,jj,jk+1)), 0._wp  ) ) &
                   &                                / e3u_n(ji,jj,jk)
-                  z3d2(ji,jj,jk) = 2._wp * rdt * MAX( 0.5 * (rpow(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) ) , &
-                  &                                   0.5 * (rpow(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) ) ) / e3u_n(ji,jj,jk)  
+                  z3d2(ji,jj,jk) = 0.5 * MAX( (rpow(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) ) , &
+                  &                           (rpow(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) ) ) * r1_rpou(ji,jj,jk) 
                END DO
             END DO
          END DO
@@ -293,8 +293,8 @@ CONTAINS
                &                                                  - MIN( 0.5 * ( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk) * un(ji  ,jj,jk)             &
                &                                                               + e2u(ji-1,jj)*e3u_n(ji-1,jj,jk) * un(ji-1,jj,jk)), 0._wp ) ) &
                &                                               / e3u_n(ji,jj,jk) 
-               z3d3(ji,jj,jk) = 2._wp * rdt * r1_e1u(ji,jj) * MAX( 0.5 * ( rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) )  , &
-               &                                                   0.5 * ( rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) / rpou(ji,jj,jk) 
+               z3d3(ji,jj,jk) =  0.5 * MAX( ( rpou(ji,jj,jk) + rpou(ji+1,jj,jk) )  , &
+               &                            ( rpou(ji,jj,jk) + rpou(ji-1,jj,jk) )  ) * r1_rpou(ji,jj,jk) 
                END DO
             END DO
          END DO
@@ -350,8 +350,7 @@ CONTAINS
                   z3d (ji,jj,jk) = 2._wp * rdt * ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk)*un(ji  ,jj,jk), 0._wp ) -   &
                      &                             MIN( e2u(ji-1,jj)*e3u_n(ji-1,jj,jk)*un(ji-1,jj,jk), 0._wp ) )   &
                      &                           * r1_e1e2t(ji,jj) / e3t_n(ji,jj,jk)
-                  z3d2(ji,jj,jk) = 2._wp * rdt   * MAX( e2u(ji,jj)*e3u_n(ji,jj,jk), e2u(ji-1,jj)*e3u_n(ji-1,jj,jk) ) &
-                     &                           * r1_e1e2t(ji,jj) / e3t_n(ji,jj,jk)
+                  z3d2(ji,jj,jk) = MAX( rpou(ji,jj,jk), rpou(ji-1,jj,jk) ) * r1_rpot(ji,jj,jk)
                END DO
             END DO
          END DO
@@ -362,7 +361,7 @@ CONTAINS
                   z3d1(ji,jj,jk) = 2._wp * rdt * ( MAX( rpow(ji,jj,jk  )*wn(ji,jj,jk  ) , 0._wp ) -   &
                   &                                MIN( rpow(ji,jj,jk+1)*wn(ji,jj,jk+1) , 0._wp ) )   &
                   &                              / e3t_n(ji,jj,jk)
-                  z3d3(ji,jj,jk) = 2._wp * rdt * MAX( rpow(ji,jj,jk), rpow(ji,jj,jk+1) ) / e3t_n(ji,jj,jk)
+                  z3d3(ji,jj,jk) = MAX( rpow(ji,jj,jk), rpow(ji,jj,jk+1) ) * r1_rpot(ji,jj,jk)
                END DO
             END DO
          END DO
