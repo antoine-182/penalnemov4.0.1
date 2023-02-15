@@ -215,24 +215,14 @@ CONTAINS
       DO jk = 1, jpk
          DO jj = 1, jpj
             DO ji = 2,jpim1
-            z3d3(ji,jj,jk) = MAX( 0.5 * ( rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) )  , &
-            &                     0.5 * ( rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) / rpou(ji,jj,jk) 
+            z3d3(ji,jj,jk) =  0.5 * MAX( ( rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) )  , &
+            &                            ( rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) * r1_rpou(ji,jj,jk) 
             END DO
          END DO
       END DO
       bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp 
    ENDIF
-
-    ! WHERE( rpou(:,:,:) <= 0.1 ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
-    ! bmpu(:,:,:) = rn_fsp * (1._wp - rpou(:,:,:))          ! frotte trop
-    !
-    ! WHERE( rpot(:,:,:) > rn_abp ) rpot(:,:,:) = 1._wp ; rpow(:,:,:) = 1._wp
-    ! z3du is like rpou but goes from 0 to 1 instead of rn_abp to 1
-    ! z3du(:,:,:) = rpou(:,:,:)
-    ! WHERE( rpou(:,:,:) >  rn_abp ) bmpu(:,:,:) = rn_fsp * (1._wp - z3du(:,:,:))**REAL(nn_cnp,wp) ! depend de rn_abp
-    ! WHERE( rpou(:,:,:) <= rn_abp ) bmpu(:,:,:) = rn_fsp
-    ! WHERE( rpou(:,:,:) >= 1._wp  ) bmpu(:,:,:) = 0._wp
-    !
+   !
     !!------------------------ Stabilite ---------------------!
     !------------------------- -------------- ---------------------!
     ! DO jk = 1, jpk
