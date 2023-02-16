@@ -211,12 +211,21 @@ CONTAINS
    ! indicator
    IF      (nn_wef == 0) THEN 
       WHERE( rpou(:,:,:) <= rn_abp ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
-   ELSE IF (nn_wef == 1) THEN
+   ELSE IF (nn_wef == 1) THEN                               ! scale on rux
       DO jk = 1, jpk
          DO jj = 1, jpj
             DO ji = 2,jpim1
             z3d3(ji,jj,jk) =  0.5 * MAX( ( rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) )  , &
             &                            ( rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) * r1_rpou(ji,jj,jk) 
+            END DO
+         END DO
+      END DO
+      bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp 
+   ELSE IF (nn_wef == 2) THEN                               ! scale on rx
+      DO jk = 1, jpk
+         DO jj = 1, jpj
+            DO ji = 2,jpim1
+            z3d3(ji,jj,jk) =  MAX( rpou(ji,jj,jk), rpou(ji-1,jj,jk) ) * r1_rpot(ji,jj,jk) 
             END DO
          END DO
       END DO

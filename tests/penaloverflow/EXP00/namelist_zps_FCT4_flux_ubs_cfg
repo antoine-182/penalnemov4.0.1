@@ -34,7 +34,10 @@
       nn_fsp = 12   ! 0 - explicit
                      ! 1 - implicit - 12 in matrix
                      ! 2 - splitted
-      nn_wef = 0    ! 0/1 friction applied where < abp / rphiuu >0
+      nn_wef = 0    ! friction 
+                     ! 0 where rpot < abp
+                     ! 1 where rux > 1
+                     ! 2 where rx  > 1
    nn_smo = 0    ! smoothing of porosity /z
 /
 !
