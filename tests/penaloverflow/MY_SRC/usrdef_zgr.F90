@@ -207,7 +207,7 @@ CONTAINS
     !!------------------------ impermeability ---------------------!
     !------------------------- -------------- ---------------------!
     !
-   bmpu(:,:,:) = 1e-10
+   bmpu(:,:,:) = 1e-10 ; z3d3(:,:,:) = 1._wp
    ! indicator
    IF      (nn_wef == 0) THEN 
       WHERE( rpou(:,:,:) <= rn_abp ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez

@@ -302,8 +302,6 @@ CONTAINS
       DO jk= 1, jpkm1
         DO jj = 2, jpjm1
           DO ji = 2, jpim1
-            ze3ua =  ( 1._wp - r_vvl ) * e3u_n(ji,jj,jk)    &
-               &             + r_vvl   * e3u_a(ji,jj,jk)    ! after scale factor at T-point !
             zwd(ji,jj,jk) = zwd(ji,jj,jk) + r2dt * bmpu(ji,jj,jk)
          END DO
        END DO
