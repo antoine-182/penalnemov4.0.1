@@ -207,7 +207,7 @@ CONTAINS
     !!------------------------ impermeability ---------------------!
     !------------------------- -------------- ---------------------!
     !
-   bmpu(:,:,:) = 0._wp
+   bmpu(:,:,:) = 1e-10
    ! indicator
    IF      (nn_wef == 0) THEN 
       WHERE( rpou(:,:,:) <= rn_abp ) bmpu(:,:,:) = rn_fsp   ! frotte pas assez
@@ -215,36 +215,22 @@ CONTAINS
       DO jk = 1, jpk
          DO jj = 1, jpj
             DO ji = 2,jpim1
-            z3d3(ji,jj,jk) =  0.5 * MAX( ( rpou(ji,jj,jk  ) + rpou(ji+1,jj,jk  ) )  , &
-            &                            ( rpou(ji,jj,jk  ) + rpou(ji-1,jj,jk  ) )  ) * r1_rpou(ji,jj,jk) 
+            z3d3(ji,jj,jk) =  0.5_wp * MAX( ( rpou(ji,jj,jk) + rpou(ji+1,jj,jk) )  , &
+            &                               ( rpou(ji,jj,jk) + rpou(ji-1,jj,jk) )  ) / rpou(ji,jj,jk) 
             END DO
          END DO
       END DO
       bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp 
-   ELSE IF (nn_wef == 2) THEN                               ! scale on rx
+   ELSE IF (nn_wef == 2) THEN                               ! scale on rx ! eq here at max(rpou/rpoti, rpou/rpoti+1 )
       DO jk = 1, jpk
          DO jj = 1, jpj
-            DO ji = 2,jpim1
-            z3d3(ji,jj,jk) =  MAX( rpou(ji,jj,jk), rpou(ji-1,jj,jk) ) * r1_rpot(ji,jj,jk) 
+            DO ji = 2,jpi
+            z3d3(ji,jj,jk) =  MAX( rpou(ji,jj,jk), rpou(ji-1,jj,jk) ) / rpot(ji,jj,jk) 
             END DO
          END DO
       END DO
       bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp 
    ENDIF
-   !
-    !!------------------------ Stabilite ---------------------!
-    !------------------------- -------------- ---------------------!
-    ! DO jk = 1, jpk
-    !   DO jj = 1, jpj
-    !      DO ji = 1, jpim1
-    !        z1d = 0.5_wp * ( rpow(ji,jj,jk) + rpow(ji+1,jj,jk) ) / rpou(ji,jj,jk)
-    !        IF   ( z1d > 1.05_wp) THEN
-    !          bmpu(ji,jj,jk) = rn_fsp
-    !        ENDIF
-    !      END DO
-    !   END DO
-    ! END DO
-    !
     !
 #endif
       !
