@@ -113,7 +113,7 @@ CONTAINS
     !  Explicit
     IF ( nn_fsp == 0 ) ua(:,:,:) = ua(:,:,:) - bmpu(:,:,:) * ub(:,:,:)
 #endif
-!!an
+!!an porosity temporaly linear
       !                    ! time stepping except vertical diffusion
       IF( ln_dynadv_vec .OR. ln_linssh ) THEN   ! applied on velocity
       !
@@ -132,17 +132,37 @@ CONTAINS
 !!an
 #if defined key_bvp
    SELECT CASE( nn_fsp )
-   CASE ( 1  ) ; ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) )   !!! Implicit r/1+s = 1
-   CASE ( 11 ) ! r included in ua
-      !bmpu(:,:,:) =  MAX( ( r2dt * ua(:,:,:) / ( rn_fsp * 1e3) - 1._wp ) , 0._wp ) /r2dt ! cfl(u*)
-      z1d =  0.5_wp * r2dt / ( rn_fsp * 1e3)
-       DO ji = 2, jpim1
-            bmpu(ji,:,:) = MAX( z1d*( MAX(ua(ji,:,:)+ua(ji+1,:,:) , ua(ji,:,:)+ua(ji-1,:,:) )) - 1._wp,  &   ! cfl(uu*)
-               &                0._wp ) /r2dt
+   CASE ( 1  ) ! = psimax
+      ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) )   
+   CASE ( 11 ) ! < psimax
+      SELECT CASE ( nn_wef )
+      CASE (1)  ! cfl(ruu*)
+         z1d =  0.5_wp * r2dt / ( rn_fsp * 1e3)
+         DO ji = 2, jpim1
+            bmpu(ji,:,:) = MAX( z1d * MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:),              & 
+               &                          rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:))/rpou(ji,:,:) &
+               &              - 1._wp, 0._wp ) /r2dt
          END DO
-      !bmpu(:,:,:) =  MAX( ( r2dt * ua(:,:,:) / ( rn_fsp * 1e3) - 1._wp ), 0._wp ) / r2dt  ! r included in ua
+      CASE (11) ! cfl(uu*)
+         z1d =  0.5_wp * r2dt / ( rn_fsp * 1e3)
+         DO ji = 2, jpim1
+            bmpu(ji,:,:) = MAX( z1d * MAX(ua(ji,:,:) + ua(ji+1,:,:),               & 
+               &                          ua(ji,:,:) + ua(ji-1,:,:)) - 1._wp, 0._wp ) /r2dt
+         END DO
+      CASE (2)  ! cfl(ru*)
+         z1d = r2dt / ( rn_fsp * 1e3)
+         DO ji = 1,jpim1
+            bmpu(ji,:,:) =  MAX( ( z1d * rpou(:,:,:)*ua(:,:,:) / MIN(rpot(ji,:,:),rpot(ji+1,:,:)) - 1._wp ),   &
+               &                0._wp ) /r2dt 
+         END DO
+      CASE (22) ! cfl(u*) 
+         z1d = r2dt / ( rn_fsp * 1e3)
+         bmpu(:,:,:) =  MAX( ( z1d * ua(:,:,:) - 1._wp ) , 0._wp ) /r2dt 
+      END SELECT
+      !
       ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,: ,:) )             ! so < rn_fsp = psimax (~0.3)
-   CASE ( 3  ) ; ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )   !!! Operator Splitting (1-s)r=1
+   CASE ( 3  ) 
+      ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )   !!! Operator Splitting (1-s)r=1
    CASE ( 31 ) 
       bmpu(:,:,:) =  MAX( ( 1._wp - rn_fsp * 1e3 / ( r2dt * ua(:,:,:) ) ) / r2dt, 0._wp ) ! r included in ua
       ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )
