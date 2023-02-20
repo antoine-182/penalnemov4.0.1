@@ -76,6 +76,7 @@ CONTAINS
       REAL(wp) ::   zWu , zWv          !   -      -
       REAL(wp) ::   zWui, zWvi         !   -      -
       REAL(wp) ::   zWus, zWvs         !   -      -
+      REAL(wp) ::  z1d                 !   -      -
       REAL(wp), DIMENSION(jpi,jpj,jpk)        ::  zwi, zwd, zws   ! 3D workspace
       REAL(wp), DIMENSION(:,:,:), ALLOCATABLE ::   ztrdu, ztrdv   !  -      -
       !!---------------------------------------------------------------------
