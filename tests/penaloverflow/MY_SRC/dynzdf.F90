@@ -28,7 +28,7 @@ MODULE dynzdf
    USE prtctl         ! Print control
    USE timing         ! Timing
 !!an
-   USE usrdef_nam, ONLY : nn_fsp, rn_fsp    ! User defined : namelist variables
+   USE usrdef_nam, ONLY : nn_fsp, rn_fsp, nn_wef    ! User defined : namelist variables
 !!
    IMPLICIT NONE
    PRIVATE
