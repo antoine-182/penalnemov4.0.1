@@ -152,7 +152,7 @@ CONTAINS
       CASE (2)  ! cfl(ru*)
          z1d = r2dt / ( rn_fsp * 1e3)
          DO ji = 1,jpim1
-            bmpu(ji,:,:) =  MAX( ( z1d * rpou(:,:,:)*ua(:,:,:) / MIN(rpot(ji,:,:),rpot(ji+1,:,:)) - 1._wp ),   &
+            bmpu(ji,:,:) =  MAX( ( z1d * rpou(ji,:,:)*ua(ji,:,:) / MIN(rpot(ji,:,:),rpot(ji+1,:,:)) - 1._wp ),   &
                &                0._wp ) /r2dt 
          END DO
       CASE (22) ! cfl(u*) 
