@@ -133,11 +133,11 @@ CONTAINS
    SELECT CASE( nn_fsp )
    CASE ( 1  ) ; ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) )   !!! Implicit r/1+s = 1
    CASE ( 11 ) 
-      bmpu(:,:,:) =  MAX( ( ua(:,:,:) / rn_fsp - 1._wp ) / r2dt, 0._wp )  ! r included in ua
+      bmpu(:,:,:) =  MAX( ( r2dt * ua(:,:,:) / ( rn_fsp * 1e3) - 1._wp ) / r2dt, 0._wp )  ! r included in ua
       ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,: ,:) )             ! so < rn_fsp = psimax (~0.3)
    CASE ( 3  ) ; ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )   !!! Operator Splitting (1-s)r=1
    CASE ( 31 ) 
-      bmpu(:,:,:) =  MAX( ( 1._wp - rn_fsp / ua(:,:,:) ) / r2dt, 0._wp ) ! r included in ua
+      bmpu(:,:,:) =  MAX( ( 1._wp - rn_fsp * 1e3 / ( r2dt * ua(:,:,:) ) ) / r2dt, 0._wp ) ! r included in ua
       ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )
    END SELECT
 #endif
@@ -312,6 +312,16 @@ CONTAINS
          END DO
        END DO
      END DO
+     ELSE IF ( nn_fsp == 21 ) THEN
+     DO jk= 1, jpkm1
+        DO jj = 2, jpjm1
+          DO ji = 2, jpim1
+            !bmpu(ji,jj,jk) =  MAX( ( ua(:,:,:) / rn_fsp - 1._wp ) / r2dt, 0._wp )  ! r included in ua
+            zwd(ji,jj,jk) = zwd(ji,jj,jk) + r2dt * bmpu(ji,jj,jk)
+         END DO
+       END DO
+     END DO
+     
     ENDIF
 #endif
       !
