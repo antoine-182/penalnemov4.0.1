@@ -130,10 +130,12 @@ CONTAINS
       ENDIF
 !!an
 #if defined key_bvp
-    ! Implicit
-    IF ( nn_fsp == 1 ) ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) )
-    ! Splitting
-    IF ( nn_fsp == 2 ) ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )
+    SELECT CASE( nn_fsp )
+      CASE ( 1  ) ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) ) ! Implicit r/1+s = 1
+      CASE ( 11 ) ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) ) 
+      CASE ( 2  ) ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) ) ! Operator Splitting (1-s)r=1
+      CASE ( 21 ) ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )
+    END SELECT
 #endif
 !!an
       !                    ! add top/bottom friction

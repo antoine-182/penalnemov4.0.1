@@ -28,16 +28,17 @@
    rn_T1       =     20.   !  surrounding water (default 20)
    rn_T0       =     10.   !  dense water (default 10)
   !
-   rn_abp = 0.0001  ! alpha boundary parameter                                        [-]
-   nn_cnp =  0      ! 0/1 rpou,rpow halfsum / minimum [-]
-   rn_fsp = 500.    ! friction parameter 1/epsilon of the permeability                [1/s]
-      nn_fsp = 12   ! 0 - explicit
-                     ! 1 - implicit - 12 in matrix
-                     ! 2 - splitted
-      nn_wef = 0    ! friction 
-                     ! 0 where rpot < abp
-                     ! 1 where rux > 1
-                     ! 2 where rx  > 1
+   rn_abp = 0.0001   ! alpha boundary parameter                                        [-]
+   nn_cnp =  0       ! 0/1 rpou,rpow halfsum / minimum [-]
+   rn_fsp = 500.     ! friction parameter 1/epsilon of the permeability                [1/s]
+      nn_fsp = 12    ! scale on r so transparent
+                        ! 1 - implicit (without wi)
+                        ! 12 - implicit in implicit matrix inversion
+                        ! 20 - operator splitting
+                     ! 11/21 -  rn_fsp max courant number where r>1
+      nn_wef = 2    ! where friction 
+                     ! 1 where rux >= 1
+                     ! 2 where rx  >= 1
    nn_smo = 0    ! smoothing of porosity /z
 /
 !
