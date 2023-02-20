@@ -334,21 +334,37 @@ CONTAINS
     IF ( nn_fsp == 2 ) THEN      ! implicit bottom friction
       DO jk= 1, jpkm1
         DO jj = 2, jpjm1
-          DO ji = 2, jpim1
-            zwd(ji,jj,jk) = zwd(ji,jj,jk) + r2dt * bmpu(ji,jj,jk)
+            DO ji = 2, jpim1
+               zwd(ji,jj,jk) = zwd(ji,jj,jk) + r2dt * bmpu(ji,jj,jk)
+            END DO
          END DO
-       END DO
-     END DO
-     ELSE IF ( nn_fsp == 21 ) THEN
-     DO jk= 1, jpkm1
-        DO jj = 2, jpjm1
-          DO ji = 2, jpim1
-            !bmpu(ji,jj,jk) =  MAX( ( ua(:,:,:) / rn_fsp - 1._wp ) / r2dt, 0._wp )  ! r included in ua
-            zwd(ji,jj,jk) = zwd(ji,jj,jk) + r2dt * bmpu(ji,jj,jk)
+      END DO
+     ELSE IF ( nn_fsp == 21 ) THEN ! same bmpu as nn_fsp=1
+      SELECT CASE ( nn_wef )   
+         CASE (1)  ! cfl(ruu*) <= cfl_max
+            z1d =  0.5_wp * r2dt / ( rn_fsp * 1e3)
+            DO ji = 2, jpim1
+               bmpu(ji,:,:) = MAX( z1d * ( MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:), 0._wp )    &
+                  &                      - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) )  &
+                  &                      / rpou(ji,:,:) - 1._wp,                                      0._wp ) / r2dt
+            END DO
+         CASE (2)  ! cfl(ru*) <= cfl_max
+            z1d = r2dt / ( rn_fsp * 1e3)
+            DO ji = 1,jpim1
+               bmpu(ji,:,:) =  MAX( ( z1d * rpou(ji,:,:)*ua(ji,:,:) / MIN(rpot(ji,:,:),rpot(ji+1,:,:)) - 1._wp ),   &
+                  &                0._wp ) /r2dt 
+            END DO
+      END SELECT
+      !
+      DO jk= 1, jpkm1
+         DO jj = 2, jpjm1
+            DO ji = 2, jpim1
+               !bmpu(ji,jj,jk) =  MAX( ( ua(:,:,:) / rn_fsp - 1._wp ) / r2dt, 0._wp )  ! r included in ua
+               zwd(ji,jj,jk) = zwd(ji,jj,jk) + r2dt * bmpu(ji,jj,jk)
+            END DO
          END DO
-       END DO
-     END DO
-     
+      END DO
+      !
     ENDIF
 #endif
       !
