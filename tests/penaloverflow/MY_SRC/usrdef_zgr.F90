@@ -210,28 +210,28 @@ CONTAINS
    bmpu(:,:,:) = 1e-10 ; z3d3(:,:,:) = 1._wp
    ! indicator
    IF (nn_wef == 1) THEN                               ! scale on rux
-         DO jk = 1, jpk
-            DO jj = 1, jpj
-               DO ji = 2,jpim1
-               z3d3(ji,jj,jk) =  0.5_wp * MAX( ( rpou(ji,jj,jk) + rpou(ji+1,jj,jk) )  , &
-               &                               ( rpou(ji,jj,jk) + rpou(ji-1,jj,jk) )  ) / rpou(ji,jj,jk) 
-               END DO
+      DO jk = 1, jpk
+         DO jj = 1, jpj
+            DO ji = 2,jpim1
+            z3d3(ji,jj,jk) =  0.5_wp * MAX( ( rpou(ji,jj,jk) + rpou(ji+1,jj,jk) )  , &
+            &                               ( rpou(ji,jj,jk) + rpou(ji-1,jj,jk) )  ) / rpou(ji,jj,jk) 
             END DO
          END DO
-         !
-      ELSE IF (nn_wef == 2) THEN                       ! scale on rx ! eq here at max(rpou/rpoti, rpou/rpoti+1 )
-         DO jk = 1, jpk
-            DO jj = 1, jpj
-               DO ji = 2,jpi
-               z3d3(ji,jj,jk) =  MAX( rpou(ji,jj,jk), rpou(ji-1,jj,jk) ) / rpot(ji,jj,jk) 
-               END DO
+      END DO
+   ELSE IF (nn_wef == 2) THEN                       ! scale on rx ! eq here at max(rpou/rpoti, rpou/rpoti+1 )
+      DO jk = 1, jpk
+         DO jj = 1, jpj
+            DO ji = 2,jpi
+            z3d3(ji,jj,jk) =  MAX( rpou(ji,jj,jk), rpou(ji-1,jj,jk) ) / rpot(ji,jj,jk) 
             END DO
          END DO
-      ENDIF
-   !      
-   IF ( nn_fsp == 1  .OR. nn_fsp == 12 ) bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp                 ! implicit
-   IF ( nn_fsp == 2                    ) bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp / z3d3(:,:,:)   ! op. splitting
-   IF ( nn_fsp == 11 .OR. nn_fsp == 21 ) bmpu(:,:,:) = 1._wp ; WHERE( z3d3(:,:,:) > 1._wp) bmpu(:,:,:) = rn_fsp                  ! 
+      END DO
+   ENDIF
+   !
+   bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) )
+   ! IF ( nn_fsp == 1  .OR. nn_fsp == 12 ) bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp                 ! implicit
+   ! IF ( nn_fsp == 2                    ) bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp / z3d3(:,:,:)   ! op. splitting
+   ! IF ( nn_fsp == 11 .OR. nn_fsp == 21 ) bmpu(:,:,:) = 1._wp ; WHERE( z3d3(:,:,:) > 1._wp) bmpu(:,:,:) = rn_fsp                  ! 
     !
 #endif
       !
