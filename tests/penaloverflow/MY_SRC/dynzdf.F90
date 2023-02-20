@@ -28,7 +28,7 @@ MODULE dynzdf
    USE prtctl         ! Print control
    USE timing         ! Timing
 !!an
-   USE usrdef_nam, ONLY : nn_fsp    ! User defined : namelist variables
+   USE usrdef_nam, ONLY : nn_fsp, rn_fsp    ! User defined : namelist variables
 !!
    IMPLICIT NONE
    PRIVATE
@@ -135,8 +135,8 @@ CONTAINS
    CASE ( 11 ) 
       bmpu(:,:,:) =  MAX( ( ua(:,:,:) / rn_fsp - 1._wp ) / rn_dt, 0._wp )  ! r included in ua
       ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,: ,:) )             ! so < rn_fsp = psimax (~0.3)
-   CASE ( 2  ) ; ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )   !!! Operator Splitting (1-s)r=1
-   CASE ( 21 ) 
+   CASE ( 3  ) ; ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )   !!! Operator Splitting (1-s)r=1
+   CASE ( 31 ) 
       bmpu(:,:,:) =  MAX( ( 1._wp - rn_fsp / ua(:,:,:) ) / rn_dt, 0._wp ) ! r included in ua
       ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )
    END SELECT
@@ -304,7 +304,7 @@ CONTAINS
 #if defined key_bvp
     ! Friction de fond pour U
     ! en linssh r_vvl = 0, niveau fixe
-    IF ( nn_fsp == 12 ) THEN      ! implicit bottom friction
+    IF ( nn_fsp == 2 ) THEN      ! implicit bottom friction
       DO jk= 1, jpkm1
         DO jj = 2, jpjm1
           DO ji = 2, jpim1
