@@ -30,15 +30,15 @@
   !
    rn_abp = 0.0001   ! alpha boundary parameter                                        [-]
    nn_cnp =  0       ! 0/1 rpou,rpow halfsum / minimum [-]
-   rn_fsp = 500.     ! friction parameter 1/epsilon of the permeability                [1/s]
+   rn_fsp = 0.05     ! friction parameter 1/epsilon of the permeability                [1/s]
       nn_fsp = 12    ! scale on r so transparent
-                        ! 1 - implicit (without wi)
+                        ! 1  - implicit (without wi)
                         ! 12 - implicit in implicit matrix inversion
-                        ! 20 - operator splitting
-                     ! 11/21 -  rn_fsp max courant number where r>1
-      nn_wef = 2    ! where friction 
-                     ! 1 where rux >= 1
-                     ! 2 where rx  >= 1
+                        ! 2  - operator splitting
+                     ! 11/21 -  rn_fsp max courant number (bypass nn_wef)
+      nn_wef = 2    ! active friction 
+                     ! based on rux >= 1
+                     !       or rx  >= 1
    nn_smo = 0    ! smoothing of porosity /z
 /
 !

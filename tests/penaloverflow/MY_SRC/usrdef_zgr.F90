@@ -222,19 +222,23 @@ CONTAINS
       DO jk = 1, jpk
          DO jj = 1, jpj
             DO ji = 2,jpi
-               z3d3(ji,jj,jk) =  MAX( rpou(ji,jj,jk), rpou(ji-1,jj,jk) ) / rpot(ji,jj,jk) 
+               !z3d3(ji,jj,jk) =  MAX( rpou(ji,jj,jk), rpou(ji-1,jj,jk) ) / rpot(ji,jj,jk) ! T-point
+               z3d3(ji,jj,jk) =  rpou(ji,jj,jk) / MIN(rpot(ji,jj,jk),rpot(ji+1,jj,jk) ) ! U-point (bof car pas contrainte stabolite)
             END DO
          END DO
       END DO
    ENDIF
    !
    !bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp
-   IF      ( nn_fsp == 1  .OR. nn_fsp == 12 ) THEN
-      bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp                 ! implicit
-   ELSE IF ( nn_fsp == 2 )                    THEN
-      bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp / z3d3(:,:,:)   ! op. splitting
-   ELSE IF ( nn_fsp == 11 .OR. nn_fsp == 21 ) THEN
-      bmpu(:,:,:) = 1._wp ; WHERE( z3d3(:,:,:) > 1._wp) bmpu(:,:,:) = rn_fsp                  ! 
+   IF      ( nn_fsp == 1  .OR. nn_fsp == 12 ) THEN                         ! implicit
+      ! bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp                    ! T node (r<1, pas instable)
+      bmpu(:,:,:) = MAX( z3d3(:,:,:) - 1._wp , 0._wp ) * rn_fsp                 ! (T point)
+      !bmpu(:,:,:) = ( MAX(z3d3(ji,:,:),z3d3(ji+1,:,:)) - 1._wp ) * rn_fsp ! U point mais bof
+   ELSE IF ( nn_fsp == 2 )                    THEN                         ! op. splitting
+      !bmpu(:,:,:) = ABS( 1._wp - z3d3(:,:,:) ) * rn_fsp / z3d3(:,:,:)     
+      bmpu(:,:,:) = MAX( z3d3(:,:,:) - 1._wp , 0._wp ) * rn_fsp  / z3d3(:,:,:)     
+   ! ELSE IF ( nn_fsp == 11 .OR. nn_fsp == 21 ) THEN
+   !    bmpu(:,:,:) = 1._wp ; WHERE( z3d3(:,:,:) > 1._wp) bmpu(:,:,:) = rn_fsp                  ! 
    ENDIF
     !
 #endif

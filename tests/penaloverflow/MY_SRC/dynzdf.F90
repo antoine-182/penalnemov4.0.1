@@ -131,10 +131,14 @@ CONTAINS
 !!an
 #if defined key_bvp
    SELECT CASE( nn_fsp )
-   CASE ( 1  ) ; ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) ) ! Implicit r/1+s = 1
-   CASE ( 11 ) ; ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) ) 
-   CASE ( 2  ) ; ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) ) ! Operator Splitting (1-s)r=1
-   CASE ( 21 ) ; ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )
+   CASE ( 1  ) ; ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) )   !!! Implicit r/1+s = 1
+   CASE ( 11 ) 
+      bmpu(:,:,:) =  MAX( ( ua(:,:,:) / rn_fsp - 1._wp ) / rn_dt, 0._wp )  ! r included in ua
+      ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,: ,:) )             ! so < rn_fsp = psimax (~0.3)
+   CASE ( 2  ) ; ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )   !!! Operator Splitting (1-s)r=1
+   CASE ( 21 ) 
+      bmpu(:,:,:) =  MAX( ( 1._wp - rn_fsp / ua(:,:,:) ) / rn_dt, 0._wp ) ! r included in ua
+      ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )
    END SELECT
 #endif
 !!an
