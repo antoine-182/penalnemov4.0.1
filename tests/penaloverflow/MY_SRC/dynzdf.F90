@@ -139,8 +139,8 @@ CONTAINS
       CASE (1)  ! cfl(ruu*) <= cfl_max
          z1d =  0.5_wp * r2dt / ( rn_fsp * 1e3)
          DO ji = 2, jpim1
-            bmpu(ji,:,:) = MAX( z1d * ( MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:), 0._wp )    &             & 
-               &                      - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0_wp  ) )  &
+            bmpu(ji,:,:) = MAX( z1d * ( MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:), 0._wp )    &
+               &                      - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) )  &
                &                      / rpou(ji,:,:) - 1._wp,                                      0._wp ) / r2dt
          END DO
       CASE (11) ! cfl(uu*) <= cfl_max
