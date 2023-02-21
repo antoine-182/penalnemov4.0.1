@@ -128,7 +128,7 @@ CONTAINS
 #if defined key_bvp
       ! 1) Definition of the porosity field
       IF ( nn_abp >= 1 ) THEN 
-         rpot(:,:,:) = 1._wp
+         rpot(:,:,:) = rn_abp
          DO ji = 2, jpi
             DO jk = 1, jpkm1
                CALL zgr_pse (ji,2,jk,glamu,pdepw_1d,rpot, nT)
@@ -317,7 +317,7 @@ CONTAINS
       IF ( nn_abp >= 1) THEN 
          k_bot(:,:) = jpkm1 ! last wet cell
          DO jk = jpkm1, 1, -1
-            WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = jk-1
+            WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk,jpkm1)
          END DO
       ENDIF
       ! 3) penalisation of the vertical scale factors (done in domain.F90)
