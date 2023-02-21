@@ -317,7 +317,7 @@ CONTAINS
       IF ( nn_abp >= 1) THEN 
          k_bot(:,:) = jpkm1 ! last wet cell
          DO jk = jpkm1, 1, -1
-            WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk,jpkm1)
+            WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk-1,jpkm1)
          END DO
       ENDIF
       ! 3) penalisation of the vertical scale factors (done in domain.F90)
