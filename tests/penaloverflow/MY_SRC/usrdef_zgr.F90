@@ -544,7 +544,7 @@ CONTAINS
         ! as profilz is downward, the integral does represent the water fraction
       ENDIF
       !
-      prpo(ki,kj,kk) =  z1d
+      prpo(ki,kj,kk) =  MAX(z1d,rn_abp)
 
    END SUBROUTINE zgr_pse
 

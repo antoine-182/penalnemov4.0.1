@@ -32,7 +32,7 @@
    nn_abp = 1        ! >= 1 rpo deduced from bathy profile (nb of bins)
                         ! (with ln_zco=T) =0  apply rn_abp at cell below
                         !                 =-1 replace bathy by rn_abp
-   nn_cnp =  0       ! definition of rpou and rpow
+   nn_cnp =  1       ! definition of rpou and rpow
                         ! 0 halfsum 
                         ! 1 minimum  
    rn_fsp = 0.05     ! friction parameter 1/epsilon of the permeability                [1/s]
