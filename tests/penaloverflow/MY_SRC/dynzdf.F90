@@ -78,6 +78,7 @@ CONTAINS
       REAL(wp) ::   zWus, zWvs         !   -      -
       REAL(wp) ::  z1d                 !   -      -
       REAL(wp), DIMENSION(jpi,jpj,jpk)        ::  zwi, zwd, zws   ! 3D workspace
+      REAL(wp), DIMENSION(jpi,jpj,jpk)        ::  z3d             ! 3D workspace
       REAL(wp), DIMENSION(:,:,:), ALLOCATABLE ::   ztrdu, ztrdv   !  -      -
       !!---------------------------------------------------------------------
       !
@@ -118,7 +119,7 @@ CONTAINS
       IF( ln_dynadv_vec .OR. ln_linssh ) THEN   ! applied on velocity
       !
          DO jk = 1, jpkm1
-            ua(:,:,jk) = ( ub(:,:,jk) + r2dt * ua(:,:,jk) ) * umask(:,:,jk)
+            ua(:,:,jk) = ( ub(:,:,jk) + r2dt * ua(:,:,jk) ) * umask(:,:,jk)   !!an integration ua -> u*
             va(:,:,jk) = ( vb(:,:,jk) + r2dt * va(:,:,jk) ) * vmask(:,:,jk)
          END DO
       ELSE                                      ! applied on thickness weighted velocity
@@ -348,6 +349,18 @@ CONTAINS
                   &                      - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) )  &
                   &                      / rpou(ji,:,:) - 1._wp,                                      0._wp ) / r2dt
             END DO
+         CASE (11)  ! cfl(ruu*) <= cfl_max
+            z1d =  0.5_wp * r2dt / ( rn_fsp * 1e3)
+            DO ji = 2, jpim1
+               bmpu(ji,:,:) = MAX( z1d * ( MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:), 0._wp )    &
+                  &                      - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) )  &
+                  &                      / rpou(ji,:,:) - 1._wp,                                      0._wp ) / r2dt
+            END DO
+            z3d(:,:,:) = 0._wp
+            DO ji = 2,jpim1 
+               z3d(ji,:,:) = MAX( bmpu(ji,:,:), bmpu(ji+1,:,:) )  
+            END DO
+            bmpu(:,:,:) = z3d(:,:,:)
          CASE (2)  ! cfl(ru*) <= cfl_max
             z1d = r2dt / ( rn_fsp * 1e3)
             DO ji = 1,jpim1
