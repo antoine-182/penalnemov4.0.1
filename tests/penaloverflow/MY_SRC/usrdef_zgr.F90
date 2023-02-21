@@ -129,7 +129,7 @@ CONTAINS
       ! 1) Definition of the porosity field
       IF ( nn_abp >= 1 ) THEN 
          rpot(:,:,:) = rn_abp
-         DO ji = 2, jpi
+         DO ji = 2, jpim1
             DO jk = 1, jpkm1
                CALL zgr_pse (ji,2,jk,glamu,pdepw_1d,rpot, nT)
             END DO
