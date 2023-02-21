@@ -315,10 +315,10 @@ CONTAINS
 #if defined key_bvp
       !
       ! 2) definition mask
-      IF (      nn_abp >= 1) THEN 
+      IF ( nn_abp >= 1) THEN 
          k_bot(:,:) = jpkm1 ! last wet cell
          DO jk = jpkm1, 1, -1
-            WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk,jpkm1)
+            WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = jk-1
          END DO
       ENDIF
       ! 3) penalisation of the vertical scale factors (done in domain.F90)
@@ -334,7 +334,7 @@ CONTAINS
          pe3vw(:,:,jk) = pe3w_1d (jk)
       END DO
 #else
-        ! classic definition without penalisation
+        ! classic cells
          ze3min = 0.1_wp * rn_dz   ! 10% of the width
          IF(lwp) WRITE(numout,*) '   minimum thickness of the partial cells = 10 % of e3 = ', ze3min
          !
