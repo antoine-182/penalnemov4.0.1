@@ -127,19 +127,21 @@ CONTAINS
       !!an pdet dimensioned
 #if defined key_bvp
       ! 1) Definition of the porosity field
-      ! rpot(:,:,:) = rn_abp
-      ! DO ji = 2, jpi
-      !    DO jk = 1, jpkm1
-      !      CALL zgr_pse (ji,2,jk,glamu,pdepw_1d,rpot, nT)
-      !    END DO
-      ! END DO
-      ! CALL lbc_lnk( 'usrdef_zgr', rpot, 'T', 1.)
-      !
-      rpot(:,:,:) = 1._wp
-      DO ji = 1, jpi
-        WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = rn_abp
-        ! WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = 1.e-10
-      END DO
+      IF ( nn_abp >= 1 ) THEN 
+         rpot(:,:,:) = rn_abo
+         DO ji = 2, jpi
+            DO jk = 1, jpkm1
+            CALL zgr_pse (ji,2,jk,glamu,pdepw_1d,rpot, nT)
+            END DO
+         END DO
+         CALL lbc_lnk( 'usrdef_zgr', rpot, 'T', 1.)
+      ELSE 
+         rpot(:,:,:) = 1._wp
+         DO ji = 1, jpi
+         WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = rn_abp
+         ! WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = 1.e-10
+         END DO
+      ENDIF
       !
       !
       !! Shapiro filter (S=1/2) or linear
@@ -278,7 +280,14 @@ CONTAINS
       IF ( ld_zco ) THEN      !==  z-coordinate  ==!   (step-like topography)
          !
 #if defined key_bvp
-          k_bot(:,:) = jpkm1 * k_top(:,:)     ! here use k_top as a land mask
+         IF (      nn_abp == -1) THEN 
+            k_bot(:,:) = jpkm1 * k_top(:,:)     ! here use k_top as a land mask
+         ELSE IF ( nn_abp == 0 ) THEN
+            k_bot(:,:) = jpkm1 ! last wet cell
+            DO jk = jpkm1, 1, -1
+               WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk,jpkm1)
+            END DO
+         ENDIF
 #else
           !                                !* bottom ocean compute from the depth of grid-points
           k_bot(:,:) = jpkm1 * k_top(:,:)     ! here use k_top as a land mask
@@ -304,24 +313,26 @@ CONTAINS
       IF ( ld_zps ) THEN      !==  zps-coordinate  ==!   (partial bottom-steps)
          !
 #if defined key_bvp
-       !
-       ! 2) definition mask
-        k_bot(:,:) = jpkm1 ! last wet cell
-        DO jk = jpkm1, 1, -1
-           WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk,jpkm1)
-        END DO
-       ! 3) penalisation of the vertical scale factors (done in domain.F90)
-        DO jk = 1, jpk                      ! initialization to the reference z-coordinate
-           pdept(:,:,jk) = pdept_1d(jk)
-           pdepw(:,:,jk) = pdepw_1d(jk)
-           pe3t (:,:,jk) = pe3t_1d (jk)
-           pe3u (:,:,jk) = pe3t_1d (jk)
-           pe3v (:,:,jk) = pe3t_1d (jk)
-           pe3f (:,:,jk) = pe3t_1d (jk)
-           pe3w (:,:,jk) = pe3w_1d (jk)
-           pe3uw(:,:,jk) = pe3w_1d (jk)
-           pe3vw(:,:,jk) = pe3w_1d (jk)
-        END DO
+      !
+      ! 2) definition mask
+      IF (      nn_abp >= 1) THEN 
+         k_bot(:,:) = jpkm1 ! last wet cell
+         DO jk = jpkm1, 1, -1
+            WHERE( rpot(:,:,jk) < rn_abp )   k_bot(:,:) = MIN(jk,jpkm1)
+         END DO
+      ENDIF
+      ! 3) penalisation of the vertical scale factors (done in domain.F90)
+      DO jk = 1, jpk                      ! initialization to the reference z-coordinate
+         pdept(:,:,jk) = pdept_1d(jk)
+         pdepw(:,:,jk) = pdepw_1d(jk)
+         pe3t (:,:,jk) = pe3t_1d (jk)
+         pe3u (:,:,jk) = pe3t_1d (jk)
+         pe3v (:,:,jk) = pe3t_1d (jk)
+         pe3f (:,:,jk) = pe3t_1d (jk)
+         pe3w (:,:,jk) = pe3w_1d (jk)
+         pe3uw(:,:,jk) = pe3w_1d (jk)
+         pe3vw(:,:,jk) = pe3w_1d (jk)
+      END DO
 #else
         ! classic definition without penalisation
          ze3min = 0.1_wp * rn_dz   ! 10% of the width
@@ -506,26 +517,26 @@ CONTAINS
       ELSE                            ! porous land
         z1d = 0._wp                   ! rectangle integration method
         !
-        !  -- + -----------o------------ + --   nn_cnp = 1
+        !  -- + -----------o------------ + --   nn_abp = 1
         !  -- + ---------->| dx/2
-        !  -- + -----o-----------o------ + --   nn_cnp = 2
+        !  -- + -----o-----------o------ + --   nn_abp = 2
         !  -- + ---->| dx/4
-        !  -- + --o--------o--------o--- + --   nn_cnp = 3
+        !  -- + --o--------o--------o--- + --   nn_abp = 3
         !  -- + ->| dx/6
         !    zA(1)                     zB(1)
         !
-        zxd = zA(1) + 1._wp / ( REAL(nn_cnp, wp) * 2._wp )
+        zxd = zA(1) + 1._wp / ( REAL(nn_abp, wp) * 2._wp )
         ! zf1 is normalised in x and z
         ! warning rn_dx is not applied yet
-        DO ji = 1,nn_cnp
+        DO ji = 1,nn_abp
           zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - zC(2))/rn_dz) )
           ! IF(lwp) WRITE(numout,*) '               zf1 =',zf1
           ! IF(lwp) WRITE(numout,*) '               xA =',zA(1)
           ! IF(lwp) WRITE(numout,*) '               zxd =',zxd
           ! IF(lwp) WRITE(numout,*) '               z =',profilz(zxd)
           ! IF(lwp) WRITE(numout,*) '               zC =',zC(2)
-          z1d = z1d + zf1   / REAL(nn_cnp, wp)
-          zxd = zxd + 1._wp / REAL(nn_cnp, wp)
+          z1d = z1d + zf1   / REAL(nn_abp, wp)
+          zxd = zxd + 1._wp / REAL(nn_abp, wp)
         END DO
         ! IF(lwp) WRITE(numout,*) '               porous z1d=',z1d
         ! z1d = -1._wp

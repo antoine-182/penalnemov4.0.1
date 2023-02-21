@@ -137,14 +137,7 @@ CONTAINS
       ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) )   
    CASE ( 11 ) ! cfl(psi*) <= cfl_max
       SELECT CASE ( nn_wef )
-      CASE (1)  ! cfl(ruu*) <= cfl_max
-         z1d =  0.5_wp * r2dt / ( rn_fsp * 1e3)
-         DO ji = 2, jpim1
-            bmpu(ji,:,:) = MAX( z1d * ( MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:), 0._wp )    &
-               &                      - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) )  &
-               &                      / rpou(ji,:,:) - 1._wp,                                      0._wp ) / r2dt
-         END DO
-      CASE (11) ! cfl(uu*) <= cfl_max
+      CASE (1) ! cfl(uu*) <= cfl_max
          z1d =  0.5_wp * r2dt / ( rn_fsp * 1e3)
          DO ji = 2, jpim1
             bmpu(ji,:,:) = MAX( z1d * MAX(ua(ji,:,:) + ua(ji+1,:,:),               & 
@@ -155,10 +148,7 @@ CONTAINS
          DO ji = 1,jpim1
             bmpu(ji,:,:) =  MAX( ( z1d * rpou(ji,:,:)*ua(ji,:,:) / MIN(rpot(ji,:,:),rpot(ji+1,:,:)) - 1._wp ),   &
                &                0._wp ) /r2dt 
-         END DO
-      CASE (22) ! cfl(u*) <= cfl_max
-         z1d = r2dt / ( rn_fsp * 1e3)
-         bmpu(:,:,:) =  MAX( ( z1d * ua(:,:,:) - 1._wp ) , 0._wp ) /r2dt 
+         END DO 
       END SELECT
       !
       ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) )             ! so < rn_fsp = psimax (~0.3)
@@ -343,13 +333,6 @@ CONTAINS
      ELSE IF ( nn_fsp == 21 ) THEN ! same bmpu as nn_fsp=1
       SELECT CASE ( nn_wef )   
          CASE (1)  ! cfl(ruu*) <= cfl_max
-            z1d =  0.5_wp * r2dt / ( rn_fsp * 1e3)
-            DO ji = 2, jpim1
-               bmpu(ji,:,:) = MAX( z1d * ( MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:), 0._wp )    &
-                  &                      - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) )  &
-                  &                      / rpou(ji,:,:) - 1._wp,                                      0._wp ) / r2dt
-            END DO
-         CASE (11)  ! cfl(ruu*) <= cfl_max
             z1d =  0.5_wp * r2dt / ( rn_fsp * 1e3)
             DO ji = 2, jpim1
                bmpu(ji,:,:) = MAX( z1d * ( MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:), 0._wp )    &

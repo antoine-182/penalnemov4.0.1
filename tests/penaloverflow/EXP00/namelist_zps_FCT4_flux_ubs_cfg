@@ -29,17 +29,22 @@
    rn_T0       =     10.   !  dense water (default 10)
   !
    rn_abp = 0.0001   ! alpha boundary parameter                                        [-]
-   nn_cnp =  0       ! 0/1 rpou,rpow halfsum / minimum [-]
+   nn_abp = 1        ! >= 1 rpo deduced from bathy profile (nb of bins)
+                        ! (with ln_zco=T) =0  apply rn_abp at cell below
+                        !                 =-1 replace bathy by rn_abp
+   nn_cnp =  0       ! definition of rpou and rpow
+                        ! 0 halfsum 
+                        ! 1 minimum  
    rn_fsp = 0.05     ! friction parameter 1/epsilon of the permeability                [1/s]
-      nn_fsp = 2    ! scale on r so transparent
-                        ! 1 - implicit (without wi)
-                        ! 2 - implicit in implicit matrix inversion
+      nn_fsp = 21    ! maximum friction
+                        ! 1 - implicit (before wi)
+                        ! 2 - implicit (with wi)
                         ! 3 - operator splitting
-                     ! 11/21/31 -  rn_fsp max courant number (bypass nn_wef)
-      nn_wef = 2    ! active friction 
-                     ! based on rux >= 1
-                     !       or rx  >= 1
-   nn_smo = 0    ! smoothing of porosity /z
+                     ! 11/21/31 -  rn_fsp max courant number
+      nn_wef = 1      ! active friction 
+                        ! based on rux >= 1
+                        !       or rx  >= 1
+   nn_smo = 0        ! smoothing of porosity /z
 /
 !
 !-----------------------------------------------------------------------
@@ -191,11 +196,11 @@
 !-----------------------------------------------------------------------
 &namtra_adv    !   advection scheme for tracer                          (default: NO selection)
 !-----------------------------------------------------------------------
-   ln_traadv_up1 = .false. !  1st order upwind scheme
+   ln_traadv_up1 = .true. !  1st order upwind scheme
    ln_traadv_cen = .false. !  2nd order centered scheme
       nn_cen_h   =  2            !  =2/4, horizontal 2nd order CEN / 4th order CEN
       nn_cen_v   =  2            !  =2/4, vertical   2nd order CEN / 4th order COMPACT
-   ln_traadv_fct = .true. !  FCT scheme
+   ln_traadv_fct = .false. !  FCT scheme
       nn_fct_h   =  3            !  =2/4, horizontal 2nd / 4th order
       nn_fct_v   =  3            !  =2/4, vertical   2nd / COMPACT 4th order
    ln_traadv_mus = .false. !  MUSCL scheme
@@ -235,9 +240,9 @@
    ln_dynadv_OFF  = .false. !  linear dynamics (no momentum advection)
    ln_dynadv_vec  = .false. !  vector form (T) or flux form (F)
    nn_dynkeg      = 0       ! scheme for grad(KE): =0   C2  ;  =1   Hollingsworth correction
-   ln_dynadv_up1  = .false. !  flux form - 1st order upwind scheme
+   ln_dynadv_up1  = .true. !  flux form - 1st order upwind scheme
    ln_dynadv_cen2 = .false. !  flux form - 2nd order centered scheme
-   ln_dynadv_ubs  = .true.  !  flux form - 3rd order upwind (UBS) scheme
+   ln_dynadv_ubs  = .false.  !  flux form - 3rd order upwind (UBS) scheme
 /
 !-----------------------------------------------------------------------
 &namdyn_vor    !   Vorticity / Coriolis scheme                          (default: NO selection)

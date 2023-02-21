@@ -34,6 +34,7 @@ MODULE usrdef_nam
    REAL(wp), PUBLIC ::   rn_T0     ! dense temp
    !                              !!* penalisation *!!
    REAL(wp), PUBLIC ::   rn_abp             ! alpha boundary parameter                                       [-]
+   INTEGER , PUBLIC ::   nn_abp             ! if T rpo deduced from bathy else indicator function
    INTEGER , PUBLIC ::   nn_cnp             ! number of cell on which is smoothed the porosity (phi)         [-]
    REAL(wp), PUBLIC ::   rn_fsp             ! friction parameter 1/epsilon of the permeability               [1/s]
    INTEGER, PUBLIC  ::   nn_fsp             ! friction parameter 1/epsilon of the permeability               [1/s]
@@ -67,7 +68,7 @@ CONTAINS
       INTEGER ::   ios   ! Local integer
       !!
       NAMELIST/namusr_def/ ln_zco, ln_zps, ln_sco, rn_dx, rn_dz, rn_T1, rn_T0,      &
-         &                 rn_abp, nn_cnp, rn_fsp, nn_fsp, nn_wef, nn_smo           ! penalisation parameters
+         &                 rn_abp, nn_abp,  nn_cnp, rn_fsp, nn_fsp, nn_wef, nn_smo  ! penalisation parameters
 
       !!----------------------------------------------------------------------
       !
@@ -84,7 +85,6 @@ CONTAINS
       kpi = INT( 200.e3 / rn_dx ) + 2
       kpj = 3
       kpk = INT(  2000. / rn_dz ) + 1
-      !
       !                             ! control print
       WRITE(numout,*) '   '
       WRITE(numout,*) 'usr_def_nam  : read the user defined namelist (namusr_def) in namelist_cfg'
@@ -126,12 +126,16 @@ CONTAINS
 #endif
       WRITE(numout,*) '   Namelist namusr_def : Brinkman Penalisation Parameters'
       WRITE(numout,*) '                                              rn_abp = ', rn_abp
+      WRITE(numout,*) '                                              nn_abp = ', nn_abp
       WRITE(numout,*) '                                              nn_cnp = ', nn_cnp
       WRITE(numout,*) '                                              rn_fsp = ', rn_fsp
       WRITE(numout,*) '                                              nn_fsp = ', nn_fsp
       WRITE(numout,*) '                                              nn_wef = ', nn_wef
       WRITE(numout,*) '                                              nn_smo = ', nn_smo
-
+      !
+      !
+      IF( .NOT. ln_zco .AND. nn_abp <  1 ) CALL ctl_stop( 'usr_def_nam: choose nn_abp accordingly to ln_zco' )
+      IF( .NOT. ln_zps .AND. nn_abp >= 1 ) CALL ctl_stop( 'usr_def_nam: choose nn_abp accordingly to ln_zps' )
       !
    END SUBROUTINE usr_def_nam
 
