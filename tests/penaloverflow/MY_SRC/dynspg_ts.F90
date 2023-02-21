@@ -1489,7 +1489,7 @@ CONTAINS
       !
 #if defined key_bvp 
       ! sum the impermeability coefficients
-      pCdU_u(:,:) = pCdU_u(:,:) +  SUM( rpou(:,:,:) * e3u_n(:,:,:) * bmpu(:,:,:) * umask(:,:,:) , DIM=3 ) * r1_hu_n(:,:)
+      pCdU_u(:,:) = pCdU_u(:,:) +  SUM( e3u_n(:,:,:) * bmpu(:,:,:) * umask(:,:,:) , DIM=3 ) * r1_hu_n(:,:)
 #endif
       !                    !==  BOTTOM stress contribution from baroclinic velocities  ==!
       !
