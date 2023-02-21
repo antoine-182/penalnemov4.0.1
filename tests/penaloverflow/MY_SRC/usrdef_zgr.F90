@@ -134,7 +134,6 @@ CONTAINS
                CALL zgr_pse (ji,2,jk,glamu,pdepw_1d,rpot, nT)
             END DO
          END DO
-         CALL lbc_lnk( 'usrdef_zgr', rpot, 'T', 1.)
       ELSE 
          rpot(:,:,:) = 1._wp
          DO ji = 1, jpi
