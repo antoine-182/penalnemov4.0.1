@@ -128,7 +128,8 @@ CONTAINS
 #if defined key_bvp
       ! 1) Definition of the porosity field
       IF ( nn_abp >= 1 ) THEN 
-         rpot(:,:,:) = 1._wp
+         rpot(:,:,:) = rn_abp
+         rpot(0,:,:) = 1._wp ; rpot(jpi,:,:) = 1_wp
          DO ji = 2, jpim1
             DO jk = 1, jpkm1
                CALL zgr_pse (ji,2,jk,glamu,pdepw_1d,rpot, nT)
@@ -315,9 +316,9 @@ CONTAINS
       !
       ! 2) definition mask
       IF ( nn_abp >= 1) THEN 
-         k_bot(:,:) = jpkm1 ! last wet cell
+         k_bot(:,:) = jpkm1 * k_top(:,:) ! last wet cell
          DO jk = jpkm1, 1, -1
-            WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = jk-1
+            WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk,jpkm1)
          END DO
       ENDIF
       ! 3) penalisation of the vertical scale factors (done in domain.F90)
@@ -514,33 +515,33 @@ CONTAINS
       ELSE IF ( zhA > zA(2) )  THEN   ! full water
         z1d = 1._wp
       ELSE                            ! porous land
-        z1d = 0._wp                   ! rectangle integration method
-        !
-        !  -- + -----------o------------ + --   nn_abp = 1
-        !  -- + ---------->| dx/2
-        !  -- + -----o-----------o------ + --   nn_abp = 2
-        !  -- + ---->| dx/4
-        !  -- + --o--------o--------o--- + --   nn_abp = 3
-        !  -- + ->| dx/6
-        !    zA(1)                     zB(1)
-        !
-        zxd = zA(1) + 1._wp / ( REAL(nn_abp, wp) * 2._wp )
-        ! zf1 is normalised in x and z
-        ! warning rn_dx is not applied yet
-        DO ji = 1,nn_abp
-          zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - zC(2))/rn_dz) )
-          ! IF(lwp) WRITE(numout,*) '               zf1 =',zf1
-          ! IF(lwp) WRITE(numout,*) '               xA =',zA(1)
-          ! IF(lwp) WRITE(numout,*) '               zxd =',zxd
-          ! IF(lwp) WRITE(numout,*) '               z =',profilz(zxd)
-          ! IF(lwp) WRITE(numout,*) '               zC =',zC(2)
-          z1d = z1d + zf1   / REAL(nn_abp, wp)
-          zxd = zxd + 1._wp / REAL(nn_abp, wp)
-        END DO
-        ! IF(lwp) WRITE(numout,*) '               porous z1d=',z1d
-        ! z1d = -1._wp
-        ! IF(lwp) WRITE(numout,*) '               porous (ki,kj,kk)=',ki,kj,kk
-        ! as profilz is downward, the integral does represent the water fraction
+         z1d = 0._wp                   ! rectangle integration method
+         !
+         !  -- + -----------o------------ + --   nn_abp = 1
+         !  -- + ---------->| dx/2
+         !  -- + -----o-----------o------ + --   nn_abp = 2
+         !  -- + ---->| dx/4
+         !  -- + --o--------o--------o--- + --   nn_abp = 3
+         !  -- + ->| dx/6
+         !    zA(1)                     zB(1)
+         !
+         zxd = zA(1) + 1._wp / ( REAL(nn_abp, wp) * 2._wp )
+         ! zf1 is normalised in x and z
+         ! warning rn_dx is not applied yet
+         DO ji = 1,nn_abp
+               zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - zC(2))/rn_dz) )
+               ! IF(lwp) WRITE(numout,*) '               zf1 =',zf1
+               ! IF(lwp) WRITE(numout,*) '               xA =',zA(1)
+               ! IF(lwp) WRITE(numout,*) '               zxd =',zxd
+               ! IF(lwp) WRITE(numout,*) '               z =',profilz(zxd)
+               ! IF(lwp) WRITE(numout,*) '               zC =',zC(2)
+               z1d = z1d + zf1   / REAL(nn_abp, wp)
+               zxd = zxd + 1._wp / REAL(nn_abp, wp)
+         END DO
+         ! IF(lwp) WRITE(numout,*) '               porous z1d=',z1d
+         ! z1d = -1._wp
+         ! IF(lwp) WRITE(numout,*) '               porous (ki,kj,kk)=',ki,kj,kk
+         ! as profilz is downward, the integral does represent the water fraction
       ENDIF
       !
       prpo(ki,kj,kk) =  MAX(z1d,rn_abp)
