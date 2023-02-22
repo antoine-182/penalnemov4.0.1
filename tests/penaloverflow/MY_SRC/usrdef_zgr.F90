@@ -134,13 +134,13 @@ CONTAINS
                CALL zgr_pse (ji,2,jk,glamu,pdepw_1d,rpot, nT)
             END DO
          END DO
-         WHERE ( pdept_1d(:) >= profilz(glamt(1,2)) )   rpot(1  ,2,:) = rn_abp
-         WHERE ( pdept_1d(:) >= profilz(glamt(jpi,2)) ) rpot(jpi,2,:) = rn_abp
+         !WHERE ( pdept_1d(:) >= profilz(glamt(1  ,2)) )   rpot(1  ,2,:) = rn_abp
+         !WHERE ( pdept_1d(:) >= profilz(glamt(jpi,2)) ) rpot(jpi,2,:) = rn_abp
       ELSE 
          rpot(:,:,:) = 1._wp
          DO ji = 1, jpi
-         WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = rn_abp
-         ! WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = 1.e-10
+            WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = rn_abp
+            ! WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = 1.e-10
          END DO
       ENDIF
       !
@@ -515,8 +515,7 @@ CONTAINS
         z1d = 0._wp
       ELSE IF ( zhA > zA(2) )  THEN   ! full water
         z1d = 1._wp
-      ELSE                            ! porous land
-         z1d = 0._wp                   ! rectangle integration method
+      ELSE                            ! porous land ! rectangle integration method
          !
          !  -- + -----------o------------ + --   nn_abp = 1
          !  -- + ---------->| dx/2
