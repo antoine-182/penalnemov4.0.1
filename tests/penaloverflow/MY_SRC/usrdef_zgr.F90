@@ -129,12 +129,13 @@ CONTAINS
       ! 1) Definition of the porosity field
       IF ( nn_abp >= 1 ) THEN 
          rpot(:,:,:) = rn_abp
-         rpot(0,:,:) = 1._wp ; rpot(jpi,:,:) = 1_wp
          DO ji = 2, jpim1
             DO jk = 1, jpkm1
                CALL zgr_pse (ji,2,jk,glamu,pdepw_1d,rpot, nT)
             END DO
          END DO
+         WHERE ( pdept_1d(:) >= profilz(glamt(1,2)) )   rpot(1  ,2,:) = rn_abp
+         WHERE ( pdept_1d(:) >= profilz(glamt(jpi,2)) ) rpot(jpi,2,:) = rn_abp
       ELSE 
          rpot(:,:,:) = 1._wp
          DO ji = 1, jpi
