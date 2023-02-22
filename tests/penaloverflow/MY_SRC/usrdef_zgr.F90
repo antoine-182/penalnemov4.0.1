@@ -134,8 +134,8 @@ CONTAINS
                CALL zgr_pse (ji,2,jk,glamu,pdepw_1d,rpot, nT)
             END DO
          END DO
-         !WHERE ( pdept_1d(:) >= profilz(glamt(1  ,2)) )   rpot(1  ,2,:) = rn_abp
-         !WHERE ( pdept_1d(:) >= profilz(glamt(jpi,2)) ) rpot(jpi,2,:) = rn_abp
+         WHERE ( pdept_1d(:) >= profilz(glamt(1  ,2)) ) rpot(1  ,2,:) = rn_abp
+         WHERE ( pdept_1d(:) >= profilz(glamt(jpi,2)) ) rpot(jpi,2,:) = rn_abp
       ELSE 
          rpot(:,:,:) = 1._wp
          DO ji = 1, jpi
