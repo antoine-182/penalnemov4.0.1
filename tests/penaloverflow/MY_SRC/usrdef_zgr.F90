@@ -527,7 +527,7 @@ CONTAINS
          !  -- + ->| dx/6
          !    zA(1)                     zB(1)
          !
-         zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp) 
+         zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp)  ; z1d = 0._wp
          WRITE(numout,*) "zxd",zxd
          DO ji = 1,nn_abp
                IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
