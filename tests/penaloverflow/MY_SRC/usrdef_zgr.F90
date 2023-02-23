@@ -133,9 +133,9 @@ CONTAINS
          DO ji = 1, jpi
             DO jk = 1, jpk
                WRITE(*,*) "bvp ji",ji,"jk",jk
-               CALL zgr_pse (ji,2,jk,
-                              glamt,pdepw_1d,rpot, 
-                              nT)
+               CALL zgr_pse (ji,2,jk,                  &
+                  &           glamt,pdepw_1d,rpot,     & 
+                  &           nT)
             END DO
          END DO
       ELSE 
