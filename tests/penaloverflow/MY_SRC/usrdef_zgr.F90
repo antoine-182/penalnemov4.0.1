@@ -128,14 +128,12 @@ CONTAINS
 #if defined key_bvp
       ! 1) Definition of the porosity field
       IF ( nn_abp >= 1 ) THEN 
-         rpot(:,:,:) = rn_abp
-         DO ji = 2, jpim1
-            DO jk = 1, jpkm1
+         rpot(:,:,:) = 1._wp
+         DO ji = 1, jpi
+            DO jk = 1, jpk
                CALL zgr_pse (ji,2,jk,glamu,pdepw_1d,rpot, nT)
             END DO
          END DO
-         WHERE ( pdept_1d(:) >= profilz(glamt(1  ,2)) ) rpot(1  ,2,:) = rn_abp
-         WHERE ( pdept_1d(:) >= profilz(glamt(jpi,2)) ) rpot(jpi,2,:) = rn_abp
       ELSE 
          rpot(:,:,:) = 1._wp
          DO ji = 1, jpi
@@ -477,17 +475,17 @@ CONTAINS
                                                                    ! T : 1, U : 2, V : 3, F : 4
       INTEGER  ::  ji                              ! dummy loop variables
       REAL     ::  z1d, zxd, zf1                   ! dummy variable
-      REAL, DIMENSION(2) ::   zA, zB, zC, zD, zM   ! coordinate array M(x,y)
+      REAL, DIMENSION(2) ::   zA, zB, zC, zD       ! coordinate array M(x,y)
       REAL               ::   zhA, zhC, zhtt       ! dummy variable
       !!----------------------------------------------------------------------
       !
       !                                      !==  Preparatory work  ==!
       SELECT CASE ( cpoint )                     !* Defining vertices
-      CASE ( nT )                                               ! UW coordinates
-          zA(1) = plam(ki-1,kj) ; zA(2) = pdepth(kk+1)
-          zB(1) = plam(ki  ,kj) ; zB(2) = pdepth(kk+1)
-          zC(1) = plam(ki  ,kj) ; zC(2) = pdepth(kk  )
-          zD(1) = plam(ki-1,kj) ; zD(2) = pdepth(kk  )
+      CASE ( nT )                                               ! x in km , z in m
+          zA(1) = plam(ki,kj) - 0.5_wp ; zA(2) = pdepth(kk) + rn_dz
+          zB(1) = plam(ki,kj) + 0.5_wp ; zB(2) = pdepth(kk) + rn_dz
+          zC(1) = plam(ki,kj) + 0.5_wp ; zC(2) = pdepth(kk)
+          zD(1) = plam(ki,kj) - 0.5_wp ; zD(2) = pdepth(kk)
         CASE ( nU )                                             ! W coordinates
           ! not working
           zA(1) = plam(ki-1,kj) ; zA(2) = pdepth(kk+1)
@@ -502,14 +500,14 @@ CONTAINS
           zD(1) = plam(ki-1,kj) ; zD(2) = pdepth(kk  )
       END SELECT
       !
-      !      A --------- B
-      !      |           |
-      !      |     +     |
-      !      |  (ki,kk)  |
-      !      D --------- C
+      !      A --------- B   + (z) and (kk)
+      !      |           |   | 
+      !      |     +     |   
+      !      |  (ki,kk)  |   
+      !      D --------- C   
       !
       ! True height given by the profile
-      zhA = profilz(zA(1)) ; zhC = profilz(zC(1)) ;  zhtt = profilz(plam(ki,kj))
+      zhA = profilz(zA(1)) ; zhC = profilz(zC(1))
       !
       IF      ( zhC < zC(2) )  THEN   ! full land
         z1d = 0._wp
@@ -525,11 +523,9 @@ CONTAINS
          !  -- + ->| dx/6
          !    zA(1)                     zB(1)
          !
-         zxd = zA(1) + 1._wp / ( REAL(nn_abp, wp) * 2._wp )
-         ! zf1 is normalised in x and z
-         ! warning rn_dx is not applied yet
+         zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp) 
          DO ji = 1,nn_abp
-               zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - zC(2))/rn_dz) )
+               zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - zC(2))/rn_dz) ) ! z rapporté à rn_dz
                ! IF(lwp) WRITE(numout,*) '               zf1 =',zf1
                ! IF(lwp) WRITE(numout,*) '               xA =',zA(1)
                ! IF(lwp) WRITE(numout,*) '               zxd =',zxd
@@ -558,8 +554,8 @@ CONTAINS
       !!
       !!----------------------------------------------------------------------
       IMPLICIT NONE
-      REAL, INTENT(in) :: x
-      REAL             :: f   ! result
+      REAL, INTENT(in) :: x   ! x in kilometers
+      REAL             :: f   ! depth from the surface (in meters)
       !!----------------------------------------------------------------------
       !
       f = + (  500. + 0.5 * 1500. * ( 1.0 + tanh( (x - 40.) / 7. ) )  )
