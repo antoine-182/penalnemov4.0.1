@@ -29,9 +29,10 @@
    rn_T0       =     10.   !  dense water (default 10)
   !
    rn_abp = 0.0001   ! alpha boundary parameter                                        [-]
-   nn_abp = 1        ! >= 1 rpo deduced from bathy profile (nb of bins)
-                        ! (with ln_zco=T) =0  apply rn_abp at cell below
-                        !                 =-1 replace bathy by rn_abp
+   nn_abp = 1        ! >= 1 Maximum number of vertical levels that can be displayed 
+                     !      (should be superior to the maximum jump of levels)
+                        ! (with ln_zco=T) = 0  apply rn_abp at cell below
+                        !                 =-1 replace continental slope by rn_abp
    nn_cnp =  1       ! definition of rpou and rpow
                         ! 0 halfsum 
                         ! 1 minimum  
@@ -42,8 +43,8 @@
                         ! 3 - operator splitting
                      ! 11/21/31 -  rn_fsp max courant number
       nn_wef = 1      ! active friction 
-                        ! based on rux >= 1
-                        !       or rx  >= 1
+                        ! 1 based on rux >= 1
+                        ! 2       or rx  >= 1
    nn_smo = 0        ! smoothing of porosity /z
 /
 !

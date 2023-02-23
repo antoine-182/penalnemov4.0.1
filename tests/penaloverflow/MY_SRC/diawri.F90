@@ -247,10 +247,10 @@ CONTAINS
                &                                                              +rpow(ji  ,:,jk  ) * z3dwi(ji  ,:,jk  ))   ) 
             END DO
          END DO
-         CALL iom_put( "rlipst" , z3d (:,:,:) )
-         CALL iom_put(  "lipst" , z3d2(:,:,:) )
-         CALL iom_put( "rlipsu" , z3d1(:,:,:) )
-         CALL iom_put(  "lipsu" , z3d3(:,:,:) )
+         CALL iom_put( "rlipst" , z3d  * tmask )
+         CALL iom_put(  "lipst" , z3d2 * tmask )
+         CALL iom_put( "rlipsu" , z3d1 * umask )
+         CALL iom_put(  "lipsu" , z3d3 * umask )
       ENDIF
 #else 
       IF( iom_use("lipst") .OR. iom_use("lipsu") ) THEN
@@ -276,6 +276,7 @@ CONTAINS
          DO jk = 1, jpkm1
             DO jj = 1, jpj
                DO ji = 1,jpim1
+                  zmsk = umask(ji,jj,jk)
                   z3d (ji,jj,jk) = 2._wp * rdt * (   MAX( 0.5 * (rpow(ji,jj,jk  ) * wn(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) * wn(ji+1,jj,jk  )), 0._wp  )   & 
                   &                                - MIN( 0.5 * (rpow(ji,jj,jk+1) * wn(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) * wn(ji+1,jj,jk+1)), 0._wp  ) ) &
                   &                                / e3u_n(ji,jj,jk)
@@ -299,12 +300,12 @@ CONTAINS
             END DO
          END DO
          !
-         CALL iom_put( "cflu" , z3d + z3d1 )
-         CALL iom_put( "cfluu", z3d1 )
-         CALL iom_put( "cfluw", z3d  )
+         CALL iom_put( "cflu" , (z3d + z3d1) * umask )
+         CALL iom_put( "cfluu", z3d1 * umask)
+         CALL iom_put( "cfluw", z3d  * umask)
          !
-         CALL iom_put( "rphiw_u", z3d2 )
-         CALL iom_put( "rphiu_u", z3d3 )
+         CALL iom_put( "rphiw_u", z3d2 * umask)
+         CALL iom_put( "rphiu_u", z3d3 * umask)
       ENDIF
 #else
       IF( iom_use("cflu") .OR. iom_use("cfluu") .OR. iom_use("cfluw") ) THEN
@@ -332,9 +333,9 @@ CONTAINS
           END DO
         END DO
         !
-        CALL iom_put( "cflu" , z3d + z3d1 )
-        CALL iom_put( "cfluu", z3d1 )
-        CALL iom_put( "cfluw", z3d  )
+        CALL iom_put( "cflu" , (z3d + z3d1) * umask )
+        CALL iom_put( "cfluu", z3d1 * umask)
+        CALL iom_put( "cfluw", z3d  * umask)
       ENDIF
 #endif
       !
@@ -366,12 +367,12 @@ CONTAINS
             END DO
          END DO
          !
-         CALL iom_put("cflt" ,z3d + z3d1 )
-         CALL iom_put("cfltu",z3d )
-         CALL iom_put("cfltw",z3d1)
+         CALL iom_put("cflt" , (z3d + z3d1) * tmask )
+         CALL iom_put("cfltu",z3d  * tmask)
+         CALL iom_put("cfltw",z3d1 * tmask)
          !
-         CALL iom_put("rphiu_t",z3d2 )
-         CALL iom_put("rphiw_t",z3d3 )
+         CALL iom_put("rphiu_t",z3d2 * tmask)
+         CALL iom_put("rphiw_t",z3d3 * tmask)
       ENDIF
 #else
        IF( iom_use("cflt") .OR. iom_use("cfltu") .OR. iom_use("cfltw") ) THEN
@@ -396,9 +397,9 @@ CONTAINS
             END DO
          END DO
          !
-         CALL iom_put("cflt" ,z3d + z3d1 )
-         CALL iom_put("cfltu",z3d )
-         CALL iom_put("cfltw",z3d1)
+         CALL iom_put("cflt" , (z3d + z3d1) * tmask )
+         CALL iom_put("cfltu", z3d * tmask)
+         CALL iom_put("cfltw", z3d1 * tmask)
       ENDIF
 #endif
       z3d1(:,:,:) = wn
