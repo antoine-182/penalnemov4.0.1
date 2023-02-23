@@ -483,7 +483,6 @@ CONTAINS
       REAL               ::   zhA, zhC, zhtt       ! dummy variable
       !!----------------------------------------------------------------------
       !
-      WRITE(numout,*) "entering pse"
       !                                      !==  Preparatory work  ==!
       SELECT CASE ( cpoint )                     !* Defining vertices
       CASE ( nT )                                               ! x in km , z in m
@@ -504,7 +503,6 @@ CONTAINS
           zC(1) = plam(ki  ,kj) ; zC(2) = pdepth(kk  )
           zD(1) = plam(ki-1,kj) ; zD(2) = pdepth(kk  )
       END SELECT
-      WRITE(numout,*) "cpoint done"
       !
       !      A --------- B   + (z) and (kk)
       !      |           |   | 
@@ -532,16 +530,15 @@ CONTAINS
          zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp) 
          WRITE(numout,*) "zxd",zxd
          DO ji = 1,nn_abp
-               IF(lwp) WRITE(numout,*) '               xA =',zA(1),'zxd',zxd,'xC',zC(2)
-               IF(lwp) WRITE(numout,*) '               zhA',zhA,    'zh',profilz(zxd),'zhC',zhC
+               IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
+               IF(lwp) WRITE(numout,*) 'zhA',zhA,    'zh',profilz(zxd),'zhC',zhC
                zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - zC(2))/rn_dz) ) ! z rapporté à rn_dz
-               IF(lwp) WRITE(numout,*) '               zf1 =',zf1
+               IF(lwp) WRITE(numout,*) 'zf1 =',zf1
                z1d = z1d + zf1   / REAL(nn_abp, wp)
+               IF(lwp) WRITE(numout,*) 'z1d =',z1d
                zxd = zxd + 1._wp / REAL(nn_abp, wp)
+               IF(lwp) WRITE(numout,*) 'zxd =',zxd
          END DO
-         IF(lwp) WRITE(numout,*) '               porous z1d=',z1d
-         ! z1d = -1._wp
-         ! IF(lwp) WRITE(numout,*) '               porous (ki,kj,kk)=',ki,kj,kk
          ! as profilz is downward, the integral does represent the water fraction
       ENDIF
       !
