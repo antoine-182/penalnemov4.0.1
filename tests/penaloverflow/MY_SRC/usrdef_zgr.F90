@@ -533,7 +533,7 @@ CONTAINS
          WRITE(numout,*) "zxd",zxd
          DO ji = 1,nn_abp
                IF(lwp) WRITE(numout,*) '               xA =',zA(1),'zxd',zxd,'xC',zC(2)
-               IF(lwp) WRITE(numout,*) '               zhA'zhA,    'zh',profilz(zxd),'zhC',zhC
+               IF(lwp) WRITE(numout,*) '               zhA',zhA,    'zh',profilz(zxd),'zhC',zhC
                zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - zC(2))/rn_dz) ) ! z rapporté à rn_dz
                IF(lwp) WRITE(numout,*) '               zf1 =',zf1
                z1d = z1d + zf1   / REAL(nn_abp, wp)
