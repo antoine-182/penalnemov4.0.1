@@ -339,6 +339,7 @@ CONTAINS
                   &                      - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) )  &
                   &                      / rpou(ji,:,:) - 1._wp,                                      0._wp ) / r2dt
             END DO
+            bmpu = bmpu * umask ! 
             z3d(:,:,:) = 0._wp
             DO ji = 2,jpim1 
                z3d(ji,:,:) = MAX( bmpu(ji-1,:,:), bmpu(ji,:,:) )  

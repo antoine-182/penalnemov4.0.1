@@ -276,7 +276,6 @@ CONTAINS
          DO jk = 1, jpkm1
             DO jj = 1, jpj
                DO ji = 1,jpim1
-                  zmsk = umask(ji,jj,jk)
                   z3d (ji,jj,jk) = 2._wp * rdt * (   MAX( 0.5 * (rpow(ji,jj,jk  ) * wn(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) * wn(ji+1,jj,jk  )), 0._wp  )   & 
                   &                                - MIN( 0.5 * (rpow(ji,jj,jk+1) * wn(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) * wn(ji+1,jj,jk+1)), 0._wp  ) ) &
                   &                                / e3u_n(ji,jj,jk)
