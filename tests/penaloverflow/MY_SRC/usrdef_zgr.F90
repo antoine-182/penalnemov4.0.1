@@ -125,14 +125,14 @@ CONTAINS
       !!an no vertical dimension yet
       CALL zgr_z1d( pdept_1d, pdepw_1d, pe3t_1d , pe3w_1d )   ! Reference z-coordinate system
       !!an pdet dimensioned
-      WRITE(*,*) "zer"
+      WRITE(numout,*) "zer"
 #if defined key_bvp
       ! 1) Definition of the porosity field
       IF ( nn_abp >= 1 ) THEN 
          rpot(:,:,:) = 1._wp
          DO ji = 1, jpi
             DO jk = 1, jpk
-               WRITE(*,*) "bvp ji",ji,"jk",jk
+               WRITE(numout,*) "bvp ji",ji,"jk",jk
                CALL zgr_pse (ji,2,jk,                  &
                   &           glamt,pdepw_1d,rpot,     & 
                   &           nT)
@@ -483,7 +483,7 @@ CONTAINS
       REAL               ::   zhA, zhC, zhtt       ! dummy variable
       !!----------------------------------------------------------------------
       !
-      WRITE(*,*) "entering pse"
+      WRITE(numout,*) "entering pse"
       !                                      !==  Preparatory work  ==!
       SELECT CASE ( cpoint )                     !* Defining vertices
       CASE ( nT )                                               ! x in km , z in m
@@ -504,7 +504,7 @@ CONTAINS
           zC(1) = plam(ki  ,kj) ; zC(2) = pdepth(kk  )
           zD(1) = plam(ki-1,kj) ; zD(2) = pdepth(kk  )
       END SELECT
-      WRITE(*,*) "cpoint done"
+      WRITE(numout,*) "cpoint done"
       !
       !      A --------- B   + (z) and (kk)
       !      |           |   | 
@@ -514,7 +514,6 @@ CONTAINS
       !
       ! True height given by the profile
       zhA = profilz(zA(1)) ; zhC = profilz(zC(1))
-      WRITE(*,*) "heights zhA",zhA
       !
       IF      ( zhC < zC(2) )  THEN   ! full land
         z1d = 0._wp
@@ -531,18 +530,16 @@ CONTAINS
          !    zA(1)                     zB(1)
          !
          zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp) 
-         WRITE(*,*) "zxd",zxd
+         WRITE(numout,*) "zxd",zxd
          DO ji = 1,nn_abp
+               IF(lwp) WRITE(numout,*) '               xA =',zA(1),'zxd',zxd,'xC',zC(2)
+               IF(lwp) WRITE(numout,*) '               zhA'zhA,    'zh',profilz(zxd),'zhC',zhC
                zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - zC(2))/rn_dz) ) ! z rapporté à rn_dz
-               ! IF(lwp) WRITE(numout,*) '               zf1 =',zf1
-               ! IF(lwp) WRITE(numout,*) '               xA =',zA(1)
-               ! IF(lwp) WRITE(numout,*) '               zxd =',zxd
-               ! IF(lwp) WRITE(numout,*) '               z =',profilz(zxd)
-               ! IF(lwp) WRITE(numout,*) '               zC =',zC(2)
+               IF(lwp) WRITE(numout,*) '               zf1 =',zf1
                z1d = z1d + zf1   / REAL(nn_abp, wp)
                zxd = zxd + 1._wp / REAL(nn_abp, wp)
          END DO
-         ! IF(lwp) WRITE(numout,*) '               porous z1d=',z1d
+         IF(lwp) WRITE(numout,*) '               porous z1d=',z1d
          ! z1d = -1._wp
          ! IF(lwp) WRITE(numout,*) '               porous (ki,kj,kk)=',ki,kj,kk
          ! as profilz is downward, the integral does represent the water fraction
