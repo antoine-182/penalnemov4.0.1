@@ -342,7 +342,7 @@ CONTAINS
             bmpu = bmpu * umask ! 
             z3d(:,:,:) = 0._wp
             DO ji = 2,jpim1 
-               z3d(ji,:,:) = MAX( bmpu(ji-1,:,:), bmpu(ji,:,:) )  
+               z3d(ji,:,:) = MAX( bmpu(ji-1,:,:), bmpu(ji,:,:), bmpu(ji+1,:,:) )  ! flow + et -
             END DO
             bmpu(:,:,:) = z3d(:,:,:)
          CASE (2)  ! cfl(ru*) <= cfl_max
