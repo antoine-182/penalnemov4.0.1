@@ -71,7 +71,7 @@ CONTAINS
       INTEGER ::   ios   ! Local integer
       !!
       NAMELIST/namusr_def/ ln_zco, ln_zps, ln_sco, rn_dx, rn_dz, rn_T1, rn_T0,      &
-         &                 rn_abp, nn_abp,  nn_cnp, rn_fsp, nn_fsp, nn_wef, nn_smo  & ! penalisation parameters
+         &                 rn_abp, nn_abp,  nn_cnp, rn_fsp, nn_fsp, nn_wef, nn_smo, & ! penalisation parameters
          &                 ln_ovf, nn_ovf                                             ! larger bathy
 
       !!----------------------------------------------------------------------
