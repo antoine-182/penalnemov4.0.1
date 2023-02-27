@@ -95,9 +95,9 @@ CONTAINS
          plamf(:,:) = plamu(:,:) 
          DO ji = 1, jpi             ! longitude 
             ! ji : indice local dans l'array partionné
-            ! ji+nimpp-1 : indice global dans le domaine
-            ji0 = INT( (ji-1+nimpp-1)/nn_ovf )
-            plamt0(ji,:) = zfact * (  - 0.5 + REAL( ji0, wp )  )
+            ! ji+nimpp-1 : indice global dans le domaine ji  0 1 2 3
+            ji0 = INT( (ji-1+nimpp-1)/nn_ovf )          !ji0 0 0 1 1
+            plamt0(ji,:) = zfact * REAL(nn_ovf,wp) * ( - 0.5 + REAL( ji0, wp )  )
          END DO
       ENDIF
       !

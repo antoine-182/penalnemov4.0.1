@@ -423,6 +423,10 @@ CONTAINS
          !
 #endif
       ENDIF
+      IF ( ln_ovf ) THEN
+         WRITE(numout,*) 'usrdef_zgr : defined mask < 0km or >200km'
+         WHERE( glamt(:,:) < 0 .OR. glamt(:,:) > 200)   k_bot(:,:) = 1
+      ENDIF
       !
    END SUBROUTINE usr_def_zgr
 
