@@ -88,14 +88,15 @@ CONTAINS
       END DO
       !
       IF ( ln_ovf ) THEN
-         plamt(:,:) = plamt(:,:) - REAL(nn_ovf - 1,wp) * rn_dx   ! offset to conserve volume
-         plamu(:,:) = plamu(:,:) - REAL(nn_ovf - 1,wp) * rn_dx
+         IF (lwp) WRITE (numout,*) '(nn_ovf - 1)',nn_ovf - 1 '* rn_dx',rn_dx,'=',REAL(nn_ovf - 1 ,wp) * rn_dx
+         plamt(:,:) = plamt(:,:) - REAL(nn_ovf - 1 ,wp) * rn_dx   ! offset to conserve volume
+         plamu(:,:) = plamu(:,:) - REAL(nn_ovf - 1 ,wp) * rn_dx
          plamv(:,:) = plamt(:,:)  
          plamf(:,:) = plamu(:,:) 
          DO ji = 1, jpi             ! longitude 
             ! ji : indice local dans l'array partionné
             ! ji+nimpp-1 : indice global dans le domaine
-            ji0 = INT((ji-1+nimpp-1)/nn_ovf)
+            ji0 = INT( (ji-1+nimpp-1)/nn_ovf )
             plamt0(ji,:) = zfact * (  - 0.5 + REAL( ji0, wp )  )
          END DO
       ENDIF

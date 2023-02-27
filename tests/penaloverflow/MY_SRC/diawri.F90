@@ -788,8 +788,7 @@ CONTAINS
             CALL histdef( nid_T, "vovvldef", "Squared level deformation"          , "%^2"    ,&  ! e3t_n
             &             jpi, jpj, nh_T, ipk, 1, ipk, nz_T, 32, clop, zsto, zout )
          ENDIF
-         CALL histdef( nid_T, "glamt0", "coarse bathy"           , ""   ,   &  ! rpot
-              &     jpi, jpj, nh_T, ipk, 1, ipk, nz_T, 32, clop, zsto, zout )
+         !
 #if defined key_bvp
        CALL histdef( nid_T, "rpot", "T porosity"           , ""   ,   &  ! rpot
               &     jpi, jpj, nh_T, ipk, 1, ipk, nz_T, 32, clop, zsto, zout )
@@ -941,7 +940,7 @@ CONTAINS
          ENDIF
 
 #if defined key_bvp
-      CALL histdef( nid_W, "rpot", "W porosity"           , ""   ,   &  ! rpow
+      CALL histdef( nid_W, "rpow", "W porosity"           , ""   ,   &  ! rpow
              &     jpi, jpj, nh_W, ipk, 1, ipk, nz_W, 32, clop, zsto, zout )
 #endif
          !                                                                                      !!! nid_W : 2D
@@ -1152,6 +1151,8 @@ CONTAINS
          CALL iom_rstput( 0, 0, inum, 'sdvecrtz', wsd            )    ! now StokesDrift k-velocity
       ENDIF
 !!an
+      CALL iom_rstput( 0, 0, inum, "glamt0", glamt0 )    ! porotisity T
+      CALL iom_rstput( 0, 0, inum, "glamt", glamt )    ! porotisity T
 #if defined key_bvp
       CALL iom_rstput( 0, 0, inum, "rpot", rpot )    ! porotisity T
       CALL iom_rstput( 0, 0, inum, "rpou", rpou )    ! porotisity T
