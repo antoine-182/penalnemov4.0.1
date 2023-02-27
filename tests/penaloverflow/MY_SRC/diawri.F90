@@ -788,7 +788,8 @@ CONTAINS
             CALL histdef( nid_T, "vovvldef", "Squared level deformation"          , "%^2"    ,&  ! e3t_n
             &             jpi, jpj, nh_T, ipk, 1, ipk, nz_T, 32, clop, zsto, zout )
          ENDIF
-
+         CALL histdef( nid_T, "glamt0", "coarse bathy"           , ""   ,   &  ! rpot
+              &     jpi, jpj, nh_T, ipk, 1, ipk, nz_T, 32, clop, zsto, zout )
 #if defined key_bvp
        CALL histdef( nid_T, "rpot", "T porosity"           , ""   ,   &  ! rpot
               &     jpi, jpj, nh_T, ipk, 1, ipk, nz_T, 32, clop, zsto, zout )

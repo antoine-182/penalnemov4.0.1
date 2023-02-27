@@ -87,7 +87,7 @@ CONTAINS
       !
       ! Global Domain size:  OVERFLOW domain is  200 km x 3 grid-points x 2000 m
       IF ( ln_ovf ) THEN
-            IF(nn_ovf<=1) CALL ctl_stop('nn_ovf must be >= 1') 
+            IF(nn_ovf<1) CALL ctl_stop('nn_ovf must be >= 1') 
             kpi = INT( 200.e3 / ( REAL(nn_ovf,wp) * rn_dx ) ) + 2               ! [m] gridspacing BIGGER cells
             IF(lwp) WRITE(numout,*) 'before kpi=',kpi
             kpi = kpi * REAL(nn_ovf,wp)
