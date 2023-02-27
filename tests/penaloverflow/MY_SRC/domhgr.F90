@@ -93,7 +93,6 @@ CONTAINS
          IF(lwp) WRITE(numout,*) '   ==>>>   read horizontal mesh in ', TRIM( cn_domcfg ), ' file'
          !
          CALL hgr_read   ( glamt , glamu , glamv , glamf ,   &    ! geographic position (required)
-            &              glamt0,                           &    ! nn_ovf
             &              gphit , gphiu , gphiv , gphif ,   &    !     -        -
             &              iff   , ff_f  , ff_t  ,           &    ! Coriolis parameter (if not on the sphere)
             &              e1t   , e1u   , e1v   , e1f   ,   &    ! scale factors (required)
@@ -105,6 +104,7 @@ CONTAINS
          IF(lwp) WRITE(numout,*) '          User defined horizontal mesh (usr_def_hgr)'
          !
          CALL usr_def_hgr( glamt , glamu , glamv , glamf ,   &    ! geographic position (required)
+            &              glamt0,                           &    ! nn_ovf
             &              gphit , gphiu , gphiv , gphif ,   &    !
             &              iff   , ff_f  , ff_t  ,           &    ! Coriolis parameter  (if domain not on the sphere)
             &              e1t   , e1u   , e1v   , e1f   ,   &    ! scale factors       (required)
