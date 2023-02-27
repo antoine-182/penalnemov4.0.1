@@ -54,6 +54,7 @@ CONTAINS
       !!              - define u- & v-surfaces (if gridsize reduction is used in some straits) (in m2)
       !!----------------------------------------------------------------------
       REAL(wp), DIMENSION(:,:), INTENT(out) ::   plamt, plamu, plamv, plamf   ! longitude outputs                     [degrees]
+      REAL(wp), DIMENSION(:,:), INTENT(out) ::   plamt0                       ! nn_ovf
       REAL(wp), DIMENSION(:,:), INTENT(out) ::   pphit, pphiu, pphiv, pphif   ! latitude outputs                      [degrees]
       INTEGER                 , INTENT(out) ::   kff                          ! =1 Coriolis parameter computed here, =0 otherwise
       REAL(wp), DIMENSION(:,:), INTENT(out) ::   pff_f, pff_t                 ! Coriolis factor at f-point                [1/s]
@@ -62,7 +63,7 @@ CONTAINS
       INTEGER                 , INTENT(out) ::   ke1e2u_v                     ! =1 u- & v-surfaces computed here, =0 otherwise
       REAL(wp), DIMENSION(:,:), INTENT(out) ::   pe1e2u, pe1e2v               ! u- & v-surfaces (if reduction in strait)   [m2]
       !
-      INTEGER  ::   ji, jj   ! dummy loop indices
+      INTEGER  ::   ji, ji0, jj   ! dummy loop indices
       REAL(wp) ::   zfact      ! local scalars
       !!-------------------------------------------------------------------------------
       !
