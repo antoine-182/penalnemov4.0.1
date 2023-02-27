@@ -88,9 +88,9 @@ CONTAINS
       END DO
       !
       IF ( ln_ovf ) THEN
-         IF (lwp) WRITE(numout,*) '(nn_ovf - 1)',nn_ovf - 1, '* rn_dx',rn_dx,'=',REAL(nn_ovf - 1 ,wp) * rn_dx
-         plamt(:,:) = plamt(:,:) - REAL(nn_ovf - 1 ,wp) * rn_dx   ! offset to conserve volume
-         plamu(:,:) = plamu(:,:) - REAL(nn_ovf - 1 ,wp) * rn_dx
+         IF (lwp) WRITE(numout,*) '(nn_ovf - 1)',nn_ovf - 1, '* rn_dx',zfact,'=',REAL(nn_ovf - 1 ,wp) * zfact
+         plamt(:,:) = plamt(:,:) - REAL(nn_ovf - 1 ,wp) * zfact   ! offset to conserve volume
+         plamu(:,:) = plamu(:,:) - REAL(nn_ovf - 1 ,wp) * zfact
          plamv(:,:) = plamt(:,:)  
          plamf(:,:) = plamu(:,:) 
          DO ji = 1, jpi             ! longitude 
