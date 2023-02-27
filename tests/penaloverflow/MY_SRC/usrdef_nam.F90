@@ -28,6 +28,9 @@ MODULE usrdef_nam
    PUBLIC   usr_def_nam   ! called by nemogcm.F90
 
    !                              !!* namusr_def namelist *!!
+   INTEGER, PUBLIC ::   nn_ovf     ! 
+   LOGICAL, PUBLIC ::   ln_ovf     ! 
+
    REAL(wp), PUBLIC ::   rn_dx     ! resolution in meters defining the horizontal domain size
    REAL(wp), PUBLIC ::   rn_dz     ! resolution in meters defining the vertical   domain size
    REAL(wp), PUBLIC ::   rn_T1     ! surrounding temp
@@ -68,7 +71,8 @@ CONTAINS
       INTEGER ::   ios   ! Local integer
       !!
       NAMELIST/namusr_def/ ln_zco, ln_zps, ln_sco, rn_dx, rn_dz, rn_T1, rn_T0,      &
-         &                 rn_abp, nn_abp,  nn_cnp, rn_fsp, nn_fsp, nn_wef, nn_smo  ! penalisation parameters
+         &                 rn_abp, nn_abp,  nn_cnp, rn_fsp, nn_fsp, nn_wef, nn_smo  & ! penalisation parameters
+         &                 ln_ovf, nn_ovf                                             ! larger bathy
 
       !!----------------------------------------------------------------------
       !
@@ -82,7 +86,15 @@ CONTAINS
       kk_cfg = INT( rn_dx )
       !
       ! Global Domain size:  OVERFLOW domain is  200 km x 3 grid-points x 2000 m
-      kpi = INT( 200.e3 / rn_dx ) + 2
+      IF ( ln_ovf ) THEN
+            IF(nn_ovf<=1) CALL ctl_stop('nn_ovf must be >= 1') 
+            kpi = INT( 200.e3 / ( REAL(nn_ovf,wp) * rn_dx ) ) + 2               ! [m] gridspacing BIGGER cells
+            IF(lwp) WRITE(numout,*) 'before kpi=',kpi
+            kpi = kpi * REAL(nn_ovf,wp)
+            IF(lwp) WRITE(numout,*) 'after  kpi=',kpi
+      ELSE
+            kpi = INT( 200.e3 / rn_dx ) + 2
+      END IF
       kpj = 3
       kpk = INT(  2000. / rn_dz ) + 1
       !                             ! control print
@@ -132,6 +144,9 @@ CONTAINS
       WRITE(numout,*) '                                              nn_fsp = ', nn_fsp
       WRITE(numout,*) '                                              nn_wef = ', nn_wef
       WRITE(numout,*) '                                              nn_smo = ', nn_smo
+      WRITE(numout,*) '                                                       '
+      WRITE(numout,*) '                                              ln_ovf = ', ln_ovf
+      WRITE(numout,*) '                                              nn_ovf = ', nn_ovf
       !
       IF( rn_fsp<=0 .AND. (nn_fsp == 11 .OR. nn_fsp == 21 .OR. nn_fsp == 31 ) ) CALL ctl_stop( 'usr_def_nam: friction cannot be negative or nil with this choice of nn_fsp' )
       !

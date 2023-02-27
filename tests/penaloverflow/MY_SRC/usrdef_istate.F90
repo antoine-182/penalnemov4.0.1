@@ -68,7 +68,7 @@ CONTAINS
       pssh(:,:)   = 0._wp
       !
       !                          ! T & S profiles
-      zdam = 20.                      ! density front position in kilometers
+      zdam = 20._wp                 ! density front position in kilometers
       pts(:,:,:,jp_tem) = rn_T1 * ptmask(:,:,:)
       DO jk = 1, jpk
         DO jj = 1, jpj

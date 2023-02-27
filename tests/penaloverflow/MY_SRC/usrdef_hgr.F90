@@ -15,7 +15,7 @@ MODULE usrdef_hgr
    USE dom_oce  ,  ONLY: nimpp, njmpp       ! ocean space and time domain
    USE par_oce         ! ocean space and time domain
    USE phycst          ! physical constants
-   USE usrdef_nam, ONLY: rn_dx   ! horizontal resolution in meters
+   USE usrdef_nam, ONLY: rn_dx, ln_ovf, nn_ovf   ! horizontal resolution in meters
    !
    USE in_out_manager  ! I/O manager
    USE lib_mpp         ! MPP library
@@ -33,6 +33,7 @@ MODULE usrdef_hgr
 CONTAINS
 
    SUBROUTINE usr_def_hgr( plamt , plamu , plamv  , plamf  ,   &   ! geographic position (required)
+      &                    plamt0,                             &   ! nn_ovf   
       &                    pphit , pphiu , pphiv  , pphif  ,   &   !
       &                    kff   , pff_f , pff_t  ,            &   ! Coriolis parameter  (if domain not on the sphere)
       &                    pe1t  , pe1u  , pe1v   , pe1f   ,   &   ! scale factors       (required)
@@ -84,6 +85,19 @@ CONTAINS
             pphif(ji,jj) = pphiv(ji,jj)
          END DO
       END DO
+      !
+      IF ( ln_ovf ) THEN
+         plamt(:,:) = plamt(:,:) - REAL(nn_ovf - 1,wp) * rn_dx   ! offset to conserve volume
+         plamu(:,:) = plamu(:,:) - REAL(nn_ovf - 1,wp) * rn_dx
+         plamv(:,:) = plamt(:,:)  
+         plamf(:,:) = plamu(:,:) 
+         DO ji = 1, jpi             ! longitude 
+            ! ji : indice local dans l'array partionné
+            ! ji+nimpp-1 : indice global dans le domaine
+            ji0 = INT((ji-1+nimpp-1)/nn_ovf)
+            plamt0(ji,:) = zfact * (  - 0.5 + REAL( ji0, wp )  )
+         END DO
+      ENDIF
       !
       !                       !==  Horizontal scale factors  ==!   (in meters)
       pe1t(:,:) = rn_dx   ;   pe2t(:,:) = rn_dx

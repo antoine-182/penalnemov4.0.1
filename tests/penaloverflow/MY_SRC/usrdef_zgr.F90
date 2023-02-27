@@ -16,7 +16,7 @@ MODULE usrdef_zgr
    USE oce            ! ocean variables
    USE dom_oce ,  ONLY: mi0, mi1, nimpp, njmpp   ! ocean space and time domain
 !!an
-   USE dom_oce ,  ONLY: glamt, glamu, gphit, gphiu                    ! ocean space and time domain
+   USE dom_oce ,  ONLY: glamt,glamt0, glamu, gphit, gphiu                    ! ocean space and time domain
 !!an
    USE usrdef_nam     ! User defined : namelist variables
    !
@@ -97,12 +97,21 @@ CONTAINS
       ! with a hyperbolic tangent transition centered at 40km
       ! NB: here glamt is in kilometers
       !
+      !
       ! zht(:,:) = + (  500. + 0.5 * 1500. * ( 1.0 + tanh( (glamt(:,:) - 40.) / 7. ) )  )
-      DO ji=1,jpi
-        DO jj=1,jpj
-          zht(ji,jj) = profilz(glamt(ji,jj))
-        END DO
-      END DO
+      IF ( ln_ovf ) THEN
+         DO ji=1,jpi
+            DO jj=1,jpj
+               zht(ji,jj) = profilz(glamt0(ji,jj))
+            END DO
+         END DO
+      ELSE
+         DO ji=1,jpi
+            DO jj=1,jpj
+               zht(ji,jj) = profilz(glamt(ji,jj))
+            END DO
+         END DO
+      ENDIF
       !
       ! at u-point: averaging zht
       DO ji = 1, jpim1
@@ -129,19 +138,35 @@ CONTAINS
       ! 1) Definition of the porosity field
       IF ( nn_abp >= 1 ) THEN 
          rpot(:,:,:) = 1._wp
-         DO ji = 1, jpi
-            DO jk = 1, jpk
-               CALL zgr_pse (ji,2,jk,                  &
-                  &           glamt,pdepw_1d,rpot,     & 
-                  &           nT)
+         IF ( ln_ovf ) THEN
+            DO ji = 1, jpi
+               DO jk = 1, jpk
+                  CALL zgr_pse (ji,2,jk,                  &
+                     &           glamt0,pdepw_1d,rpot,     & 
+                     &           nT)
+               END DO
             END DO
-         END DO
+         ELSE
+            DO ji = 1, jpi
+               DO jk = 1, jpk
+                  CALL zgr_pse (ji,2,jk,                  &
+                     &           glamt,pdepw_1d,rpot,     & 
+                     &           nT)
+               END DO
+            END DO
+         ELSE
       ELSE 
          rpot(:,:,:) = 1._wp
-         DO ji = 1, jpi
-            WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = rn_abp
-            ! WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = 1.e-10
-         END DO
+         IF ( ln_ovf ) THEN
+            DO ji = 1, jpi
+               WHERE ( pdept_1d(:) >= profilz(glamt0(ji,2)) ) rpot(ji,2,:) = rn_abp
+            END DO
+         ELSE
+            DO ji = 1, jpi
+               WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = rn_abp
+            END DO
+         ENDIF
+         
       ENDIF
       !
       !

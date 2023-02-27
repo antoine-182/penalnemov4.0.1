@@ -262,8 +262,8 @@ CONTAINS
                &                                                  - 0.5_wp*(z3dwi(ji+1,:,jk  ) + z3dwi(ji  ,:,jk  ))   ) 
             END DO
          END DO
-         CALL iom_put(  "lipst" , z3d2(:,:,:) )
-         CALL iom_put(  "lipsu" , z3d3(:,:,:) )
+         CALL iom_put(  "lipst" , z3d2 * tmask )
+         CALL iom_put(  "lipsu" , z3d3 * umask )
       ENDIF
 #endif
       !

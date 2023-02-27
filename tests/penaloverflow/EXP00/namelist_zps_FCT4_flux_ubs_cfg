@@ -28,6 +28,9 @@
    rn_T1       =     20.   !  surrounding water (default 20)
    rn_T0       =     10.   !  dense water (default 10)
   !
+  ln_ovf = .false.         !  if true apply the same bathy as nn_ovf*rn_dx
+      nn_ovf = 1
+  !
    rn_abp = 0.0001   ! alpha boundary parameter                                        [-]
    nn_abp = 1        ! >= 1 Maximum number of vertical levels that can be displayed 
                      !      (should be superior to the maximum jump of levels)
