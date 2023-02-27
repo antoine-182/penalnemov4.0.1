@@ -139,13 +139,13 @@ CONTAINS
       SELECT CASE ( nn_wef )
       CASE (1) ! cfl(uu*) <= cfl_max
          DO ji = 2, jpim1
-            z1d =  0.5_wp * r2dt / ( rn_fsp * e1t(ji,1,1))
+            z1d =  0.5_wp * r2dt / ( rn_fsp * e1t(ji,1))
             bmpu(ji,:,:) = MAX( z1d * MAX(ua(ji,:,:) + ua(ji+1,:,:),               & 
                &                          ua(ji,:,:) + ua(ji-1,:,:)) - 1._wp, 0._wp ) /r2dt
          END DO
       CASE (2)  ! cfl(ru*) <= cfl_max
          DO ji = 1,jpim1
-            z1d =  r2dt / ( rn_fsp * e1t(ji,1,1))
+            z1d =  r2dt / ( rn_fsp * e1t(ji,1))
             bmpu(ji,:,:) =  MAX( ( z1d * rpou(ji,:,:)*ua(ji,:,:) / MIN(rpot(ji,:,:),rpot(ji+1,:,:)) - 1._wp ),   &
                &                0._wp ) /r2dt 
          END DO 
@@ -334,7 +334,7 @@ CONTAINS
       SELECT CASE ( nn_wef )   
          CASE (1)  ! cfl(ruu*) <= cfl_max
             DO ji = 2, jpim1
-               z1d =  0.5_wp * r2dt / ( rn_fsp * e1t(ji,1,1))
+               z1d =  0.5_wp * r2dt / ( rn_fsp * e1t(ji,1))
                bmpu(ji,:,:) = MAX( z1d * ( MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:), 0._wp )    &
                   &                      - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) )  &
                   &                      / rpou(ji,:,:) - 1._wp,                                      0._wp ) / r2dt
@@ -347,7 +347,7 @@ CONTAINS
             bmpu(:,:,:) = z3d(:,:,:)
          CASE (2)  ! cfl(ru*) <= cfl_max
             DO ji = 1,jpim1
-               z1d =  r2dt / ( rn_fsp * e1t(ji,1,1))
+               z1d =  r2dt / ( rn_fsp * e1t(ji,1))
                bmpu(ji,:,:) =  MAX( ( z1d * rpou(ji,:,:)*ua(ji,:,:) / MIN(rpot(ji,:,:),rpot(ji+1,:,:)) - 1._wp ),   &
                   &                0._wp ) /r2dt 
             END DO
