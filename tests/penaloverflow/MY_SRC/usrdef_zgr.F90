@@ -154,7 +154,7 @@ CONTAINS
                      &           nT)
                END DO
             END DO
-         ELSE
+         ENDIF
       ELSE 
          rpot(:,:,:) = 1._wp
          IF ( ln_ovf ) THEN
@@ -166,7 +166,6 @@ CONTAINS
                WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = rn_abp
             END DO
          ENDIF
-         
       ENDIF
       !
       !
