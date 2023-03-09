@@ -27,7 +27,11 @@ MODULE dynadv_ubs
    PRIVATE
 
    REAL(wp), PARAMETER :: gamma1 = 1._wp/3._wp  ! =1/4 quick      ; =1/3  3rd order UBS
+# if defined key_ubsC2
+   REAL(wp), PARAMETER :: gamma2 = 0.           ! =0   2nd order  ; =1/32 4th order centred
+# else 
    REAL(wp), PARAMETER :: gamma2 = 1._wp/32._wp ! =0   2nd order  ; =1/32 4th order centred
+# endif
 
    PUBLIC   dyn_adv_ubs   ! routine called by step.F90
    PUBLIC   dyn_adv_up1   ! routine called by step.F90
