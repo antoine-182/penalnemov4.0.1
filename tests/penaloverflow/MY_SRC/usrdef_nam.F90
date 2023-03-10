@@ -125,8 +125,19 @@ CONTAINS
 #else
       WRITE(numout,*) ' key_ubs inactive'
 #endif
+      !
+#if defined key_ubsC2
+      WRITE(numout,*) ' key_ubsC2 active'
+#else
+      WRITE(numout,*) ' key_ubsC2 inactive'
+#endif
+      !
 #if defined key_bvp
       WRITE(numout,*) ' key_bvp active'
+      IF( rn_fsp<=0 .AND. (nn_fsp == 11 .OR. nn_fsp == 21 .OR. nn_fsp == 31 ) ) CALL ctl_stop( 'usr_def_nam: friction cannot be negative or nil with this choice of nn_fsp' )
+      !
+      IF( .NOT. ln_zco .AND. nn_abp <  1 ) CALL ctl_stop( 'usr_def_nam: choose nn_abp accordingly to ln_zco' )
+      IF( .NOT. ln_zps .AND. nn_abp >= 1 ) CALL ctl_stop( 'usr_def_nam: choose nn_abp accordingly to ln_zps' )
 #else
       WRITE(numout,*) ' key_bvp inactive'
 #endif
@@ -148,10 +159,6 @@ CONTAINS
       WRITE(numout,*) '                                              ln_ovf = ', ln_ovf
       WRITE(numout,*) '                                              nn_ovf = ', nn_ovf
       !
-      IF( rn_fsp<=0 .AND. (nn_fsp == 11 .OR. nn_fsp == 21 .OR. nn_fsp == 31 ) ) CALL ctl_stop( 'usr_def_nam: friction cannot be negative or nil with this choice of nn_fsp' )
-      !
-      IF( .NOT. ln_zco .AND. nn_abp <  1 ) CALL ctl_stop( 'usr_def_nam: choose nn_abp accordingly to ln_zco' )
-      IF( .NOT. ln_zps .AND. nn_abp >= 1 ) CALL ctl_stop( 'usr_def_nam: choose nn_abp accordingly to ln_zps' )
       !
    END SUBROUTINE usr_def_nam
 
