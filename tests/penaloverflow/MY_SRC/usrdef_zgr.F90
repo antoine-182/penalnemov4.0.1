@@ -504,15 +504,15 @@ CONTAINS
       INTEGER  ::  ji                              ! dummy loop variables
       REAL     ::  z1d, zxd, zf1, zet                   ! dummy variable
       REAL, DIMENSION(2) ::   zA, zB               ! coordinate array M(x,y)
-      REAL               ::   zhA, zhB, zxT, zhT       ! dummy variable
+      REAL               ::   zhA, zhB, zxT, zhT, r1_abp       ! dummy variable
       !!----------------------------------------------------------------------
       !
       !                                      !==  Preparatory work  ==!
       ! x in km , z in m
       zet = 1e-3 * rn_dx
-      zA(1) = plam(ki,kj)/zet - 0.5_wp ; zA(2) = pdepth(kk) + rn_dz
-      zB(1) = plam(ki,kj)/zet + 0.5_wp ; zB(2) = pdepth(kk) + rn_dz
-      zxT   = plam(ki,kj)/zet          ; zhT   = profilz(plam(ki,kj))
+      zA(1) = plam(ki,kj) - 0.5_wp * zet ; zA(2) = pdepth(kk) + rn_dz
+      zB(1) = plam(ki,kj) + 0.5_wp * zet ; zB(2) = pdepth(kk) + rn_dz
+      zxT   = plam(ki,kj) /zet           ; zhT   = profilz(plam(ki,kj))
       !zC(1) = plam(ki,kj) + 0.5_wp * zet ; zC(2) = pdepth(kk)
       !zD(1) = plam(ki,kj) - 0.5_wp * zet ; zD(2) = pdepth(kk)
       !
@@ -532,26 +532,27 @@ CONTAINS
       !  -- + ->| dx/6
       !    zA(1)                     zB(1)  
       !
+      r1_abp = 1._wp / REAL(nn_abp, wp)
       !
       SELECT CASE (jval)
          CASE (-1)
             zhA = profilz(zA(1)) ; zhB = profilz(zB(1))
             !
-            IF      ( zhB < pdepth(kk) + rn_dz )  THEN   ! full land
+            IF      ( zhB < pdepth(kk)         )  THEN   ! full land
                z1d = 0._wp
-            ELSE IF ( zhA > pdepth(kk)         )  THEN   ! full water
+            ELSE IF ( zhA > pdepth(kk) + rn_dz )  THEN   ! full water
                z1d = 1._wp
             ELSE                            ! porous land ! rectangle integration method
-               zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp)  ; z1d = 0._wp
+               zxd = zA(1) + zet * 0.5_wp * r1_abp   ; z1d = 0._wp
                DO ji = 1,nn_abp
                      !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
                      !IF(lwp) WRITE(numout,*) 'zhA',zhA,   'zh',profilz(zxd),'zhB',zhB
                      zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - pdepth(kk))/rn_dz) ) ! z rapporté à rn_dz
                      !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
-                     z1d = z1d + zf1   / REAL(nn_abp, wp)
+                     z1d = z1d + zf1 * r1_abp
                      !IF(lwp) WRITE(numout,*) 'z1d =',z1d
                      !
-                     zxd = zxd + 1._wp / REAL(nn_abp, wp)
+                     zxd = zxd + zet * r1_abp
                      !IF(lwp) WRITE(numout,*) 'zxd =',zxd
                END DO
             ENDIF
@@ -560,12 +561,12 @@ CONTAINS
             zhA = 0.5_wp * (profilz(plam(ki,kj) - zet ) + profilz(plam(ki,kj))) 
             zhB = 0.5_wp * (profilz(plam(ki,kj) + zet ) + profilz(plam(ki,kj))) 
             !
-            IF      ( zhB < pdepth(kk) + rn_dz )  THEN   ! full land
+            IF      ( zhB < pdepth(kk)         )  THEN   ! full land
                z1d = 0._wp
-            ELSE IF ( zhA > pdepth(kk)         )  THEN   ! full water
+            ELSE IF ( zhA > pdepth(kk) + rn_dz )  THEN   ! full water
                z1d = 1._wp
             ELSE                            ! porous land ! rectangle integration method
-               zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp)  ; z1d = 0._wp
+               zxd = zA(1)/zet + 0.5_wp * r1_abp  ; z1d = 0._wp
                DO ji = 1,nn_abp
                      !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
                      !IF(lwp) WRITE(numout,*) 'zhA',zhA,   'zh',profilz(zxd),'zhB',zhB
@@ -574,10 +575,10 @@ CONTAINS
                         &  ( zhT - (zhA - zhT) * MIN(zxd - zxT,0.)/2. + (zhB - zhT) * MAX(0., zxd - zxT)/2. - pdepth(kk) )  & 
                         &  /rn_dz )) ! z rapporté à rn_dz
                      !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
-                     z1d = z1d + zf1   / REAL(nn_abp, wp)
+                     z1d = z1d + zf1   * r1_abp
                      !IF(lwp) WRITE(numout,*) 'z1d =',z1d
                      !
-                     zxd = zxd + 1._wp / REAL(nn_abp, wp)
+                     zxd = zxd + 1._wp * r1_abp
                      !IF(lwp) WRITE(numout,*) 'zxd =',zxd
                END DO
             ENDIF
