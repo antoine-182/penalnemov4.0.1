@@ -154,7 +154,7 @@ CONTAINS
       WRITE(numout,*) '                                              nn_ovf = ', nn_ovf
       !
       !
-      IF (nn_abp == 2 ) nn_abp = jpk ; WRITE(numout,*) ' nn_abp>2 so nn_abp is set to jpk=',jpk
+      IF (nn_abp == 2 ) nn_abp = kpk ; WRITE(numout,*) ' nn_abp>2 so nn_abp is set to jpk=',kpk
    END SUBROUTINE usr_def_nam
 
    !!======================================================================
