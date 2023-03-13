@@ -142,16 +142,14 @@ CONTAINS
             DO ji = 1, jpi
                DO jk = 1, jpk
                   CALL zgr_pse (ji,2,jk,                  &
-                     &           glamt0,pdepw_1d,rpot,     & 
-                     &           nT)
+                     &           glamt0,pdepw_1d,rpot     )
                END DO
             END DO
          ELSE
             DO ji = 1, jpi
                DO jk = 1, jpk
                   CALL zgr_pse (ji,2,jk,                  &
-                     &           glamt,pdepw_1d,rpot,     & 
-                     &           nT)
+                     &           glamt,pdepw_1d,rpot,     )
                END DO
             END DO
          ENDIF
@@ -488,76 +486,110 @@ CONTAINS
 
    SUBROUTINE zgr_pse( ki, kj, kk,                  &
       &                plam,pdepth,prpo,            &
-      &                cpoint                       )
+      &                jval                  )
       !!----------------------------------------------------------------------
       !!                  ***  ROUTINE zgr_pse  ***
       !!
       !! ** Purpose :   Estimate the porosity field within the cell
       !!
-      !! ** Method  :   find the intersection points with the boundaries
-      !!                calculate the area land/water
+      !! ** Method  :   Integrate the depth profile known analitically
       !!----------------------------------------------------------------------
       INTEGER                   , INTENT(in   ) ::   ki, kj, kk    ! coordinate of the center of the cell
       REAL, DIMENSION(:,:)      , INTENT(in   ) ::   plam          ! horizontal position    [m]
       REAL, DIMENSION(:)        , INTENT(in   ) ::   pdepth        ! depth array            [m]
       REAL, DIMENSION(:,:,:)    , INTENT(inout) ::   prpo          ! porosity field
-      INTEGER                   , INTENT(in   ) ::   cpoint        ! type of point in the C-grid
-                                                                   ! T : 1, U : 2, V : 3, F : 4
+      INTEGER, OPTIONAL,VALUE                   ::   jval          ! style of integration 1:piecewise linear -1) analytical
+
       INTEGER  ::  ji                              ! dummy loop variables
-      REAL     ::  z1d, zxd, zf1                   ! dummy variable
-      REAL, DIMENSION(2) ::   zA, zB, zC, zD       ! coordinate array M(x,y)
-      REAL               ::   zhA, zhC, zhtt       ! dummy variable
+      REAL     ::  z1d, zxd, zf1, zet                   ! dummy variable
+      REAL, DIMENSION(2) ::   zA, zB               ! coordinate array M(x,y)
+      REAL               ::   zhA, zhB, zxT, zhT       ! dummy variable
       !!----------------------------------------------------------------------
       !
       !                                      !==  Preparatory work  ==!
-      SELECT CASE ( cpoint )                     !* Defining vertices
-      CASE ( nT )                                               ! x in km , z in m
-          zA(1) = plam(ki,kj) - 0.5_wp ; zA(2) = pdepth(kk) + rn_dz
-          zB(1) = plam(ki,kj) + 0.5_wp ; zB(2) = pdepth(kk) + rn_dz
-          zC(1) = plam(ki,kj) + 0.5_wp ; zC(2) = pdepth(kk)
-          zD(1) = plam(ki,kj) - 0.5_wp ; zD(2) = pdepth(kk)
-        CASE ( nU )                                             ! W coordinates
-          ! not working
-          zA(1) = plam(ki-1,kj) ; zA(2) = pdepth(kk+1)
-          zB(1) = plam(ki  ,kj) ; zB(2) = pdepth(kk+1)
-          zC(1) = plam(ki  ,kj) ; zC(2) = pdepth(kk  )
-          zD(1) = plam(ki-1,kj) ; zD(2) = pdepth(kk  )
-        CASE ( nW )                                             ! U coordinates
-          ! not working
-          zA(1) = plam(ki-1,kj) ; zA(2) = pdepth(kk+1)
-          zB(1) = plam(ki  ,kj) ; zB(2) = pdepth(kk+1)
-          zC(1) = plam(ki  ,kj) ; zC(2) = pdepth(kk  )
-          zD(1) = plam(ki-1,kj) ; zD(2) = pdepth(kk  )
-      END SELECT
+      ! x in km , z in m
+      zet = 1e-3 * rn_dx
+      zA(1) = plam(ki,kj)/zet - 0.5_wp ; zA(2) = pdepth(kk) + rn_dz
+      zB(1) = plam(ki,kj)/zet + 0.5_wp ; zB(2) = pdepth(kk) + rn_dz
+      zxT   = plam(ki,kj)/zet          ; zhT   = profilz(plam(ki,kj))
+      !zC(1) = plam(ki,kj) + 0.5_wp * zet ; zC(2) = pdepth(kk)
+      !zD(1) = plam(ki,kj) - 0.5_wp * zet ; zD(2) = pdepth(kk)
       !
-      !      A --------- B   + (z) and (kk)
-      !      |           |   | 
+      IF(.NOT. PRESENT(jval)) jval = 1 ! default, piecewise integrate analitycal profile
+      !
+      !      A --------- B -- pdepth(kk) + rn_dz
+      !      |           |    
       !      |     +     |   
-      !      |  (ki,kk)  |   
-      !      D --------- C   
+      !      |  T(ki,kk) |   
+      !      + --------- + -- pdepth(kk)  
+      !
+      !
+      !  -- + -----------o------------ + --   nn_abp = 1
+      !  -- + ---------->| dx/2
+      !  -- + -----o-----------o------ + --   nn_abp = 2
+      !  -- + ---->| dx/4
+      !  -- + --o--------o--------o--- + --   nn_abp = 3
+      !  -- + ->| dx/6
+      !    zA(1)                     zB(1)  
       !
       ! True height given by the profile
-      zhA = profilz(zA(1)) ; zhC = profilz(zC(1))
-      !
-      IF      ( zhC < zC(2) )  THEN   ! full land
-        z1d = 0._wp
-      ELSE IF ( zhA > zA(2) )  THEN   ! full water
-        z1d = 1._wp
-      ELSE                            ! porous land ! rectangle integration method
+      SELECT CASE (jval)
+         CASE (-1)
+         zhA = profilz(zA(1)) ; zhB = profilz(zB(1))
          !
-         !  -- + -----------o------------ + --   nn_abp = 1
-         !  -- + ---------->| dx/2
-         !  -- + -----o-----------o------ + --   nn_abp = 2
-         !  -- + ---->| dx/4
-         !  -- + --o--------o--------o--- + --   nn_abp = 3
-         !  -- + ->| dx/6
-         !    zA(1)                     zB(1)
+         IF      ( zhB < pdepth(kk) + rn_dz )  THEN   ! full land
+         z1d = 0._wp
+         ELSE IF ( zhA > pdepth(kk)         )  THEN   ! full water
+         z1d = 1._wp
+         ELSE                            ! porous land ! rectangle integration method
+            zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp)  ; z1d = 0._wp
+            DO ji = 1,nn_abp
+                  !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
+                  !IF(lwp) WRITE(numout,*) 'zhA',zhA,   'zh',profilz(zxd),'zhB',zhB
+                  zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - pdepth(kk))/rn_dz) ) ! z rapporté à rn_dz
+                  !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
+                  z1d = z1d + zf1   / REAL(nn_abp, wp)
+                  !IF(lwp) WRITE(numout,*) 'z1d =',z1d
+                  !
+                  zxd = zxd + 1._wp / REAL(nn_abp, wp)
+                  !IF(lwp) WRITE(numout,*) 'zxd =',zxd
+            END DO
          !
+         CASE (1) ! piecewise-linear integration
+         zhA = 0.5_wp * (profilz(plam(ki,kj) - zet ) + profilz(plam(ki,kj))) 
+         zhB = 0.5_wp * (profilz(plam(ki,kj) + zet ) + profilz(plam(ki,kj))) 
+         !
+         IF      ( zhB < pdepth(kk) + rn_dz )  THEN   ! full land
+         z1d = 0._wp
+         ELSE IF ( zhA > pdepth(kk)         )  THEN   ! full water
+         z1d = 1._wp
+         ELSE                            ! porous land ! rectangle integration method
          zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp)  ; z1d = 0._wp
+            DO ji = 1,nn_abp
+                  !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
+                  !IF(lwp) WRITE(numout,*) 'zhA',zhA,   'zh',profilz(zxd),'zhB',zhB
+                  zf1 = MIN(1._wp, MAX( 0._wp, (
+                        zhT - (zhA - zhT) * MIN(zxd - zxT,0.)/2. + (zhB - zhT) * MAX(0., zxd - zxT)/2.
+                        - pdepth(kk))/rn_dz) ) ! z rapporté à rn_dz
+                  !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
+                  z1d = z1d + zf1   / REAL(nn_abp, wp)
+                  !IF(lwp) WRITE(numout,*) 'z1d =',z1d
+                  !
+                  zxd = zxd + 1._wp / REAL(nn_abp, wp)
+                  !IF(lwp) WRITE(numout,*) 'zxd =',zxd
+            END DO
+         !
+         CASE DEFAULT
+            CALL ctl_stop( 'usr_def_zgr: choose an option jval of zgr_pse' )
+      END SELECT
+      !
+      
+         
          DO ji = 1,nn_abp
                !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
-               !IF(lwp) WRITE(numout,*) 'zhA',zhA,    'zh',profilz(zxd),'zhC',zhC
-               zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - zC(2))/rn_dz) ) ! z rapporté à rn_dz
+               !IF(lwp) WRITE(numout,*) 'zhA',zhA,    'zh',profilz(zxd),'zhB',zhB
+               ! interpolation 
+               zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - pdepth(kk))/rn_dz) ) ! z rapporté à rn_dz
                !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
                z1d = z1d + zf1   / REAL(nn_abp, wp)
                !IF(lwp) WRITE(numout,*) 'z1d =',z1d
@@ -565,8 +597,9 @@ CONTAINS
                zxd = zxd + 1._wp / REAL(nn_abp, wp)
                !IF(lwp) WRITE(numout,*) 'zxd =',zxd
          END DO
-         ! as profilz is downward, the integral does represent the water fraction
+         
       ENDIF
+      ! as profilz is downward, the integral does represent the water fraction
       !
       prpo(ki,kj,kk) =  MAX(z1d,rn_abp)
 
@@ -576,7 +609,7 @@ CONTAINS
       !!----------------------------------------------------------------------
       !!                 ***  ROUTINE profilz  ***
       !!
-      !! ** Purpose : topographic slope
+      !! ** Purpose : topographic slope at T depths. Interpolate at U,V points
       !!
       !! ** Method  :
       !!
