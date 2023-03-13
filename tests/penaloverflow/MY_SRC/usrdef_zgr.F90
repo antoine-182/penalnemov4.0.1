@@ -143,14 +143,14 @@ CONTAINS
             DO ji = 1, jpi
                DO jk = 1, jpk
                   CALL zgr_pse (ji,2,jk,                  &
-                     &           glamt0,pdepw_1d,rpot     )
+                     &           glamt0,pdepw_1d,rpot,1   )
                END DO
             END DO
          ELSE
             DO ji = 1, jpi
                DO jk = 1, jpk
                   CALL zgr_pse (ji,2,jk,                  &
-                     &           glamt,pdepw_1d,rpot    )
+                     &           glamt,pdepw_1d,rpot,1    )
                END DO
             END DO
          ENDIF
@@ -499,7 +499,7 @@ CONTAINS
       REAL, DIMENSION(:,:)      , INTENT(in   ) ::   plam          ! horizontal position    [m]
       REAL, DIMENSION(:)        , INTENT(in   ) ::   pdepth        ! depth array            [m]
       REAL, DIMENSION(:,:,:)    , INTENT(inout) ::   prpo          ! porosity field
-      INTEGER, OPTIONAL                         ::   jval          ! style of integration 1:piecewise linear -1) analytical
+      INTEGER, INTENT(in   )                    ::   jval          ! style of integration 1:piecewise linear -1) analytical
 
       INTEGER  ::  ji                              ! dummy loop variables
       REAL     ::  z1d, zxd, zf1, zet                   ! dummy variable
@@ -516,7 +516,6 @@ CONTAINS
       !zC(1) = plam(ki,kj) + 0.5_wp * zet ; zC(2) = pdepth(kk)
       !zD(1) = plam(ki,kj) - 0.5_wp * zet ; zD(2) = pdepth(kk)
       !
-      IF(.NOT. PRESENT(jval)) jval = 1 ! default, piecewise integrate analitycal profile
       !
       !      A --------- B -- pdepth(kk) + rn_dz
       !      |           |    
