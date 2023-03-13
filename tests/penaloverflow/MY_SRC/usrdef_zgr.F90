@@ -499,7 +499,7 @@ CONTAINS
       REAL, DIMENSION(:,:)      , INTENT(in   ) ::   plam          ! horizontal position    [m]
       REAL, DIMENSION(:)        , INTENT(in   ) ::   pdepth        ! depth array            [m]
       REAL, DIMENSION(:,:,:)    , INTENT(inout) ::   prpo          ! porosity field
-      INTEGER,          OPTIONAL, INTENT(in   ) ::   jval          ! style of integration 1:piecewise linear -1) analytical
+      INTEGER, OPTIONAL                         ::   jval          ! style of integration 1:piecewise linear -1) analytical
 
       INTEGER  ::  ji                              ! dummy loop variables
       REAL     ::  z1d, zxd, zf1, zet                   ! dummy variable
