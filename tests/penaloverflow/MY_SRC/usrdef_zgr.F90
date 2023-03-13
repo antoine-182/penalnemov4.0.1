@@ -137,11 +137,11 @@ CONTAINS
 #if defined key_bvp
       ! 1) Definition of the porosity field
       IF ( nn_abp >= 1 ) THEN 
-         IF(lwp) WRITE(numout,*) 'default profile : piecewise linear profile'
+         IF(lwp) WRITE(numout,*) 'default profile : piecewise linear profile (1)'
          rpot(:,:,:) = 1._wp
          IF ( ln_ovf ) THEN      ! preserving big steps
             DO ji = 1, jpi
-               IF (glamt0(ji,2) <= 21._wp) THEN 
+               IF (glamt0(ji,2) <= 17._wp) THEN 
                   WHERE ( pdept_1d(:) >= profilz(glamt0(ji,2)) ) rpot(ji,2,:) = rn_abp
                ELSE
                   DO jk = 1, jpk
@@ -152,7 +152,7 @@ CONTAINS
             END DO
          ELSE                    ! normal case
             DO ji = 1, jpi
-               IF (glamt(ji,2) <= 21._wp) THEN 
+               IF (glamt(ji,2) <= 17._wp) THEN   ! closest to zps initialisation
                   WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = rn_abp
                ELSE
                   DO jk = 1, jpk
