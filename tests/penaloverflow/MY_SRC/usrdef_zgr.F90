@@ -137,6 +137,7 @@ CONTAINS
 #if defined key_bvp
       ! 1) Definition of the porosity field
       IF ( nn_abp >= 1 ) THEN 
+         IF(lwp) WRITE(numout,*) 'default profile : piecewise linear profile'
          rpot(:,:,:) = 1._wp
          IF ( ln_ovf ) THEN
             DO ji = 1, jpi
@@ -532,73 +533,58 @@ CONTAINS
       !  -- + ->| dx/6
       !    zA(1)                     zB(1)  
       !
-      ! True height given by the profile
+      !
       SELECT CASE (jval)
          CASE (-1)
-         zhA = profilz(zA(1)) ; zhB = profilz(zB(1))
-         !
-         IF      ( zhB < pdepth(kk) + rn_dz )  THEN   ! full land
-         z1d = 0._wp
-         ELSE IF ( zhA > pdepth(kk)         )  THEN   ! full water
-         z1d = 1._wp
-         ELSE                            ! porous land ! rectangle integration method
-            zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp)  ; z1d = 0._wp
-            DO ji = 1,nn_abp
-                  !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
-                  !IF(lwp) WRITE(numout,*) 'zhA',zhA,   'zh',profilz(zxd),'zhB',zhB
-                  zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - pdepth(kk))/rn_dz) ) ! z rapporté à rn_dz
-                  !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
-                  z1d = z1d + zf1   / REAL(nn_abp, wp)
-                  !IF(lwp) WRITE(numout,*) 'z1d =',z1d
-                  !
-                  zxd = zxd + 1._wp / REAL(nn_abp, wp)
-                  !IF(lwp) WRITE(numout,*) 'zxd =',zxd
-            END DO
+            zhA = profilz(zA(1)) ; zhB = profilz(zB(1))
+            !
+            IF      ( zhB < pdepth(kk) + rn_dz )  THEN   ! full land
+               z1d = 0._wp
+            ELSE IF ( zhA > pdepth(kk)         )  THEN   ! full water
+               z1d = 1._wp
+            ELSE                            ! porous land ! rectangle integration method
+               zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp)  ; z1d = 0._wp
+               DO ji = 1,nn_abp
+                     !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
+                     !IF(lwp) WRITE(numout,*) 'zhA',zhA,   'zh',profilz(zxd),'zhB',zhB
+                     zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - pdepth(kk))/rn_dz) ) ! z rapporté à rn_dz
+                     !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
+                     z1d = z1d + zf1   / REAL(nn_abp, wp)
+                     !IF(lwp) WRITE(numout,*) 'z1d =',z1d
+                     !
+                     zxd = zxd + 1._wp / REAL(nn_abp, wp)
+                     !IF(lwp) WRITE(numout,*) 'zxd =',zxd
+               END DO
+            ENDIF
          !
          CASE (1) ! piecewise-linear integration
-         zhA = 0.5_wp * (profilz(plam(ki,kj) - zet ) + profilz(plam(ki,kj))) 
-         zhB = 0.5_wp * (profilz(plam(ki,kj) + zet ) + profilz(plam(ki,kj))) 
-         !
-         IF      ( zhB < pdepth(kk) + rn_dz )  THEN   ! full land
-         z1d = 0._wp
-         ELSE IF ( zhA > pdepth(kk)         )  THEN   ! full water
-         z1d = 1._wp
-         ELSE                            ! porous land ! rectangle integration method
-         zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp)  ; z1d = 0._wp
-            DO ji = 1,nn_abp
-                  !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
-                  !IF(lwp) WRITE(numout,*) 'zhA',zhA,   'zh',profilz(zxd),'zhB',zhB
-                  zf1 = MIN(1._wp, MAX( 0._wp, (
-                        zhT - (zhA - zhT) * MIN(zxd - zxT,0.)/2. + (zhB - zhT) * MAX(0., zxd - zxT)/2.
-                        - pdepth(kk))/rn_dz) ) ! z rapporté à rn_dz
-                  !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
-                  z1d = z1d + zf1   / REAL(nn_abp, wp)
-                  !IF(lwp) WRITE(numout,*) 'z1d =',z1d
-                  !
-                  zxd = zxd + 1._wp / REAL(nn_abp, wp)
-                  !IF(lwp) WRITE(numout,*) 'zxd =',zxd
-            END DO
+            zhA = 0.5_wp * (profilz(plam(ki,kj) - zet ) + profilz(plam(ki,kj))) 
+            zhB = 0.5_wp * (profilz(plam(ki,kj) + zet ) + profilz(plam(ki,kj))) 
+            !
+            IF      ( zhB < pdepth(kk) + rn_dz )  THEN   ! full land
+               z1d = 0._wp
+            ELSE IF ( zhA > pdepth(kk)         )  THEN   ! full water
+               z1d = 1._wp
+            ELSE                            ! porous land ! rectangle integration method
+               zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp)  ; z1d = 0._wp
+                  DO ji = 1,nn_abp
+                        !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
+                        !IF(lwp) WRITE(numout,*) 'zhA',zhA,   'zh',profilz(zxd),'zhB',zhB
+                        zf1 = MIN(1._wp, MAX( 0._wp, (
+                              zhT - (zhA - zhT) * MIN(zxd - zxT,0.)/2. + (zhB - zhT) * MAX(0., zxd - zxT)/2.
+                              - pdepth(kk))/rn_dz) ) ! z rapporté à rn_dz
+                        !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
+                        z1d = z1d + zf1   / REAL(nn_abp, wp)
+                        !IF(lwp) WRITE(numout,*) 'z1d =',z1d
+                        !
+                        zxd = zxd + 1._wp / REAL(nn_abp, wp)
+                        !IF(lwp) WRITE(numout,*) 'zxd =',zxd
+                  END DO
+            ENDIF
          !
          CASE DEFAULT
             CALL ctl_stop( 'usr_def_zgr: choose an option jval of zgr_pse' )
-      END SELECT
-      !
-      
-         
-         DO ji = 1,nn_abp
-               !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
-               !IF(lwp) WRITE(numout,*) 'zhA',zhA,    'zh',profilz(zxd),'zhB',zhB
-               ! interpolation 
-               zf1 = MIN(1._wp, MAX( 0._wp, (profilz(zxd) - pdepth(kk))/rn_dz) ) ! z rapporté à rn_dz
-               !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
-               z1d = z1d + zf1   / REAL(nn_abp, wp)
-               !IF(lwp) WRITE(numout,*) 'z1d =',z1d
-               !
-               zxd = zxd + 1._wp / REAL(nn_abp, wp)
-               !IF(lwp) WRITE(numout,*) 'zxd =',zxd
-         END DO
-         
-      ENDIF
+      END SELECT         
       ! as profilz is downward, the integral does represent the water fraction
       !
       prpo(ki,kj,kk) =  MAX(z1d,rn_abp)
