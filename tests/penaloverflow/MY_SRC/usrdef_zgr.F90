@@ -567,20 +567,20 @@ CONTAINS
                z1d = 1._wp
             ELSE                            ! porous land ! rectangle integration method
                zxd = zA(1) + 0.5_wp / REAL(nn_abp, wp)  ; z1d = 0._wp
-                  DO ji = 1,nn_abp
-                        !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
-                        !IF(lwp) WRITE(numout,*) 'zhA',zhA,   'zh',profilz(zxd),'zhB',zhB
-                        zf1 = MIN( 1._wp,                                                                                       &     
-                           &  MAX( 0._wp,                                                                                       &  
-                           &  ( zhT - (zhA - zhT) * MIN(zxd - zxT,0.)/2. + (zhB - zhT) * MAX(0., zxd - zxT)/2. - pdepth(kk) )  & 
-                           &  /rn_dz )) ! z rapporté à rn_dz
-                        !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
-                        z1d = z1d + zf1   / REAL(nn_abp, wp)
-                        !IF(lwp) WRITE(numout,*) 'z1d =',z1d
-                        !
-                        zxd = zxd + 1._wp / REAL(nn_abp, wp)
-                        !IF(lwp) WRITE(numout,*) 'zxd =',zxd
-                  END DO
+               DO ji = 1,nn_abp
+                     !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
+                     !IF(lwp) WRITE(numout,*) 'zhA',zhA,   'zh',profilz(zxd),'zhB',zhB
+                     zf1 = MIN( 1._wp,                                                                                      &     
+                        &  MAX( 0._wp,                                                                                      &  
+                        &  ( zhT - (zhA - zhT) * MIN(zxd - zxT,0.)/2. + (zhB - zhT) * MAX(0., zxd - zxT)/2. - pdepth(kk) )  & 
+                        &  /rn_dz )) ! z rapporté à rn_dz
+                     !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
+                     z1d = z1d + zf1   / REAL(nn_abp, wp)
+                     !IF(lwp) WRITE(numout,*) 'z1d =',z1d
+                     !
+                     zxd = zxd + 1._wp / REAL(nn_abp, wp)
+                     !IF(lwp) WRITE(numout,*) 'zxd =',zxd
+               END DO
             ENDIF
          !
          CASE DEFAULT

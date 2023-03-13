@@ -185,7 +185,7 @@ CONTAINS
                      DO ji = fs_2, fs_jpim1   ! vector opt. (ensure same order of calculation as below if wi=0.)
                         zzwi = - p2dt * zwt(ji,jj,jk  ) / e3w_n(ji,jj,jk  )
                         zzws = - p2dt * zwt(ji,jj,jk+1) / e3w_n(ji,jj,jk+1)
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
                         zwd(ji,jj,jk) = e3t_a(ji,jj,jk) - zzwi - zzws                                      &   !!diffusion
                            &                 + p2dt * ( MAX( rpow(ji,jj,jk  ) * wi(ji,jj,jk  ) , 0._wp )   &   !!transport vertical
                            &                          - MIN( rpow(ji,jj,jk+1) * wi(ji,jj,jk+1) , 0._wp )   )

@@ -141,12 +141,6 @@ CONTAINS
 #else
       WRITE(numout,*) ' key_bvp inactive'
 #endif
-      !
-#if defined key_w_bvp
-      WRITE(numout,*) ' key_w_bvp active'
-#else
-      WRITE(numout,*) ' key_w_bvp inactive'
-#endif
       WRITE(numout,*) '   Namelist namusr_def : Brinkman Penalisation Parameters'
       WRITE(numout,*) '                                              rn_abp = ', rn_abp
       WRITE(numout,*) '                                              nn_abp = ', nn_abp

@@ -114,7 +114,7 @@ CONTAINS
          DO jk = 1, jpkm1
             zun(:,:,jk) = e2u  (:,:) * e3u_n(:,:,jk) * un(:,:,jk)               ! eulerian transport only
             zvn(:,:,jk) = e1v  (:,:) * e3v_n(:,:,jk) * vn(:,:,jk)
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
             ! (u,v) penalised via e3
             zwn(:,:,jk) = e1e2t(:,:)                 * wn(:,:,jk) * rpow(:,:,jk)  !
 #else

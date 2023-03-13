@@ -206,7 +206,7 @@ CONTAINS
       END DO
       IF( ln_linssh ) THEN                         ! constant volume : advection through the surface
       !
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
       ! top flux set
       DO jj = 2, jpjm1
          DO ji = fs_2, fs_jpim1
@@ -431,7 +431,7 @@ CONTAINS
          END DO
       END DO
       !
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
       DO jk = 1, jpk            ! vertical volume fluxes penalised !
          zfw(:,:,jk) = 0.5_wp * e1e2t(:,:) * wn(:,:,jk) * rpow(:,:,jk)
       END DO

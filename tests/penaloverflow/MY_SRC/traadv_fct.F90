@@ -139,7 +139,7 @@ CONTAINS
                !!an si wi<0 (MIN), si wi>0 (MAX)
                !!an aussi CLF(tra) > CFL(dyn)
                !! Resolution implicite de la partie implicite pour le first guess
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
                   zwdia(ji,jj,jk) =  1._wp + p2dt * ( MAX( wi(ji,jj,jk  ) * rpow(ji,jj,jk  ), 0._wp )    &
                         &                           - MIN( wi(ji,jj,jk+1) * rpow(ji,jj,jk+1), 0._wp ) ) / e3t_a(ji,jj,jk)
                   zwinf(ji,jj,jk) =  p2dt * MIN( rpow(ji,jj,jk  ) * wi(ji,jj,jk  ) , 0._wp ) / e3t_a(ji,jj,jk)
@@ -219,7 +219,7 @@ CONTAINS
                       !!an zwi first guess avec UP1, necessaire pour implicit
                       !!   car il faut la temperature deja advecte avec lexplicit
                       !!   limplicit se repose sur la partie deja advecte explicitement
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
                      zfp_wk = ( wi(ji,jj,jk) + ABS( wi(ji,jj,jk) ) ) * rpow(ji,jj,jk)
                      zfm_wk = ( wi(ji,jj,jk) - ABS( wi(ji,jj,jk) ) ) * rpow(ji,jj,jk)
 #else
@@ -432,7 +432,7 @@ CONTAINS
             DO jk = 2, jpkm1        ! Interior value ( multiplied by wmask)
                DO jj = 2, jpjm1
                   DO ji = fs_2, fs_jpim1   ! vector opt.
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
                      zfp_wk = ( wi(ji,jj,jk) + ABS( wi(ji,jj,jk) ) ) * rpow(ji,jj,jk)
                      zfm_wk = ( wi(ji,jj,jk) - ABS( wi(ji,jj,jk) ) ) * rpow(ji,jj,jk)
 #else
@@ -471,7 +471,7 @@ CONTAINS
             DO jk = 2, jpkm1        ! Interior value ( multiplied by wmask)
                DO jj = 2, jpjm1
                   DO ji = fs_2, fs_jpim1   ! vector opt.
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
                      zfp_wk = ( wi(ji,jj,jk) + ABS( wi(ji,jj,jk) ) ) * rpow(ji,jj,jk)
                      zfm_wk = ( wi(ji,jj,jk) - ABS( wi(ji,jj,jk) ) ) * rpow(ji,jj,jk)
 #else
@@ -585,7 +585,7 @@ CONTAINS
       zwz(:,:, 1 ) = 0._wp
       zwz(:,:,jpk) = 0._wp   ;   zwx(:,:,jpk) = 0._wp   ;   zwy(:,:,jpk) = 0._wp      
       !
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
       !!an pun, pvn, pwn are transports and therefore already penalised (in traadv for pwn)
 #endif
       !

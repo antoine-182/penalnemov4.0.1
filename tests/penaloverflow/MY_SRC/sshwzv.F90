@@ -189,7 +189,7 @@ CONTAINS
          !          IF( ln_vvl_layer ) wn(:,:,:) = 0.e0
          DEALLOCATE( zhdiv )
       ELSE   ! z_star and linear free surface cases
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
         ! avec penalisation w peut devenir une vitesse penalisee
          DO jk = jpkm1, 1, -1                       ! integrate from the bottom the hor. divergence
             ! computation of w (actual velocity)
@@ -340,7 +340,7 @@ CONTAINS
                DO ji = 2, fs_jpim1   ! vector opt.
                   z1_e3t = 1._wp / e3t_n(ji,jj,jk)
                   ! 2*rdt and not r2dt (for restartability)
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
                   Cu_adv(ji,jj,jk) = 2._wp * rdt * ( ( MAX( rpow(ji,jj,jk  )*wn(ji,jj,jk  ) , 0._wp )              -   &
                      &                                 MIN( rpow(ji,jj,jk+1)*wn(ji,jj,jk+1) , 0._wp ) )                &
                      &                             + ( MAX( e2u(ji  ,jj)*e3u_n(ji  ,jj,jk)*un(ji  ,jj,jk), 0._wp ) -   &

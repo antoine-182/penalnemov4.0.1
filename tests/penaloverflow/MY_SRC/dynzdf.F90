@@ -224,7 +224,7 @@ CONTAINS
                      ze3ua =  ( 1._wp - r_vvl ) * e3u_n(ji,jj,jk) + r_vvl * e3u_a(ji,jj,jk)   ! after scale factor at U-point
                      zzwi = - zdt * ( avm(ji+1,jj,jk  ) + avm(ji,jj,jk  ) ) / ( ze3ua * e3uw_n(ji,jj,jk  ) ) * wumask(ji,jj,jk  )
                      zzws = - zdt * ( avm(ji+1,jj,jk+1) + avm(ji,jj,jk+1) ) / ( ze3ua * e3uw_n(ji,jj,jk+1) ) * wumask(ji,jj,jk+1)
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
                      !! advection implicite
                      zWui = ( rpow(ji,jj,jk  ) * wi(ji,jj,jk  ) + rpow(ji+1,jj,jk  ) * wi(ji+1,jj,jk  ) ) / ze3ua
                      zWus = ( rpow(ji,jj,jk+1) * wi(ji,jj,jk+1) + rpow(ji+1,jj,jk+1) * wi(ji+1,jj,jk+1) ) / ze3ua
@@ -244,7 +244,7 @@ CONTAINS
                zwi(ji,jj,1) = 0._wp
                ze3ua =  ( 1._wp - r_vvl ) * e3u_n(ji,jj,1) + r_vvl * e3u_a(ji,jj,1)
                zzws = - zdt * ( avm(ji+1,jj,2) + avm(ji  ,jj,2) ) / ( ze3ua * e3uw_n(ji,jj,2) ) * wumask(ji,jj,2)
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
                zWus = ( rpow(ji,jj,2) * wi(ji,jj,2) +  rpow(ji+1,jj,2) * wi(ji+1,jj,2) ) / ze3ua
 #else
                zWus = ( wi(ji  ,jj,2) +  wi(ji+1,jj,2) ) / ze3ua

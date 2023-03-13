@@ -76,7 +76,7 @@ CONTAINS
       DO jk = 2, jpkm1              ! Vertical momentum advection at level w and u- and v- vertical
          DO jj = 2, jpj                   ! vertical fluxes
             DO ji = fs_2, jpi             ! vector opt.
-#if defined key_bvp && key_w_bvp
+#if defined key_bvp
                zww(ji,jj) = 0.25_wp * e1e2t(ji,jj) * wn(ji,jj,jk) * rpow(ji,jj,jk)
 #else
                zww(ji,jj) = 0.25_wp * e1e2t(ji,jj) * wn(ji,jj,jk)
