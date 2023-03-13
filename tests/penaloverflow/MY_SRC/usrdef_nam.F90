@@ -136,8 +136,8 @@ CONTAINS
       WRITE(numout,*) ' key_bvp active'
       IF( rn_fsp<=0 .AND. (nn_fsp == 11 .OR. nn_fsp == 21 .OR. nn_fsp == 31 ) ) CALL ctl_stop( 'usr_def_nam: friction cannot be negative or nil with this choice of nn_fsp' )
       !
-      IF( .NOT. ln_zco .AND. nn_abp <  1 ) CALL ctl_stop( 'usr_def_nam: choose nn_abp accordingly to ln_zco' )
-      IF( .NOT. ln_zps .AND. nn_abp >= 1 ) CALL ctl_stop( 'usr_def_nam: choose nn_abp accordingly to ln_zps' )
+      IF( .NOT. ln_zco .AND. nn_abp <  0 ) CALL ctl_stop( 'usr_def_nam: choose nn_abp accordingly to ln_zco' )
+      IF( .NOT. ln_zps .AND. nn_abp >= 0 ) CALL ctl_stop( 'usr_def_nam: choose nn_abp accordingly to ln_zps' )
 #else
       WRITE(numout,*) ' key_bvp inactive'
 #endif

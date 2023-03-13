@@ -34,9 +34,9 @@
    rn_abp = 0.0001   ! alpha boundary parameter                                        [-]
    nn_abp = 2        ! Maximum number of vertical levels that can be displayed (should be superior to the maximum jump of levels)
                         ! (with ln_zco=T) = -1 replace continental slope by rn_abp
-                        !                 =  0  apply rn_abp at cell below
-                        ! (with ln_zps=T) =  1  partial cells (rn_abp min)
-                        !                 =  2  adapt to fit any slope
+                        !(with ln_zps=T)  =  0  apply rn_abp at cell below
+                        !                 =  1  partial cells (rn_abp min)
+                        !                 =  2  adapt to fit any slope (piecewise linear)
    nn_cnp =  1       ! definition of rpou and rpow
                         ! 0 halfsum 
                         ! 1 minimum  

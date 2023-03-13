@@ -303,23 +303,12 @@ CONTAINS
       !
       IF ( ld_zco ) THEN      !==  z-coordinate  ==!   (step-like topography)
          !
-#if defined key_bvp
-         IF (      nn_abp == -1) THEN 
-            k_bot(:,:) = jpkm1 * k_top(:,:)     ! here use k_top as a land mask
-         ELSE IF ( nn_abp == 0 ) THEN
-            k_bot(:,:) = jpkm1 ! last wet cell
-            DO jk = jpkm1, 1, -1
-               WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk,jpkm1)
-            END DO
-         ENDIF
-#else
-          !                                !* bottom ocean compute from the depth of grid-points
-          k_bot(:,:) = jpkm1 * k_top(:,:)     ! here use k_top as a land mask
-          DO jk = 1, jpkm1
-             WHERE( pdept_1d(jk) < zht(:,:) .AND. zht(:,:) <= pdept_1d(jk+1) )   k_bot(:,:) = jk * k_top(:,:)
-          END DO
-#endif
-         !                                !* horizontally uniform coordinate (reference z-co everywhere)
+         !                                !* bottom ocean compute from the depth of grid-points
+         k_bot(:,:) = jpkm1 * k_top(:,:)     ! here use k_top as a land mask
+         DO jk = 1, jpkm1
+            WHERE( pdept_1d(jk) < zht(:,:) .AND. zht(:,:) <= pdept_1d(jk+1) )   k_bot(:,:) = jk * k_top(:,:)
+         END DO
+-        !                                !* horizontally uniform coordinate (reference z-co everywhere)
          DO jk = 1, jpk
             pdept(:,:,jk) = pdept_1d(jk)
             pdepw(:,:,jk) = pdepw_1d(jk)
@@ -343,6 +332,11 @@ CONTAINS
          k_bot(:,:) = jpkm1 ! last wet cell
          DO jk = jpkm1, 1, -1
             WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk-1,jpkm1)
+         END DO
+      ELSE IF ( nn_abp == 0 ) THEN
+         k_bot(:,:) = jpkm1 ! last wet cell
+         DO jk = jpkm1, 1, -1
+            WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk,jpkm1)
          END DO
       ENDIF
       ! 3) penalisation of the vertical scale factors (done in domain.F90)
