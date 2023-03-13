@@ -149,7 +149,7 @@ CONTAINS
             DO ji = 1, jpi
                DO jk = 1, jpk
                   CALL zgr_pse (ji,2,jk,                  &
-                     &           glamt,pdepw_1d,rpot,     )
+                     &           glamt,pdepw_1d,rpot    )
                END DO
             END DO
          ENDIF
