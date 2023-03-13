@@ -308,7 +308,7 @@ CONTAINS
          DO jk = 1, jpkm1
             WHERE( pdept_1d(jk) < zht(:,:) .AND. zht(:,:) <= pdept_1d(jk+1) )   k_bot(:,:) = jk * k_top(:,:)
          END DO
--        !                                !* horizontally uniform coordinate (reference z-co everywhere)
+        !                                !* horizontally uniform coordinate (reference z-co everywhere)
          DO jk = 1, jpk
             pdept(:,:,jk) = pdept_1d(jk)
             pdepw(:,:,jk) = pdepw_1d(jk)
