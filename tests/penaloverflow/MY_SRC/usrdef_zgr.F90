@@ -143,14 +143,14 @@ CONTAINS
             DO ji = 1, jpi
                DO jk = 1, jpk
                   CALL zgr_pse (ji,2,jk,                 &
-                     &          glamt0,pdepw_1d,rpot,-1   )
+                     &          glamt0,pdepw_1d,rpot,1   )
                END DO
             END DO
          ELSE
             DO ji = 1, jpi
                DO jk = 1, jpk
                   CALL zgr_pse (ji,2,jk,                &
-                     &          glamt,pdepw_1d,rpot,-1   )
+                     &          glamt,pdepw_1d,rpot,1   )
                END DO
             END DO
          ENDIF
@@ -572,7 +572,7 @@ CONTAINS
                      !IF(lwp) WRITE(numout,*) 'zhA',zhA,   'zh',profilz(zxd),'zhB',zhB
                      zf1 = MIN( 1._wp,                                                                                      &     
                         &  MAX( 0._wp,                                                                                      &  
-                        &  ( zhT - (zhA - zhT) * MIN(zxd - zxT,0.)/2. + (zhB - zhT) * MAX(0., zxd - zxT)/2. - pdepth(kk) )  & 
+                        &  ( zhT - (zhA - zhT) * MIN(zxd - zxT,0.) + (zhB - zhT) * MAX(0., zxd - zxT)/ - pdepth(kk) )  & 
                         &  /rn_dz )) ! z rapporté à rn_dz 
                      !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
                      z1d = z1d + zf1   * r1_abp
