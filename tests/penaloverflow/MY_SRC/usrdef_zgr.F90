@@ -142,16 +142,14 @@ CONTAINS
             DO ji = 1, jpi
                DO jk = 1, jpk
                   CALL zgr_pse (ji,2,jk,                  &
-                     &           glamt0,pdepw_1d,rpot,     & 
-                     &           nT)
+                     &           glamt0,pdepw_1d,rpot     )
                END DO
             END DO
          ELSE
             DO ji = 1, jpi
                DO jk = 1, jpk
                   CALL zgr_pse (ji,2,jk,                  &
-                     &           glamt,pdepw_1d,rpot,     & 
-                     &           nT)
+                     &           glamt,pdepw_1d,rpot,     )
                END DO
             END DO
          ENDIF
@@ -488,7 +486,7 @@ CONTAINS
 
    SUBROUTINE zgr_pse( ki, kj, kk,                  &
       &                plam,pdepth,prpo,            &
-      &                cpoint,jval                  )
+      &                jval                  )
       !!----------------------------------------------------------------------
       !!                  ***  ROUTINE zgr_pse  ***
       !!
