@@ -572,7 +572,7 @@ CONTAINS
                      !IF(lwp) WRITE(numout,*) 'zhA',zhA,   'zh',profilz(zxd),'zhB',zhB
                      zf1 = MIN( 1._wp,                                                                                      &     
                         &  MAX( 0._wp,                                                                                      &  
-                        &  ( zhT - (zhA - zhT) * MIN(zxd - zxT,0.) + (zhB - zhT) * MAX(0., zxd - zxT)/ - pdepth(kk) )  & 
+                        &  ( zhT - (zhA - zhT) * MIN(zxd - zxT,0.) + (zhB - zhT) * MAX(0., zxd - zxT) - pdepth(kk) )  & 
                         &  /rn_dz )) ! z rapporté à rn_dz 
                      !IF(lwp) WRITE(numout,*) 'zf1 =',zf1
                      z1d = z1d + zf1   * r1_abp
