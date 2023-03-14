@@ -642,7 +642,7 @@ CONTAINS
       !
       f = atanh(2._wp * ( z - 500._wp ) - 1._wp ) * 7._wp + 40._wp
       !
-   ! END FUNCTION profilx
+   END FUNCTION profilx
     !
     FUNCTION profil_int(a,b)  RESULT(f)
        !!----------------------------------------------------------------------
