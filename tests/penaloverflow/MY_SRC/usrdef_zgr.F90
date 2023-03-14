@@ -585,8 +585,8 @@ CONTAINS
                   zx2 = zB(1)
                ENDIF
                IF(lwp) WRITE(numout,*) 'zx2=',zx2
-               zf1 = (zx1 - zA(1)) + profil_int(zx1,zx2) / rn_dz
-               IF(lwp) WRITE(numout,*) 'zf1=',zf1
+               z1d = (zx1 - zA(1)) + profil_int(zx1,zx2) / rn_dz
+               IF(lwp) WRITE(numout,*) 'z1d=',z1d
             ENDIF
          !
          CASE (1) ! piecewise-linear integration
