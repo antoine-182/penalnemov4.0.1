@@ -586,12 +586,13 @@ CONTAINS
                ENDIF
                IF(lwp) WRITE(numout,*) 'zx2=',zx2
                IF(lwp) WRITE(numout,*) 'hint=',profil_int(zx1,zx2)
-               IF(lwp) WRITE(numout,*) 'dept=',pdepth(kk)
-               IF(lwp) WRITE(numout,*) 'dh=',profil_int(zx1,zx2) - pdepth(kk)
-               z1d = zet * (profil_int(zx1,zx2) - pdepth(kk)) / rn_dz 
+               IF(lwp) WRITE(numout,*) 'dept=',(zB(1)-zx2)*(pdepth(kk)+rn_dz)
+               IF(lwp) WRITE(numout,*) 'dh=',pdepth(kk)*(zB(1)-zx1)
+               z1d = profil_int(zx1,zx2) + (zB(1)-zx2)*(pdepth(kk)+rn_dz) - pdepth(kk)*(zB(1)-zx1) ! volume of water within the cell
                IF(lwp) WRITE(numout,*) 'int=',z1d
-               z1d = z1d + zet * (zB(1)-zx2)   ! fraction of water
+               z1d = z1d / (zet * rn_dz)
                IF(lwp) WRITE(numout,*) 'res=',z1d
+               z1d = z1d / 
             ENDIF
          !
          CASE (1) ! piecewise-linear integration
