@@ -110,7 +110,7 @@ CONTAINS
             DO jj=1,jpj
                ! zht(ji,jj) = profilz(glamt(ji,jj))
                zht(ji,jj) = profil_int(glamt(ji,jj) - 1e-3*rn_dx/2.,  &
-                  &                    glamt(ji,jj) + 1e-3*rn_dx/2.   )
+                  &                    glamt(ji,jj) + 1e-3*rn_dx/2.   ) / rn_dx
             END DO
          END DO
       ENDIF
