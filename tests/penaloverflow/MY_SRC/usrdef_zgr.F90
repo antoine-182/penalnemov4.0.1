@@ -508,7 +508,7 @@ CONTAINS
       INTEGER  ::  ji                              ! dummy loop variables
       REAL     ::  z1d, zxd, zf1, zet                   ! dummy variable
       REAL, DIMENSION(2) ::   zA, zB               ! coordinate array M(x,y)
-      REAL               ::   zhA, zhB, zxT, zhT, r1_abp       ! dummy variable
+      REAL               ::   zhA, zhB, zxT, zhT, r1_abp, zx1, zx2       ! dummy variable
       !!----------------------------------------------------------------------
       !
       !                                      !==  Preparatory work  ==!
