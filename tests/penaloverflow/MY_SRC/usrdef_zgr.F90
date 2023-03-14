@@ -570,16 +570,23 @@ CONTAINS
                z1d = 1._wp
             ELSE                            ! porous land ! rectangle integration method
                IF ( zhA < pdepth(kk)         ) THEN 
+                  IF(lwp) WRITE(numout,*) 'f-1 zx1'
                   zx1 = profilx( pdepth(kk) )
                ELSE 
+                  IF(lwp) WRITE(numout,*) 'else zx1'
                   zx1 = zA(1)
                ENDIF 
+               IF(lwp) WRITE(numout,*) 'zx1=',zx1
                IF  ( zhB > pdepth(kk) + rn_dz ) THEN
+                  IF(lwp) WRITE(numout,*) 'f-1 zx2'
                   zx2 = profilx( pdepth(kk) + rn_dz )
                ELSE 
+                  IF(lwp) WRITE(numout,*) 'else zx2'
                   zx2 = zB(1)
                ENDIF
+               IF(lwp) WRITE(numout,*) 'zx2=',zx2
                zf1 = (zx1 - zA(1)) + profil_int(zx1,zx2) / rn_dz
+               IF(lwp) WRITE(numout,*) 'zf1=',zf1
             ENDIF
          !
          CASE (1) ! piecewise-linear integration
