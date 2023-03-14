@@ -585,7 +585,7 @@ CONTAINS
                   zx2 = zB(1)
                ENDIF
                IF(lwp) WRITE(numout,*) 'zx2=',zx2
-               z1d = (zx1 - zA(1)) + profil_int(zx1,zx2) / rn_dz
+               z1d = (zx1 - zA(1)) + profil_int(zx1,zx2) / (rn_dx*rn_dz)
                IF(lwp) WRITE(numout,*) 'z1d=',z1d
             ENDIF
          !
@@ -638,7 +638,7 @@ CONTAINS
       REAL             :: f   ! depth from the surface (in meters)
       !!----------------------------------------------------------------------
       !
-      f = + (  500. + 0.5 * 1500. * ( 1.0 + tanh( (x - 40.) / 7. ) )  )
+      f = 500. + 0.5 * 1500. * ( 1.0 + tanh( (x - 40.) / 7. ) )
       !
    END FUNCTION profilz
 
