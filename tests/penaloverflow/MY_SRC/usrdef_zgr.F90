@@ -585,7 +585,7 @@ CONTAINS
                   zx2 = zB(1)
                ENDIF
                IF(lwp) WRITE(numout,*) 'zx2=',zx2
-               z1d = (profil_int(zx1,zx2)/rn_dx - pdepth(kk)) / rn_dz + (zB(1)-zx2)   ! fraction of water
+               z1d = (profil_int(zx1,zx2) - pdepth(kk)) / rn_dz + (zB(1)-zx2)   ! fraction of water
                IF(lwp) WRITE(numout,*) 'z1d=',z1d
             ENDIF
          !
