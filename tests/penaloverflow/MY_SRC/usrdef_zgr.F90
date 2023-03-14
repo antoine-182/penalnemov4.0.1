@@ -585,7 +585,7 @@ CONTAINS
                   zx2 = zB(1)
                ENDIF
                IF(lwp) WRITE(numout,*) 'zx2=',zx2
-               z1d = profil_int(zx1,zx2) / (rn_dx*rn_dz) + (zB(1)-zx2)   ! fraction of water
+               z1d = (profil_int(zx1,zx2)/rn_dx - pdepth(kk)) / rn_dz + (zB(1)-zx2)   ! fraction of water
                IF(lwp) WRITE(numout,*) 'z1d=',z1d
             ENDIF
          !
@@ -674,7 +674,6 @@ CONTAINS
        REAL             :: f   ! result
        !!----------------------------------------------------------------------
        !
-       !f = + (  500. + 0.5 * 1500. * ( 1.0 + tanh( (x - 40.) / 7. ) )  )
        f = ( 500 + 0.5 * 1500. )*( b-a ) + 0.5*1500.*7.*LOG( COSH((40.-b)/7.)/COSH((40.-a)/7.) )
        !
     END FUNCTION 
