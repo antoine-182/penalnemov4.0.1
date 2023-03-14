@@ -585,6 +585,8 @@ CONTAINS
                   zx2 = zB(1)
                ENDIF
                IF(lwp) WRITE(numout,*) 'zx2=',zx2
+               IF(lwp) WRITE(numout,*) 'hint=',profil_int(zx1,zx2)
+               IF(lwp) WRITE(numout,*) 'dept=',pdepth(kk)
                IF(lwp) WRITE(numout,*) 'dh=',profil_int(zx1,zx2) - pdepth(kk)
                z1d = zet * (profil_int(zx1,zx2) - pdepth(kk)) / rn_dz 
                IF(lwp) WRITE(numout,*) 'int=',z1d
