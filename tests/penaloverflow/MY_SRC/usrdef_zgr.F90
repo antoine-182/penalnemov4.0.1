@@ -110,7 +110,7 @@ CONTAINS
             DO jj=1,jpj
                ! zht(ji,jj) = profilz(glamt(ji,jj))
                zht(ji,jj) = profil_int(glamt(ji,jj) - 1e-3*rn_dx/2.,  &
-                  &                    glamt(ji,jj) + 1e-3*rn_dx/2.   ) / rn_dx
+                  &                    glamt(ji,jj) + 1e-3*rn_dx/2.   )
             END DO
          END DO
       ENDIF
@@ -585,8 +585,11 @@ CONTAINS
                   zx2 = zB(1)
                ENDIF
                IF(lwp) WRITE(numout,*) 'zx2=',zx2
-               z1d = (profil_int(zx1,zx2) - pdepth(kk)) / rn_dz + (zB(1)-zx2)   ! fraction of water
-               IF(lwp) WRITE(numout,*) 'z1d=',z1d
+               IF(lwp) WRITE(numout,*) 'dh=',profil_int(zx1,zx2) - pdepth(kk)
+               z1d = zet * (profil_int(zx1,zx2) - pdepth(kk)) / rn_dz 
+               IF(lwp) WRITE(numout,*) 'int=',z1d
+               z1d = z1d + zet * (zB(1)-zx2)   ! fraction of water
+               IF(lwp) WRITE(numout,*) 'res=',z1d
             ENDIF
          !
          CASE (1) ! piecewise-linear integration
