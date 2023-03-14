@@ -108,7 +108,9 @@ CONTAINS
       ELSE
          DO ji=1,jpi
             DO jj=1,jpj
-               zht(ji,jj) = profilz(glamt(ji,jj))
+               ! zht(ji,jj) = profilz(glamt(ji,jj))
+               zht(ji,jj) = profil_int(glamt(ji,jj) - 1e-3*rn_dx/2.,  &
+                  &                    glamt(ji,jj) + 1e-3*rn_dx/2.   )
             END DO
          END DO
       ENDIF
@@ -146,7 +148,7 @@ CONTAINS
                ELSE
                   DO jk = 1, jpk
                      CALL zgr_pse (ji,2,jk,                 &
-                        &          glamt0,pdepw_1d,rpot,1   )
+                        &          glamt0,pdepw_1d,rpot, 0 )
                   END DO
                ENDIF
             END DO
@@ -157,7 +159,7 @@ CONTAINS
                ELSE
                   DO jk = 1, jpk
                      CALL zgr_pse (ji,2,jk,                &
-                        &          glamt,pdepw_1d,rpot,1   )
+                        &          glamt,pdepw_1d,rpot, 0 )
                   END DO
                ENDIF 
             END DO
@@ -538,13 +540,13 @@ CONTAINS
       !
       SELECT CASE (jval)
          CASE (-1)
-            zhA = profilz(zA(1)) ; zhB = profilz(zB(1))
+            zhA = profilz(zA(1)) ; zhB = profilz(zB(1))  ! analytical profile - rectangle integration method
             !
             IF      ( zhB < pdepth(kk)         )  THEN   ! full land
                z1d = 0._wp
             ELSE IF ( zhA > pdepth(kk) + rn_dz )  THEN   ! full water
                z1d = 1._wp
-            ELSE                            ! porous land ! rectangle integration method
+            ELSE                            ! porous land 
                zxd = zA(1) + zet * 0.5_wp * r1_abp   ; z1d = 0._wp
                DO ji = 1,nn_abp
                      !IF(lwp) WRITE(numout,*) 'xA =',zA(1),'zxd',zxd,'xC',zC(2)
@@ -557,6 +559,18 @@ CONTAINS
                      zxd = zxd + zet * r1_abp
                      !IF(lwp) WRITE(numout,*) 'zxd =',zxd
                END DO
+            ENDIF
+         !
+         CASE (0)
+            zhA = profilz(zA(1)) ; zhB = profilz(zB(1))  ! analytical profile - real integral
+            !
+            IF      ( zhB < pdepth(kk)         )  THEN   ! full land
+               z1d = 0._wp
+            ELSE IF ( zhA > pdepth(kk) + rn_dz )  THEN   ! full water
+               z1d = 1._wp
+            ELSE                            ! porous land ! rectangle integration method
+               zx1 = profilx( pdepth(kk) ) ; zx2 = profilx( pdepth(kk) + rn_dz )
+               zf1 = (zx1 - zA(1)) + profil_int(zx1,zx2) / rn_dz
             ENDIF
          !
          CASE (1) ! piecewise-linear integration
@@ -612,42 +626,41 @@ CONTAINS
       !
    END FUNCTION profilz
 
-   ! FUNCTION profilx(z)  RESULT(f)
-   !    !!----------------------------------------------------------------------
-   !    !!                 ***  ROUTINE profilz  ***
-   !    !!
-   !    !! ** Purpose : topographic slope
-   !    !!
-   !    !! ** Method  :
-   !    !!
-   !    !!----------------------------------------------------------------------
-   !    IMPLICIT NONE
-   !    REAL, INTENT(in) :: z
-   !    REAL             :: f   ! result
-   !    !!----------------------------------------------------------------------
-   !    !
-   !    f = atanh(2._wp * ( z - 500._wp ) - 1._wp ) * 7._wp + 40._wp
-   !    !
+   FUNCTION profilx(z)  RESULT(f)
+      !!----------------------------------------------------------------------
+      !!                 ***  ROUTINE profilz  ***
+      !!
+      !! ** Purpose : topographic slope
+      !!
+      !! ** Method  :
+      !!
+      !!----------------------------------------------------------------------
+      IMPLICIT NONE
+      REAL, INTENT(in) :: z
+      REAL             :: f   ! result
+      !!----------------------------------------------------------------------
+      !
+      f = atanh(2._wp * ( z - 500._wp ) - 1._wp ) * 7._wp + 40._wp
+      !
    ! END FUNCTION profilx
     !
-    FUNCTION profilz_(x,gridw)  RESULT(f)
+    FUNCTION profil_int(a,b)  RESULT(f)
        !!----------------------------------------------------------------------
        !!                 ***  ROUTINE profilz  ***
        !!
-       !! ** Purpose : topographic slope
+       !! ** Purpose : integral of profile
        !!
        !! ** Method  :
        !!
        !!----------------------------------------------------------------------
        IMPLICIT NONE
-       REAL, INTENT(in) :: x
-       REAL, DIMENSION(jpk), INTENT(in) :: gridw
+       REAL, INTENT(in) :: a,b
        REAL             :: f   ! result
        !!----------------------------------------------------------------------
        !
-       f = + (  500. + 0.5 * 1500. * ( 1.0 + tanh( (x - 40.) / 7. ) )  )
-       ! f = MIN(f,)
+       !f = + (  500. + 0.5 * 1500. * ( 1.0 + tanh( (x - 40.) / 7. ) )  )
+       f = ( 500 + 0.5 * 1500. )*( b-a ) * 0.5*1500.*7.*LOG( COSH((40-b)/7)/COSH((40-a)/7) )
        !
-    END FUNCTION profilz_
+    END FUNCTION 
    !!======================================================================
 END MODULE usrdef_zgr
