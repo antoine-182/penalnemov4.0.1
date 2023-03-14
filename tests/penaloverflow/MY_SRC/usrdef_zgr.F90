@@ -562,14 +562,23 @@ CONTAINS
             ENDIF
          !
          CASE (0)
-            zhA = profilz(zA(1)) ; zhB = profilz(zB(1))  ! analytical profile - real integral
+            zhA = profilz(zA(1)) ; zhB = profilz(zB(1))  ! analytical profile - exact integral
             !
-            IF      ( zhB < pdepth(kk)         )  THEN   ! full land
+            IF      ( zhB <= pdepth(kk)         )  THEN   ! full land
                z1d = 0._wp
-            ELSE IF ( zhA > pdepth(kk) + rn_dz )  THEN   ! full water
+            ELSE IF ( zhA >= pdepth(kk) + rn_dz )  THEN   ! full water
                z1d = 1._wp
             ELSE                            ! porous land ! rectangle integration method
-               zx1 = profilx( pdepth(kk) ) ; zx2 = profilx( pdepth(kk) + rn_dz )
+               IF ( zhA < pdepth(kk)         ) THEN 
+                  zx1 = profilx( pdepth(kk) )
+               ELSE 
+                  zx1 = zA(1)
+               ENDIF 
+               IF  ( zhB > pdepth(kk) + rn_dz ) THEN
+                  zx2 = profilx( pdepth(kk) + rn_dz )
+               ELSE 
+                  zx2 = zB(1)
+               ENDIF
                zf1 = (zx1 - zA(1)) + profil_int(zx1,zx2) / rn_dz
             ENDIF
          !
