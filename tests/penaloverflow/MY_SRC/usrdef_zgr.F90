@@ -165,6 +165,7 @@ CONTAINS
             END DO
          ENDIF
       ELSE 
+         ! nn_abp = 0 or -1 /= from integratle
          rpot(:,:,:) = 1._wp
          IF ( ln_ovf ) THEN
             DO ji = 1, jpi
@@ -570,29 +571,18 @@ CONTAINS
                z1d = 1._wp
             ELSE                            ! porous land ! rectangle integration method
                IF ( zhA < pdepth(kk)         ) THEN 
-                  IF(lwp) WRITE(numout,*) 'f-1 zx1'
                   zx1 = profilx( pdepth(kk) )
                ELSE 
-                  IF(lwp) WRITE(numout,*) 'else zx1'
                   zx1 = zA(1)
                ENDIF 
-               IF(lwp) WRITE(numout,*) 'zx1=',zx1
                IF  ( zhB > pdepth(kk) + rn_dz ) THEN
-                  IF(lwp) WRITE(numout,*) 'f-1 zx2'
                   zx2 = profilx( pdepth(kk) + rn_dz )
                ELSE 
-                  IF(lwp) WRITE(numout,*) 'else zx2'
                   zx2 = zB(1)
                ENDIF
-               IF(lwp) WRITE(numout,*) 'zx2=',zx2
-               IF(lwp) WRITE(numout,*) 'hint=',profil_int(zx1,zx2)
-               IF(lwp) WRITE(numout,*) 'dept=',(zB(1)-zx2)*(pdepth(kk)+rn_dz)
-               IF(lwp) WRITE(numout,*) 'dh=',pdepth(kk)*(zB(1)-zx1)
                !z1d = profil_int(zx1,zx2) + (zB(1)-zx2)*(pdepth(kk)+rn_dz) - pdepth(kk)*(zB(1)-zx1) ! volume of water within the cell
                z1d = (profil_int(zx1,zx2) - pdepth(kk)*(zx2-zx1))/rn_dz + (zB(1)-zx2) ! volume of water within the cell
-               IF(lwp) WRITE(numout,*) 'int=',z1d
                z1d = z1d * zet
-               IF(lwp) WRITE(numout,*) 'res=',z1d
             ENDIF
          !
          CASE (1) ! piecewise-linear integration
