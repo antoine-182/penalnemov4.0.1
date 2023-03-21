@@ -571,6 +571,7 @@ CONTAINS
        INTEGER , INTENT(in)                           :: ktype ! active friction based on (1) rux, (2) rx, (3) both
        REAL(wp), INTENT(out), DIMENSION(jpi,jpj,jpk) :: bmptab
        REAL(wp), DIMENSION(jpi,jpj,jpk) :: z3d, z3d2
+       INTEGER                          :: ji
        REAL(wp)                         :: z1d
        !!----------------------------------------------------------------------
        !
@@ -603,7 +604,7 @@ CONTAINS
          CASE (3) ! both
             z3d2(:,:,:) = friction_bmp(1)
             z3d (:,:,:) = friction_bmp(2)
-            bmptab(:,:,:) = = MAX( z3d2, z3d )
+            bmptab(:,:,:) = MAX( z3d2, z3d )
          CASE DEFAULT                                             ! error
             CALL ctl_stop('STOP','dynzdf friction_bmp: wrong value for nn_wef'  )
       END SELECT
