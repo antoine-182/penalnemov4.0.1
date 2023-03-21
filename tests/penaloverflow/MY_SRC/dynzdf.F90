@@ -558,7 +558,7 @@ CONTAINS
 
 
    !
-    FUNCTION friction_bmp(ktype)  RESULT(bmptab)
+    RECURSIVE FUNCTION friction_bmp(ktype)  RESULT(bmptab)
        !!----------------------------------------------------------------------
        !!                 ***  ROUTINE friction_bmp  ***
        !!
