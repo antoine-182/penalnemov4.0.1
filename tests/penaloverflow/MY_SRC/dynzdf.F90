@@ -594,8 +594,8 @@ CONTAINS
                   &              - MIN(rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) / rpot(ji,:,:) 
                z3d(ji,:,:) = MAX( z3d(ji,:,:) - 1._wp, 0._wp ) / r2dt
             END DO
-            z3d = z3d * umask ! 
-            DO ji = 2,jpi 
+            z3d = z3d * tmask ! 
+            DO ji = 1,jpim1
                WHERE ( rpou(ji,:,:) < 0.95_wp ) bmptab(ji,:,:) = MAX( z3d(ji,:,:), z3d(ji+1,:,:) )  ! flow + et -
             END DO
          CASE (3) ! both
