@@ -569,7 +569,7 @@ CONTAINS
        !!----------------------------------------------------------------------
        IMPLICIT NONE
        INTEGER , INTENT(in)                           :: ktype ! active friction based on (1) rux, (2) rx, (3) both
-       REAL(wp), INTENT(out), DIMENSIO N(jpi,jpj,jpk) :: bmptab
+       REAL(wp), INTENT(out), DIMENSION(jpi,jpj,jpk) :: bmptab
        REAL(wp), DIMENSION(jpi,jpj,jpk) :: z3d, z3d2
        REAL(wp)                         :: z1d
        !!----------------------------------------------------------------------
