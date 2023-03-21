@@ -244,7 +244,7 @@ CONTAINS
     !!------------------------ impermeability ---------------------!
     !------------------------- -------------- ---------------------!
     !
-   bmpu(:,:,:) = 1e-10 ; z3d3(:,:,:) = 1._wp
+   bmpu(:,:,:) = 1e-20 ; z3d3(:,:,:) = 1._wp
    ! indicator
    IF      ( nn_fsp == 2  .OR. nn_fsp == 3 ) THEN
       IF (nn_wef == 1) THEN                               ! scale on rux
