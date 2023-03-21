@@ -589,13 +589,13 @@ CONTAINS
                bmptab(ji,:,:) = MAX( z3d(ji-1,:,:), z3d(ji,:,:), z3d(ji+1,:,:) )  ! flow + et -
             END DO
          CASE (2)  ! cfl(ru*) <= cfl_max
-            DO ji = 1,jpim1
+            DO ji = 2,jpi
                z3d(ji,:,:) = z1d * MAX(rpou(ji  ,:,:)*ua(ji  ,:,:), 0._wp ) &
                   &              - MIN(rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) / rpot(ji,:,:) 
                z3d(ji,:,:) = MAX( z3d(ji,:,:) - 1._wp, 0._wp ) / r2dt
             END DO
             z3d = z3d * umask ! 
-            DO ji = 2,jpim1 
+            DO ji = 2,jpi 
                bmptab(ji,:,:) = MAX( z3d(ji-1,:,:), z3d(ji,:,:) )  ! flow + et -
             END DO
          CASE (3) ! both

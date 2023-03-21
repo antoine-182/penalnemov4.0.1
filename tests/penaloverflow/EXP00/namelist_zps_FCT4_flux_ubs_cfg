@@ -34,9 +34,10 @@
    rn_abp = 0.0001   ! alpha boundary parameter                                        [-]
    nn_abp = 2        ! Maximum number of vertical levels that can be displayed (should be superior to the maximum jump of levels)
                         ! (with ln_zco=T) = -1 replace continental slope by rn_abp
-                        !(with ln_zps=T)  =  0  apply rn_abp at cell below
+                        ! (with ln_zps=T) =  0  apply rn_abp at cell below
                         !                 =  1  partial cells (rn_abp min)
-                        !                 =  2  adapt to fit any slope (piecewise linear)
+                        !                 =  2  shaved cells (piecewise linear)
+   nn_smo = 0        ! smoothing of porosity 
    nn_cnp =  1       ! definition of rpou and rpow
                         ! 0 halfsum 
                         ! 1 minimum  
@@ -49,7 +50,7 @@
                         ! 1 based on rux >= 1
                         ! 2       or rx  >= 1
                         ! 3 based on both
-   nn_smo = 0        ! smoothing of porosity /z
+
 /
 !
 !-----------------------------------------------------------------------
@@ -201,13 +202,13 @@
 !-----------------------------------------------------------------------
 &namtra_adv    !   advection scheme for tracer                          (default: NO selection)
 !-----------------------------------------------------------------------
-   ln_traadv_up1 = .true. !  1st order upwind scheme
+   ln_traadv_up1 = .false. !  1st order upwind scheme
    ln_traadv_cen = .false. !  2nd order centered scheme
       nn_cen_h   =  2            !  =2/4, horizontal 2nd order CEN / 4th order CEN
       nn_cen_v   =  2            !  =2/4, vertical   2nd order CEN / 4th order COMPACT
-   ln_traadv_fct = .false. !  FCT scheme
-      nn_fct_h   =  3            !  =2/4, horizontal 2nd / 4th order
-      nn_fct_v   =  3            !  =2/4, vertical   2nd / COMPACT 4th order
+   ln_traadv_fct = .true. !  FCT scheme
+      nn_fct_h   =  4            !  =2/4, horizontal 2nd / 4th order
+      nn_fct_v   =  4            !  =2/4, vertical   2nd / COMPACT 4th order
    ln_traadv_mus = .false. !  MUSCL scheme
       ln_mus_ups = .false.       !  use upstream scheme near river mouths
    ln_traadv_ubs = .false. !  UBS scheme
@@ -245,9 +246,9 @@
    ln_dynadv_OFF  = .false. !  linear dynamics (no momentum advection)
    ln_dynadv_vec  = .false. !  vector form (T) or flux form (F)
    nn_dynkeg      = 0       ! scheme for grad(KE): =0   C2  ;  =1   Hollingsworth correction
-   ln_dynadv_up1  = .true. !  flux form - 1st order upwind scheme
+   ln_dynadv_up1  = .false. !  flux form - 1st order upwind scheme
    ln_dynadv_cen2 = .false. !  flux form - 2nd order centered scheme
-   ln_dynadv_ubs  = .false.  !  flux form - 3rd order upwind (UBS) scheme
+   ln_dynadv_ubs  = .true.  !  flux form - 3rd order upwind (UBS) scheme
 /
 !-----------------------------------------------------------------------
 &namdyn_vor    !   Vorticity / Coriolis scheme                          (default: NO selection)
