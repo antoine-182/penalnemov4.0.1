@@ -42,13 +42,13 @@
                         ! 1 minimum  
    rn_fsp = 0.05     ! friction parameter 1/epsilon of the permeability                [1/s]
       nn_fsp = 21    ! maximum friction
-                        ! 1 - implicit (before wi)
                         ! 2 - implicit (with wi)
                         ! 3 - operator splitting
-                     ! 11/21/31 -  rn_fsp max courant number
+                     ! 21/31 - adaptive, rn_fsp max courant number
       nn_wef = 1      ! active friction 
                         ! 1 based on rux >= 1
                         ! 2       or rx  >= 1
+                        ! 3 based on both
    nn_smo = 0        ! smoothing of porosity /z
 /
 !

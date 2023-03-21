@@ -133,29 +133,11 @@ CONTAINS
 !!an
 #if defined key_bvp
    SELECT CASE( nn_fsp )
-   CASE ( 1  ) ! cfl(psi*) = cfl_max
-      ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) )   
-   CASE ( 11 ) ! cfl(psi*) <= cfl_max
-      SELECT CASE ( nn_wef )
-      CASE (1) ! cfl(uu*) <= cfl_max
-         DO ji = 2, jpim1
-            z1d =  0.5_wp * r2dt / ( rn_fsp * rn_dx)
-            bmpu(ji,:,:) = MAX( z1d * MAX(ua(ji,:,:) + ua(ji+1,:,:),               & 
-               &                          ua(ji,:,:) + ua(ji-1,:,:)) - 1._wp, 0._wp ) /r2dt
-         END DO
-      CASE (2)  ! cfl(ru*) <= cfl_max
-         DO ji = 1,jpim1
-            z1d =  r2dt / ( rn_fsp * rn_dx)
-            bmpu(ji,:,:) =  MAX( ( z1d * rpou(ji,:,:)*ua(ji,:,:) / MIN(rpot(ji,:,:),rpot(ji+1,:,:)) - 1._wp ),   &
-               &                0._wp ) /r2dt 
-         END DO 
-      END SELECT
-      !
-      ua(:,:,:) = ua(:,:,:) / ( 1._wp  + r2dt * bmpu(:,:,:) )             ! so < rn_fsp = psimax (~0.3)
    CASE ( 3  ) 
       ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )   !!! Operator Splitting (1-s)r=1
    CASE ( 31 ) 
-      bmpu(:,:,:) =  MAX( ( 1._wp - rn_fsp * rn_dx / ( r2dt * ua(:,:,:) ) ) / r2dt, 0._wp ) ! r included in ua
+      bmpu(:,:,:) = friction_bmp(nn_wef)
+      ! MAX( ( 1._wp - rn_fsp * rn_dx / ( r2dt * ua(:,:,:) ) ) / r2dt, 0._wp ) ! r included in ua
       ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )
    END SELECT
 #endif
@@ -331,32 +313,12 @@ CONTAINS
          END DO
       END DO
      ELSE IF ( nn_fsp == 21 ) THEN ! same bmpu as nn_fsp=1
-      SELECT CASE ( nn_wef )   
-         CASE (1)  ! cfl(ruu*) <= cfl_max
-            DO ji = 2, jpim1
-               z1d =  0.5_wp * r2dt / ( rn_fsp * rn_dx)
-               bmpu(ji,:,:) = MAX( z1d * ( MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:), 0._wp )    &
-                  &                      - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) )  &
-                  &                      / rpou(ji,:,:) - 1._wp,                                      0._wp ) / r2dt
-            END DO
-            bmpu = bmpu * umask ! 
-            z3d(:,:,:) = 0._wp
-            DO ji = 2,jpim1 
-               z3d(ji,:,:) = MAX( bmpu(ji-1,:,:), bmpu(ji,:,:), bmpu(ji+1,:,:) )  ! flow + et -
-            END DO
-            bmpu(:,:,:) = z3d(:,:,:)
-         CASE (2)  ! cfl(ru*) <= cfl_max
-            DO ji = 1,jpim1
-               z1d =  r2dt / ( rn_fsp * rn_dx )
-               bmpu(ji,:,:) =  MAX( ( z1d * rpou(ji,:,:)*ua(ji,:,:) / MIN(rpot(ji,:,:),rpot(ji+1,:,:)) - 1._wp ),   &
-                  &                0._wp ) /r2dt 
-            END DO
-      END SELECT
+      !
+      bmpu(:,:,:) = friction_bmp(nn_wef)
       !
       DO jk= 1, jpkm1
          DO jj = 2, jpjm1
             DO ji = 2, jpim1
-               !bmpu(ji,jj,jk) =  MAX( ( ua(:,:,:) / rn_fsp - 1._wp ) / r2dt, 0._wp )  ! r included in ua
                zwd(ji,jj,jk) = zwd(ji,jj,jk) + r2dt * bmpu(ji,jj,jk)
             END DO
          END DO
@@ -593,6 +555,60 @@ CONTAINS
       IF( ln_timing )   CALL timing_stop('dyn_zdf')
       !
    END SUBROUTINE dyn_zdf
+
+
+   !
+    FUNCTION friction_bmp(ktype)  RESULT(bmptab)
+       !!----------------------------------------------------------------------
+       !!                 ***  ROUTINE friction_bmp  ***
+       !!
+       !! ** Purpose : estimate the minimum friction allowed with the penalisation
+       !!
+       !! ** Method  :
+       !!
+       !!----------------------------------------------------------------------
+       IMPLICIT NONE
+       INTEGER , INTENT(in)                           :: ktype ! active friction based on (1) rux, (2) rx, (3) both
+       REAL(wp), INTENT(out), DIMENSIO N(jpi,jpj,jpk) :: bmptab
+       REAL(wp), DIMENSION(jpi,jpj,jpk) :: z3d, z3d2
+       REAL(wp)                         :: z1d
+       !!----------------------------------------------------------------------
+       !
+       z3d(:,:,:) = 0._wp ; z1d =  r2dt / ( rn_fsp * rn_dx )
+       !
+       SELECT CASE ( ktype )   
+         CASE (1)  ! cfl(ruu*) <= cfl_max
+            DO ji = 2, jpim1
+               z3d(ji,:,:) = 0.5_wp * z1d * ( MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:), 0._wp )    &
+                  &                         - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) )  / rpou(ji,:,:)
+               z3d(ji,:,:) = MAX( z3d(ji,:,:) - 1._wp, 0._wp ) / r2dt
+            END DO
+            bmptab = z3d * umask ! 
+            z3d(:,:,:) = 0._wp
+            DO ji = 2,jpim1 
+               z3d(ji,:,:) = MAX( bmptab(ji-1,:,:), bmptab(ji,:,:), bmptab(ji+1,:,:) )  ! flow + et -
+            END DO
+            bmptab(:,:,:) = z3d(:,:,:)
+         CASE (2)  ! cfl(ru*) <= cfl_max
+            DO ji = 1,jpim1
+               z3d(ji,:,:) = z1d * MAX(rpou(ji  ,:,:)*ua(ji  ,:,:), 0._wp ) &
+                  &              - MIN(rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) / rpot(ji,:,:) 
+               z3d(ji,:,:) = MAX( z3d(ji,:,:) - 1._wp, 0._wp ) / r2dt
+            END DO
+            bmptab = z3d * umask ! 
+            DO ji = 2,jpim1 
+               z3d(ji,:,:) = MAX( bmptab(ji-1,:,:), bmptab(ji,:,:) )  ! flow + et -
+            END DO
+            bmptab(:,:,:) = z3d(:,:,:)
+         CASE (3) ! both
+            z3d2(:,:,:) = friction_bmp(1)
+            z3d (:,:,:) = friction_bmp(2)
+            bmptab(:,:,:) = = MAX( z3d2, z3d )
+         CASE DEFAULT                                             ! error
+            CALL ctl_stop('STOP','dynzdf friction_bmp: wrong value for nn_wef'  )
+      END SELECT
+       !
+    END FUNCTION 
 
    !!==============================================================================
 END MODULE dynzdf
