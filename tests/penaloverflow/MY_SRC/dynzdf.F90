@@ -569,13 +569,13 @@ CONTAINS
        !!----------------------------------------------------------------------
        IMPLICIT NONE
        INTEGER , INTENT(in)                           :: ktype ! active friction based on (1) rux, (2) rx, (3) both
-       REAL(wp), INTENT(out), DIMENSION(jpi,jpj,jpk) :: bmptab
+       REAL(wp), DIMENSION(jpi,jpj,jpk) :: bmptab
        REAL(wp), DIMENSION(jpi,jpj,jpk) :: z3d, z3d2
        INTEGER                          :: ji
        REAL(wp)                         :: z1d
        !!----------------------------------------------------------------------
        !
-       z3d(:,:,:) = 0._wp ; z1d =  r2dt / ( rn_fsp * rn_dx )
+       z3d(:,:,:) = 0._wp ; z1d =  r2dt / ( rn_fsp * rn_dx ) ; bmptab(:,:,:) = 0._wp
        !
        SELECT CASE ( ktype )   
          CASE (1)  ! cfl(ruu*) <= cfl_max
@@ -584,23 +584,20 @@ CONTAINS
                   &                         - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) )  / rpou(ji,:,:)
                z3d(ji,:,:) = MAX( z3d(ji,:,:) - 1._wp, 0._wp ) / r2dt
             END DO
-            bmptab = z3d * umask ! 
-            z3d(:,:,:) = 0._wp
+            z3d = z3d * umask ! 
             DO ji = 2,jpim1 
-               z3d(ji,:,:) = MAX( bmptab(ji-1,:,:), bmptab(ji,:,:), bmptab(ji+1,:,:) )  ! flow + et -
+               bmptab(ji,:,:) = MAX( z3d(ji-1,:,:), z3d(ji,:,:), z3d(ji+1,:,:) )  ! flow + et -
             END DO
-            bmptab(:,:,:) = z3d(:,:,:)
          CASE (2)  ! cfl(ru*) <= cfl_max
             DO ji = 1,jpim1
                z3d(ji,:,:) = z1d * MAX(rpou(ji  ,:,:)*ua(ji  ,:,:), 0._wp ) &
                   &              - MIN(rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) / rpot(ji,:,:) 
                z3d(ji,:,:) = MAX( z3d(ji,:,:) - 1._wp, 0._wp ) / r2dt
             END DO
-            bmptab = z3d * umask ! 
+            z3d = z3d * umask ! 
             DO ji = 2,jpim1 
-               z3d(ji,:,:) = MAX( bmptab(ji-1,:,:), bmptab(ji,:,:) )  ! flow + et -
+               bmptab(ji,:,:) = MAX( z3d(ji-1,:,:), z3d(ji,:,:) )  ! flow + et -
             END DO
-            bmptab(:,:,:) = z3d(:,:,:)
          CASE (3) ! both
             z3d2(:,:,:) = friction_bmp(1)
             z3d (:,:,:) = friction_bmp(2)
