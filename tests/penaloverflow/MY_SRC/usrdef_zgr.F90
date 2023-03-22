@@ -186,7 +186,7 @@ CONTAINS
       DO jx = 1, nn_smo
          IF(lwp) WRITE(numout,*) ' smooth  zer ',jx
             DO ji = 2,jpim1
-               IF (glamt(ji,2) > 17._wp) THEN     
+               IF (glamt(ji,2) > 17._wp ) THEN  ! preserve the shelf
                   DO jk = 1,jpk
                      DO jj = 1,jpj
                      z3d (ji,jj,jk) = 0.25_wp * rpot(ji-1,jj,jk)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji+1,jj,jk )
@@ -199,7 +199,7 @@ CONTAINS
          rpot(:,:,:) = z3d(:,:,:)
         !------------------------ smoothing along z ---------------------!
          DO ji = 1,jpi
-            IF (glamt(ji,2) > 17._wp) THEN     
+            IF (glamt(ji,2) > 17._wp .OR. glamt(ji,2) < 60._wp ) THEN    ! preserve the shelf stop the in the abyssal plain  
                DO jk = 2,jpkm1
                   DO jj = 1,jpj
                      z3d(ji,jj,jk)  = 0.25_wp * rpot(ji,jj,jk-1)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji,jj,jk+1)
