@@ -184,27 +184,31 @@ CONTAINS
       !------------------------ ----------------- ---------------------!
       z3d (:,:,:) = rpot(:,:,:)
       DO jx = 1, nn_smo
-        IF(lwp) WRITE(numout,*) ' smooth  zer ',jx
-        DO jk = 1,jpk
-            DO jj = 1,jpj
-              DO ji = 2,jpim1
-                z3d (ji,jj,jk) = 0.25_wp * rpot(ji-1,jj,jk)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji+1,jj,jk )
-                ! z3d (ji,jj,jk) = ( rpot(ji-1,jj,jk) + rpot(ji,jj,jk) + rpot(ji+1,jj,jk ) ) / 3._wp
-            END DO
-          END DO
-        END DO
-        CALL lbc_lnk( 'usrdef_zgr', z3d, 'T', 1._wp, kfillmode=jpfillcopy)
-        rpot(:,:,:) = z3d(:,:,:)
+         IF(lwp) WRITE(numout,*) ' smooth  zer ',jx
+            DO ji = 2,jpim1
+               IF (glamt(ji,2) > 17._wp) THEN     
+                  DO jk = 1,jpk
+                     DO jj = 1,jpj
+                     z3d (ji,jj,jk) = 0.25_wp * rpot(ji-1,jj,jk)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji+1,jj,jk )
+                     ! z3d (ji,jj,jk) = ( rpot(ji-1,jj,jk) + rpot(ji,jj,jk) + rpot(ji+1,jj,jk ) ) / 3._wp
+                     END DO
+                  END DO
+               ENDIF
+         END DO
+         CALL lbc_lnk( 'usrdef_zgr', z3d, 'T', 1._wp, kfillmode=jpfillcopy)
+         rpot(:,:,:) = z3d(:,:,:)
         !------------------------ smoothing along z ---------------------!
-        DO jk = 2,jpkm1
-          DO jj = 1,jpj
-            DO ji = 1,jpi
-                z3d(ji,jj,jk)  = 0.25_wp * rpot(ji,jj,jk-1)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji,jj,jk+1)
-                ! z3d(ji,jj,jk)  = ( rpot(ji,jj,jk-1) + rpot(ji,jj,jk) + rpot(ji,jj,jk+1) ) / 3._wp
-            END DO
-          END DO
-        END DO
-        rpot(:,:,:) = z3d(:,:,:)
+         DO ji = 1,jpi
+            IF (glamt(ji,2) > 17._wp) THEN     
+               DO jk = 2,jpkm1
+                  DO jj = 1,jpj
+                     z3d(ji,jj,jk)  = 0.25_wp * rpot(ji,jj,jk-1)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji,jj,jk+1)
+                     ! z3d(ji,jj,jk)  = ( rpot(ji,jj,jk-1) + rpot(ji,jj,jk) + rpot(ji,jj,jk+1) ) / 3._wp
+                  END DO
+               END DO
+            ENDIF
+         END DO
+         rpot(:,:,:) = z3d(:,:,:)
       END DO
       !
       ! CALL lbc_lnk( 'usrdef_zgr', rpot, 'T', 1._wp)
