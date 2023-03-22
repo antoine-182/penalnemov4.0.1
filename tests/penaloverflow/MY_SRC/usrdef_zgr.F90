@@ -99,6 +99,7 @@ CONTAINS
       !
       !
       ! zht(:,:) = + (  500. + 0.5 * 1500. * ( 1.0 + tanh( (glamt(:,:) - 40.) / 7. ) )  )
+
       IF ( ln_ovf ) THEN
          DO ji=1,jpi
             DO jj=1,jpj
@@ -108,9 +109,12 @@ CONTAINS
       ELSE
          DO ji=1,jpi
             DO jj=1,jpj
-               ! zht(ji,jj) = profilz(glamt(ji,jj))
+#if defined key_bvp
+               zht(ji,jj) = profilz(glamt(ji,jj))
+#else
                zht(ji,jj) = profil_int(glamt(ji,jj) - 1e-3*rn_dx/2.,  &
                   &                    glamt(ji,jj) + 1e-3*rn_dx/2.   )
+#endif
             END DO
          END DO
       ENDIF
@@ -147,8 +151,8 @@ CONTAINS
                   WHERE ( pdept_1d(:) >= profilz(glamt0(ji,2)) ) rpot(ji,2,:) = rn_abp
                ELSE
                   DO jk = 1, jpk
-                     CALL zgr_pse (ji,2,jk,                 &
-                        &          glamt0,pdepw_1d,rpot, 0 )
+                     CALL zgr_pse(ji,2,jk,                 &
+                        &         glamt0,pdepw_1d,rpot, 0 )
                   END DO
                ENDIF
             END DO
