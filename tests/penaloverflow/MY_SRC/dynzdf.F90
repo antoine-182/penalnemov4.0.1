@@ -575,12 +575,12 @@ CONTAINS
        REAL(wp)                         :: z1d
        !!----------------------------------------------------------------------
        !
-       z3d(:,:,:) = 0._wp ; z1d =  r2dt / ( rn_fsp * rn_dx ) ; bmptab(:,:,:) = 0._wp
+       z3d(:,:,:) = 0._wp ; bmptab(:,:,:) = 0._wp ; z1d =  r2dt / ( rn_fsp * rn_dx ) 
        !
        SELECT CASE ( ktype )   
          CASE (1)  ! cfl(ruu*) <= cfl_max
             DO ji = 2, jpim1
-               z3d(ji,:,:) = 0.5_wp * z1d * ( MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:), 0._wp )    &
+               z3d(ji,:,:) = 0.5_wp * z1d * ( MAX(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji+1,:,:)*ua(ji+1,:,:), 0._wp ) &
                   &                         - MIN(rpou(ji,:,:)*ua(ji,:,:) + rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) )  / rpou(ji,:,:)
                z3d(ji,:,:) = MAX( z3d(ji,:,:) - 1._wp, 0._wp ) / r2dt
             END DO
@@ -590,8 +590,8 @@ CONTAINS
             END DO
          CASE (2)  ! cfl(ru*) <= cfl_max
             DO ji = 2,jpi
-               z3d(ji,:,:) = z1d * MAX(rpou(ji  ,:,:)*ua(ji  ,:,:), 0._wp ) &
-                  &              - MIN(rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) / rpot(ji,:,:) 
+               z3d(ji,:,:) = z1d * ( MAX(rpou(ji  ,:,:)*ua(ji  ,:,:), 0._wp ) &
+                  &                - MIN(rpou(ji-1,:,:)*ua(ji-1,:,:), 0._wp ) ) / rpot(ji,:,:) 
                z3d(ji,:,:) = MAX( z3d(ji,:,:) - 1._wp, 0._wp ) / r2dt
             END DO
             z3d = z3d * tmask ! 
