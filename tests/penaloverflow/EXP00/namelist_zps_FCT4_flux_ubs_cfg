@@ -31,14 +31,14 @@
   ln_ovf = .false.         !  if true apply the same bathy as nn_ovf*rn_dx
       nn_ovf = 1
   !
-   rn_abp = 0.0001   ! alpha boundary parameter                                        [-]
+   rn_abp = 0.001   ! alpha boundary parameter                                        [-]
    nn_abp = 2        ! Maximum number of vertical levels that can be displayed (should be superior to the maximum jump of levels)
                         ! (with ln_zco=T) = -1 replace continental slope by rn_abp
                         ! (with ln_zps=T) =  0  apply rn_abp at cell below
                         !                 =  1  partial cells (rn_abp min)
                         !                 =  2  shaved cells (piecewise linear)
    nn_smo = 0        ! smoothing of porosity 
-   nn_cnp =  1       ! definition of rpou and rpow
+   nn_cnp = 0        ! definition of rpou and rpow
                         ! 0 halfsum 
                         ! 1 minimum  
    rn_fsp = 0.05     ! friction parameter 1/epsilon of the permeability                [1/s]
@@ -174,6 +174,15 @@
    ln_loglayer = .false.    !  logarithmic drag: Cd = vkarmn/log(z/z0) |U|
    !
    ln_drgimp  = .true.     !  implicit top/bottom friction flag
+/
+!-----------------------------------------------------------------------
+&nambbl        !   bottom boundary layer scheme                         (default: OFF)
+!-----------------------------------------------------------------------
+   ln_trabbl   = .false.   !  Bottom Boundary Layer parameterisation flag
+      nn_bbl_ldf  =  1        !  diffusive bbl (=1)   or not (=0)
+      nn_bbl_adv  =  2        !  advective bbl (=1/2) or not (=0)
+      rn_ahtbbl   =  1000.    !  lateral mixing coefficient in the bbl  [m2/s]
+      rn_gambbl   =  10.      !  advective bbl coefficient                 [s]
 /
 !!======================================================================
 !!                        Tracer (T-S) namelists                      !!

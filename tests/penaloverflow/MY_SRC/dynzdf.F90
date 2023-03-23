@@ -586,7 +586,7 @@ CONTAINS
             END DO
             z3d = z3d * umask ! 
             DO ji = 2,jpim1 
-               WHERE ( rpou(ji,:,:) < 0.95_wp ) bmptab(ji,:,:) = MAX( z3d(ji-1,:,:), z3d(ji,:,:), z3d(ji+1,:,:) )  ! flow + et -
+               WHERE ( rpou(ji,:,:) < 0.9_wp ) bmptab(ji,:,:) = MAX( z3d(ji-1,:,:), z3d(ji,:,:), z3d(ji+1,:,:) )  ! flow + et -
             END DO
          CASE (2)  ! cfl(ru*) <= cfl_max
             DO ji = 2,jpi
@@ -596,16 +596,17 @@ CONTAINS
             END DO
             z3d = z3d * tmask ! 
             DO ji = 1,jpim1
-               WHERE ( rpou(ji,:,:) < 0.95_wp ) bmptab(ji,:,:) = MAX( z3d(ji,:,:), z3d(ji+1,:,:) )  ! flow + et -
+               WHERE ( rpou(ji,:,:) < 0.9_wp ) bmptab(ji,:,:) = MAX( z3d(ji,:,:), z3d(ji+1,:,:) )  ! flow + et -
             END DO
          CASE (3) ! both
             z3d2(:,:,:) = friction_bmp(1)
             z3d (:,:,:) = friction_bmp(2)
-            bmptab(:,:,:) = MAX( z3d2, z3d )
+            bmptab(:,:,:) = MAX( z3d2, z3d ) 
          CASE DEFAULT                                             ! error
             CALL ctl_stop('STOP','dynzdf friction_bmp: wrong value for nn_wef'  )
       END SELECT
        !
+       bmptab = bmptab * umask
     END FUNCTION 
 
    !!==============================================================================

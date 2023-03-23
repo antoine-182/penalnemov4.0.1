@@ -67,7 +67,6 @@ MODULE oce
 
    !! Energy budget of the leads (open water embedded in sea ice)
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:)   ::   fraqsr_1lev        !: fraction of solar net radiation absorbed in the first ocean level [-]
-#if defined key_bvp
          !! Penalisation fields
          !! ------------
          REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:)     ::   rpot            !: porosity      (phi)    [-]
@@ -77,8 +76,6 @@ MODULE oce
          REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:)     ::   r1_rpou         !
          REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:)     ::   r1_rpow         !
          REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:)     ::   bmpu            !: U - permeability   (sigma)  [1/s]
-#endif
-
 
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
@@ -124,11 +121,9 @@ CONTAINS
 #if defined key_agrif
       ALLOCATE( ub2_i_b(jpi,jpj), vb2_i_b(jpi,jpj)                                  , STAT=ierr(6) )
 #endif
-#if defined key_bvp
       ALLOCATE(     rpot(jpi,jpj,jpk),    rpou(jpi,jpj,jpk),    rpow(jpi,jpj,jpk),   &
          &       r1_rpot(jpi,jpj,jpk), r1_rpou(jpi,jpj,jpk), r1_rpow(jpi,jpj,jpk),   &
          &                                bmpu(jpi,jpj,jpk),                         STAT=ierr(7) )
-#endif
          !
       oce_alloc = MAXVAL( ierr )
       IF( oce_alloc /= 0 )   CALL ctl_stop( 'STOP', 'oce_alloc: failed to allocate arrays' )
