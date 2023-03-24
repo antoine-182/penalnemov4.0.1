@@ -266,7 +266,7 @@ CONTAINS
      END DO
       ! no need to call  lbc_lnk
       !
-      z1d = 1._wp/32._wp
+      !z1d = 1._wp/32._wp
       DO jk = 2, jpkm1
          DO jj = 1, jpjm1
             DO ji = 1, fs_jpim1   ! vector opt.
@@ -280,15 +280,15 @@ CONTAINS
                ELSE                      ;    zl_v = zlv_vw( ji,jj,jk-1,1)
                ENDIF
                !                      UBS = [C2-(gamma2)moy(laplacien) = C4]*C2 - [upstream=(gamma1)up]
-               zfu_uw(ji  ,jj  ,jk) = ( zfuk - z1d * ( zlw_uw(ji+1,jj,jk,2) + zlw_uw(ji,jj,jk,2) ) )   & ! UW nodes
-                  &                * ( un(ji,jj,jk) + un(ji,jj,jk-1) - gamma1 * zl_u )
-               zfv_vw(ji  ,jj  ,jk) = ( zfvk - z1d * ( zlw_vw(ji,jj+1,jk,2) + zlw_vw(ji,jj,jk,2) ) )   & ! VW nodes
-                  &                 * ( vn(ji,jj,jk) + vn(ji,jj,jk-1) - gamma1 * zl_v )
+               !zfu_uw(ji  ,jj  ,jk) = ( zfuk - z1d * ( zlw_uw(ji+1,jj,jk,2) + zlw_uw(ji,jj,jk,2) ) )   & ! UW nodes
+               !   &                * ( un(ji,jj,jk) + un(ji,jj,jk-1) - gamma1 * zl_u )
+               !zfv_vw(ji  ,jj  ,jk) = ( zfvk - z1d * ( zlw_vw(ji,jj+1,jk,2) + zlw_vw(ji,jj,jk,2) ) )   & ! VW nodes
+               !   &                 * ( vn(ji,jj,jk) + vn(ji,jj,jk-1) - gamma1 * zl_v )
                !                          C2 - upstream
-               ! zfu_uw(ji  ,jj  ,jk) = ( zfuk                    )   &          ! UW nodes
-               !    &                * ( un(ji,jj,jk) + un(ji,jj,jk-1) - gamma1 * zl_u )
-               ! zfv_vw(ji  ,jj  ,jk) = ( zfvk                    )   &          ! VW nodes
-               !    &                 * ( vn(ji,jj,jk) + vn(ji,jj,jk-1) - gamma1 * zl_v )
+               zfu_uw(ji  ,jj  ,jk) = ( zfuk                    )   &          ! UW nodes
+                  &                * ( un(ji,jj,jk) + un(ji,jj,jk-1) - gamma1 * zl_u )
+               zfv_vw(ji  ,jj  ,jk) = ( zfvk                    )   &          ! VW nodes
+                  &                 * ( vn(ji,jj,jk) + vn(ji,jj,jk-1) - gamma1 * zl_v )
             END DO
          END DO
       END DO
