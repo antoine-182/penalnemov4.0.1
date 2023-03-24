@@ -585,6 +585,7 @@ CONTAINS
                z3d(ji,:,:) = MAX( z3d(ji,:,:) - 1._wp, 0._wp ) / r2dt
             END DO
             z3d = z3d * umask ! 
+            CALL lbc_lnk( 'dynzdf', z3d, 'U', 1. )
             DO ji = 2,jpim1 
                WHERE ( rpou(ji,:,:) < 0.9_wp ) bmptab(ji,:,:) = MAX( z3d(ji-1,:,:), z3d(ji,:,:), z3d(ji+1,:,:) )  ! flow + et -
             END DO
@@ -595,6 +596,7 @@ CONTAINS
                z3d(ji,:,:) = MAX( z3d(ji,:,:) - 1._wp, 0._wp ) / r2dt
             END DO
             z3d = z3d * tmask ! 
+            CALL lbc_lnk( 'dynzdf', z3d, 'T', 1. )
             DO ji = 1,jpim1
                WHERE ( rpou(ji,:,:) < 0.9_wp ) bmptab(ji,:,:) = MAX( z3d(ji,:,:), z3d(ji+1,:,:) )  ! flow + et -
             END DO

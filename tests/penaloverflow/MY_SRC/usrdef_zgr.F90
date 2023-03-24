@@ -212,6 +212,7 @@ CONTAINS
                END DO
             ENDIF
          END DO
+         CALL lbc_lnk( 'usrdef_zgr', z3d, 'T', 1._wp, kfillmode=jpfillcopy)
          rpot(:,:,:) = z3d(:,:,:)
       END DO
       !
