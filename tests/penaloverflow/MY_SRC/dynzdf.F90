@@ -29,6 +29,7 @@ MODULE dynzdf
    USE timing         ! Timing
 !!an
    USE usrdef_nam, ONLY : nn_fsp, rn_fsp, nn_wef, rn_dx    ! User defined : namelist variables
+   USE lbclnk         ! ocean lateral boundary conditions (or mpp link)
 !!
    IMPLICIT NONE
    PRIVATE
