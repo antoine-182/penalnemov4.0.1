@@ -31,22 +31,22 @@
   ln_ovf = .false.         !  if true apply the same bathy as nn_ovf*rn_dx
       nn_ovf = 1
   !
-   rn_abp = 0.001    ! alpha boundary parameter                                        [-]
-   nn_abp = 2        ! Maximum number of vertical levels that can be displayed (should be superior to the maximum jump of levels)
-                        ! (with ln_zco=T) = -1 replace continental slope by rn_abp
-                        ! (with ln_zps=T) =  0  apply rn_abp at cell below
-                        !                 =  1  partial cells (rn_abp min)
-                        !                 =  2  shaved cells (piecewise linear)
+   rn_abp = 0.01    ! lowest porosity in the penalised region                                      [-]
+   nn_abp = 2        ! representation method (by default with ln_zps=T)
+                        ! (with ln_zco=T) = -1  whole sill is porous at minimum porosity (rn_abp) - unmasked
+                        ! (-)             =  0  last wet cell of the sill is porous (rn_abp) - masked under
+                        ! (-)             =  1  penalised partial cells (rn_abp min)
+                        ! (-)             =  2  penalised shaved cells (piecewise linear)
    nn_smo = 0        ! smoothing of porosity 
    nn_cnp = 0        ! definition of rpou and rpow
                         ! 0 halfsum 
                         ! 1 minimum  
-   rn_fsp = 0.05     ! friction parameter 1/epsilon of the permeability                [1/s]
-      nn_fsp = 21    ! maximum friction
-                        ! 2 - implicit (with wi)
-                        ! 3 - operator splitting
-                     ! 21/31 - adaptive, rn_fsp max courant number
-      nn_wef = 1      ! active friction 
+   rn_fsp = 0.05     ! friction parameter -sU of the permeability                [1/s]
+      nn_fsp = 21    ! implicit integration method (during matrix inversion)
+                        ! 2  - s fixed before simulation depending on nn_wef
+                        ! 21 - s adapted in function of CFL condition (nn_wef)
+                        ! 0  - explicit for testing
+      nn_wef = 1      ! limited friction for stability
                         ! 1 based on rux >= 1
                         ! 2       or rx  >= 1
                         ! 3 based on both
@@ -271,9 +271,9 @@
 !-----------------------------------------------------------------------
 &namdyn_hpg    !   Hydrostatic pressure gradient option                 (default: NO selection)
 !-----------------------------------------------------------------------
-   ln_hpg_zco  = .true.  !  pure z-coordinate
+   ln_hpg_zco  = .false.  !  pure z-coordinate
    ln_hpg_zps  = .false.  !  z-coordinate - partial steps (interpolation)
-   ln_hpg_sco  = .false.   !  s-coordinate (standard jacobian formulation)
+   ln_hpg_sco  = .true.   !  s-coordinate (standard jacobian formulation)
 /
 !-----------------------------------------------------------------------
 &namdyn_spg    !   surface pressure gradient                            (default: NO selection)
@@ -331,7 +331,7 @@
    ln_zdfgls   = .false.      !  Generic Length Scale closure           (T =>   fill namzdf_gls)
    !
    !                       ! convection
-   ln_zdfevd   = .false.      !  enhanced vertical diffusion
+   ln_zdfevd   = .true.      !  enhanced vertical diffusion
       nn_evdm     =    0         ! apply on tracer (=0) or on tracer and momentum (=1)
       rn_evd      =  100.        ! mixing coefficient [m2/s]
    ln_zdfnpc   = .false.      !  Non-Penetrative Convective algorithm
