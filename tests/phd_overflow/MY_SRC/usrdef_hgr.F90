@@ -15,11 +15,11 @@ MODULE usrdef_hgr
    USE dom_oce  ,  ONLY: nimpp, njmpp       ! ocean space and time domain
    USE par_oce         ! ocean space and time domain
    USE phycst          ! physical constants
-   USE usrdef_nam, ONLY: rn_dx   ! horizontal resolution in meters
+   USE usrdef_nam, ONLY: rn_dx, ln_ovf, nn_ovf   ! horizontal resolution in meters
    !
    USE in_out_manager  ! I/O manager
    USE lib_mpp         ! MPP library
-   
+
    IMPLICIT NONE
    PRIVATE
 
@@ -27,12 +27,13 @@ MODULE usrdef_hgr
 
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
-   !! $Id: usrdef_hgr.F90 10074 2018-08-28 16:15:49Z nicolasmartin $ 
+   !! $Id: usrdef_hgr.F90 10074 2018-08-28 16:15:49Z nicolasmartin $
    !! Software governed by the CeCILL license (see ./LICENSE)
    !!----------------------------------------------------------------------
 CONTAINS
 
    SUBROUTINE usr_def_hgr( plamt , plamu , plamv  , plamf  ,   &   ! geographic position (required)
+      &                    plamt0,                             &   ! nn_ovf   
       &                    pphit , pphiu , pphiv  , pphif  ,   &   !
       &                    kff   , pff_f , pff_t  ,            &   ! Coriolis parameter  (if domain not on the sphere)
       &                    pe1t  , pe1u  , pe1v   , pe1f   ,   &   ! scale factors       (required)
@@ -47,21 +48,22 @@ CONTAINS
       !!                OVERFLOW configuration : uniform grid spacing (rn_dx)
       !!                without Coriolis force (f=0)
       !!
-      !! ** Action  : - define longitude & latitude of t-, u-, v- and f-points (in degrees) 
+      !! ** Action  : - define longitude & latitude of t-, u-, v- and f-points (in degrees)
       !!              - define coriolis parameter at f-point if the domain in not on the sphere (on beta-plane)
       !!              - define i- & j-scale factors at t-, u-, v- and f-points (in meters)
       !!              - define u- & v-surfaces (if gridsize reduction is used in some straits) (in m2)
       !!----------------------------------------------------------------------
       REAL(wp), DIMENSION(:,:), INTENT(out) ::   plamt, plamu, plamv, plamf   ! longitude outputs                     [degrees]
+      REAL(wp), DIMENSION(:,:), INTENT(out) ::   plamt0                       ! nn_ovf
       REAL(wp), DIMENSION(:,:), INTENT(out) ::   pphit, pphiu, pphiv, pphif   ! latitude outputs                      [degrees]
       INTEGER                 , INTENT(out) ::   kff                          ! =1 Coriolis parameter computed here, =0 otherwise
       REAL(wp), DIMENSION(:,:), INTENT(out) ::   pff_f, pff_t                 ! Coriolis factor at f-point                [1/s]
       REAL(wp), DIMENSION(:,:), INTENT(out) ::   pe1t, pe1u, pe1v, pe1f       ! i-scale factors                             [m]
       REAL(wp), DIMENSION(:,:), INTENT(out) ::   pe2t, pe2u, pe2v, pe2f       ! j-scale factors                             [m]
-      INTEGER                 , INTENT(out) ::   ke1e2u_v                     ! =1 u- & v-surfaces computed here, =0 otherwise 
+      INTEGER                 , INTENT(out) ::   ke1e2u_v                     ! =1 u- & v-surfaces computed here, =0 otherwise
       REAL(wp), DIMENSION(:,:), INTENT(out) ::   pe1e2u, pe1e2v               ! u- & v-surfaces (if reduction in strait)   [m2]
       !
-      INTEGER  ::   ji, jj   ! dummy loop indices
+      INTEGER  ::   ji, ji0, jj   ! dummy loop indices
       REAL(wp) ::   zfact      ! local scalars
       !!-------------------------------------------------------------------------------
       !
@@ -73,7 +75,7 @@ CONTAINS
       zfact = rn_dx * 1.e-3         ! conversion in km
       DO jj = 1, jpj
          DO ji = 1, jpi             ! longitude
-            plamt(ji,jj) = zfact * (  - 0.5 + REAL( ji-1 + nimpp-1 , wp )  )  
+            plamt(ji,jj) = zfact * (  - 0.5 + REAL( ji-1 + nimpp-1 , wp )  )
             plamu(ji,jj) = zfact * (          REAL( ji-1 + nimpp-1 , wp )  )
             plamv(ji,jj) = plamt(ji,jj)
             plamf(ji,jj) = plamu(ji,jj)
@@ -85,13 +87,27 @@ CONTAINS
          END DO
       END DO
       !
-      !                       !==  Horizontal scale factors  ==!   (in meters) 
+      IF ( ln_ovf ) THEN
+         IF (lwp) WRITE(numout,*) '(nn_ovf - 1)',nn_ovf - 1, '* rn_dx',zfact,'=',REAL(nn_ovf - 1 ,wp) * zfact
+         plamt(:,:) = plamt(:,:) - REAL(nn_ovf - 1 ,wp) * zfact   ! offset to conserve volume
+         plamu(:,:) = plamu(:,:) - REAL(nn_ovf - 1 ,wp) * zfact
+         plamv(:,:) = plamt(:,:)  
+         plamf(:,:) = plamu(:,:) 
+         DO ji = 1, jpi             ! longitude 
+            ! ji : indice local dans l'array partionné
+            ! ji+nimpp-1 : indice global dans le domaine ji  0 1 2 3
+            ji0 = INT( (ji-1+nimpp-1)/nn_ovf )          !ji0 0 0 1 1
+            plamt0(ji,:) = zfact * REAL(nn_ovf,wp) * ( - 0.5 + REAL( ji0, wp )  )
+         END DO
+      ENDIF
+      !
+      !                       !==  Horizontal scale factors  ==!   (in meters)
       pe1t(:,:) = rn_dx   ;   pe2t(:,:) = rn_dx
       pe1u(:,:) = rn_dx   ;   pe2u(:,:) = rn_dx
       pe1v(:,:) = rn_dx   ;   pe2v(:,:) = rn_dx
       pe1f(:,:) = rn_dx   ;   pe2f(:,:) = rn_dx
       !
-      !                             ! NO reduction of grid size in some straits 
+      !                             ! NO reduction of grid size in some straits
       ke1e2u_v = 0                  !    ==>> u_ & v_surfaces will be computed in dom_ghr routine
       pe1e2u(:,:) = 0._wp           !    CAUTION: set to zero to avoid error with some compilers that
       pe1e2v(:,:) = 0._wp           !             require an initialization of INTENT(out) arguments
