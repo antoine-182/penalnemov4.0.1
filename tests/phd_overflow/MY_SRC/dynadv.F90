@@ -36,6 +36,7 @@ MODULE dynadv
    LOGICAL, PUBLIC ::   ln_dynadv_cen2  !: flux form - 2nd order centered scheme flag
 !!an
    LOGICAL, PUBLIC ::   ln_dynadv_ubs   !: flux form - 3rd order UBS scheme flag
+   LOGICAL, PUBLIC ::   ln_dynadv_up3   !: flux form - 3rd order UBS scheme flag
    LOGICAL, PUBLIC ::   ln_dynadv_up1   !: flux form - 1st order upwind scheme
    
    INTEGER, PUBLIC ::   n_dynadv   !: choice of the formulation and scheme for momentum advection
