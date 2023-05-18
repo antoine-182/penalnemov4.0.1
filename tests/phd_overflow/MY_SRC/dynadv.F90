@@ -46,7 +46,7 @@ MODULE dynadv
    INTEGER, PUBLIC, PARAMETER ::   np_FLX_c2  = 2   ! flux   form : 2nd order centered scheme
 !!an
    INTEGER, PUBLIC, PARAMETER ::   np_FLX_ubs = 3   ! flux   form : 3rd order Upstream Biased Scheme
-   INTEGER, PUBLIC, PARAMETER ::   np_FLX_up3 = 31   ! flux   form : Upstream 3rd order
+   INTEGER, PUBLIC, PARAMETER ::   np_FLX_up3 = 31  ! flux   form : Upstream 3rd order
    INTEGER, PUBLIC, PARAMETER ::   np_FLX_up1 = 4   ! flux   form : upwind 1 scheme
 
    !! * Substitutions
@@ -105,7 +105,7 @@ CONTAINS
       !!----------------------------------------------------------------------
       INTEGER ::   ioptio, ios   ! Local integer
       !
-      NAMELIST/namdyn_adv/ ln_dynadv_OFF, ln_dynadv_vec, nn_dynkeg, ln_dynadv_cen2, ln_dynadv_ubs, ln_dynadv_up1
+      NAMELIST/namdyn_adv/ ln_dynadv_OFF, ln_dynadv_vec, nn_dynkeg, ln_dynadv_cen2, ln_dynadv_ubs, ln_dynadv_up1, ln_dynadv_up3
       !!----------------------------------------------------------------------
       !
       IF(lwp) THEN
