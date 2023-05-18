@@ -34,7 +34,7 @@ MODULE dynadv
    LOGICAL, PUBLIC ::   ln_dynadv_vec   !: vector form
    INTEGER, PUBLIC ::      nn_dynkeg       !: scheme of grad(KE): =0 C2 ; =1 Hollingsworth
    LOGICAL, PUBLIC ::   ln_dynadv_cen2  !: flux form - 2nd order centered scheme flag
-!!
+!!an
    LOGICAL, PUBLIC ::   ln_dynadv_ubs   !: flux form - 3rd order UBS scheme flag
    LOGICAL, PUBLIC ::   ln_dynadv_up1   !: flux form - 1st order upwind scheme
    
@@ -45,6 +45,7 @@ MODULE dynadv
    INTEGER, PUBLIC, PARAMETER ::   np_FLX_c2  = 2   ! flux   form : 2nd order centered scheme
 !!an
    INTEGER, PUBLIC, PARAMETER ::   np_FLX_ubs = 3   ! flux   form : 3rd order Upstream Biased Scheme
+   INTEGER, PUBLIC, PARAMETER ::   np_FLX_up3 = 31   ! flux   form : Upstream 3rd order
    INTEGER, PUBLIC, PARAMETER ::   np_FLX_up1 = 4   ! flux   form : upwind 1 scheme
 
    !! * Substitutions
@@ -83,6 +84,8 @@ CONTAINS
 !!an
       CASE( np_FLX_ubs )   
          CALL dyn_adv_ubs ( kt )               ! 3rd order UBS      scheme (UP3)
+      CASE( np_FLX_up3 )   
+         CALL dyn_adv_up3 ( kt )               !  pure scheme (UP3)
       CASE( np_FLX_up1 )   
          CALL dyn_adv_up1 ( kt )               ! 1st order upwind   scheme (UP1)
       END SELECT
@@ -125,7 +128,8 @@ CONTAINS
          WRITE(numout,*) '         with Hollingsworth scheme (=1) or not (=0)       nn_dynkeg   = ', nn_dynkeg
          WRITE(numout,*) '      flux form: 2nd order centred scheme              ln_dynadv_cen2 = ', ln_dynadv_cen2
 !!an
-         WRITE(numout,*) '                 3rd order UBS scheme                  ln_dynadv_ubs  = ', ln_dynadv_ubs
+         WRITE(numout,*) '                           UP3 horiz. / C2 vert.       ln_dynadv_ubs  = ', ln_dynadv_ubs
+         WRITE(numout,*) '                           UP3 scheme                  ln_dynadv_up3  = ', ln_dynadv_up3
          WRITE(numout,*) '                 1st order UP scheme                   ln_dynadv_up1  = ', ln_dynadv_up1
       ENDIF
 
@@ -135,6 +139,7 @@ CONTAINS
       IF( ln_dynadv_cen2 ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_c2    ;   ENDIF
 !!an
       IF( ln_dynadv_ubs  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_ubs   ;   ENDIF
+      IF( ln_dynadv_up3  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_up3   ;   ENDIF
       IF( ln_dynadv_up1  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_up1   ;   ENDIF
 
       IF( ioptio /= 1 )   CALL ctl_stop( 'choose ONE and only ONE advection scheme' )
@@ -150,6 +155,7 @@ CONTAINS
             IF( nn_dynkeg == nkeg_HW  )   WRITE(numout,*) '              with Hollingsworth keg scheme'
          CASE( np_FLX_c2  )   ;   WRITE(numout,*) '   ==>>>   flux form   : 2nd order scheme is used'
          CASE( np_FLX_ubs )   ;   WRITE(numout,*) '   ==>>>   flux form   : UBS       scheme is used'
+         CASE( np_FLX_up3 )   ;   WRITE(numout,*) '   ==>>>   flux form   : UP3       scheme is used'
          CASE( np_FLX_up1 )   ;   WRITE(numout,*) '   ==>>>   flux form   : UP1       scheme is used'
          END SELECT
       ENDIF

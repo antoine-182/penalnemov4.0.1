@@ -256,7 +256,8 @@
    nn_dynkeg      = 0       ! scheme for grad(KE): =0   C2  ;  =1   Hollingsworth correction
    ln_dynadv_up1  = .false. !  flux form - 1st order upwind scheme
    ln_dynadv_cen2 = .false. !  flux form - 2nd order centered scheme
-   ln_dynadv_ubs  = .true.  !  flux form - 3rd order upwind (UBS) scheme
+   ln_dynadv_ubs  = .false.  !  flux form - UP3 horiz. - C2 vert. (sensitive to key_)
+   ln_dynadv_up3  = .true.  !  flux form - UP3 horiz. and vert.
 /
 !-----------------------------------------------------------------------
 &namdyn_vor    !   Vorticity / Coriolis scheme                          (default: NO selection)
