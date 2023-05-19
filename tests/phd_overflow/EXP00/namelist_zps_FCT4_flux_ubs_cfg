@@ -46,7 +46,7 @@
                         ! 2  - s fixed before simulation depending on nn_wef
                         ! 21 - s adapted in function of CFL condition (nn_wef)
                         ! 0  - explicit for testing
-      nn_wef = 1      ! limited friction for stability
+      nn_wef = 3      ! limited friction for stability
                         ! 1 based on rux >= 1
                         ! 2       or rx  >= 1
                         ! 3 based on both

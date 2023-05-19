@@ -110,16 +110,16 @@ CONTAINS
          DO ji=1,jpi
             DO jj=1,jpj
 #if defined key_bvp
-               zht(ji,jj) = profilz(glamt(ji,jj))
+               zht(ji,jj) = profilz(glamt(ji,jj))   ! profile to be integrated by zgr_pse
 #else
                zht(ji,jj) = profil_int(glamt(ji,jj) - 1e-3*rn_dx/2.,  &
-                  &                    glamt(ji,jj) + 1e-3*rn_dx/2.   )
+                  &                    glamt(ji,jj) + 1e-3*rn_dx/2.   )   ! integrated profile
 #endif
             END DO
          END DO
       ENDIF
       !
-      ! at u-point: averaging zht
+      ! u-point: averaged zht
       DO ji = 1, jpim1
          zhu(ji,:) = 0.5_wp * ( zht(ji,:) + zht(ji+1,:) )
       END DO
@@ -143,9 +143,13 @@ CONTAINS
 #if defined key_bvp
       ! 1) Definition of the porosity field
       IF ( nn_abp >= 1 ) THEN 
-         IF(lwp) WRITE(numout,*) 'default profile : piecewise linear profile (1)'
+
+         IF(lwp) WRITE(numout,*) 'nn_abp >= 1 : the sill is masked and'   
+         IF(lwp) WRITE(numout,*) 'boundary is defined piecewise linear profile (1)'
+
          rpot(:,:,:) = 1._wp
-         IF ( ln_ovf ) THEN      ! preserving big steps
+
+         IF ( ln_ovf ) THEN      ! Big 'steped profile' preserved
             DO ji = 1, jpi
                IF (glamt0(ji,2) <= 17._wp) THEN 
                   WHERE ( pdept_1d(:) >= profilz(glamt0(ji,2)) ) rpot(ji,2,:) = rn_abp
@@ -156,7 +160,9 @@ CONTAINS
                   END DO
                ENDIF
             END DO
-         ELSE                    ! normal case
+
+         ELSE                    ! usual case
+
             DO ji = 1, jpi
                IF (glamt(ji,2) <= 17._wp) THEN   ! closest to zps initialisation
                   WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = rn_abp
@@ -167,15 +173,19 @@ CONTAINS
                   END DO
                ENDIF 
             END DO
+
          ENDIF
       ELSE 
          ! nn_abp = 0 or -1 /= from integratle
-         rpot(:,:,:) = 1._wp
-         IF ( ln_ovf ) THEN
+
+         IF(lwp) WRITE(numout,*) 'nn_abp < 1 : the whole sill is porous'
+
+         rpot(:,:,:) = 1._wp    
+         IF ( ln_ovf ) THEN    ! Big 'steped profile' preserved
             DO ji = 1, jpi
                WHERE ( pdept_1d(:) >= profilz(glamt0(ji,2)) ) rpot(ji,2,:) = rn_abp
             END DO
-         ELSE
+         ELSE                  ! usual case
             DO ji = 1, jpi
                WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = rn_abp
             END DO
@@ -183,18 +193,17 @@ CONTAINS
       ENDIF
       !
       !
-      !! Shapiro filter (S=1/2) or linear
+      !! Shapiro filter (S=1/2) 
       !------------------------ smoothing along x ---------------------!
       !------------------------ ----------------- ---------------------!
       z3d (:,:,:) = rpot(:,:,:)
       DO jx = 1, nn_smo
-         IF(lwp) WRITE(numout,*) ' smooth  zer ',jx
+         IF(lwp) WRITE(numout,*) 'nth pass of Shapiro (1/4,1/2,1/4) filter ',jx
             DO ji = 2,jpim1
                IF (glamt(ji,2) > 17._wp ) THEN  ! preserve the shelf
                   DO jk = 1,jpk
                      DO jj = 1,jpj
                      z3d (ji,jj,jk) = 0.25_wp * rpot(ji-1,jj,jk)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji+1,jj,jk )
-                     ! z3d (ji,jj,jk) = ( rpot(ji-1,jj,jk) + rpot(ji,jj,jk) + rpot(ji+1,jj,jk ) ) / 3._wp
                      END DO
                   END DO
                ENDIF
@@ -207,7 +216,6 @@ CONTAINS
                DO jk = 2,jpkm1
                   DO jj = 1,jpj
                      z3d(ji,jj,jk)  = 0.25_wp * rpot(ji,jj,jk-1)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji,jj,jk+1)
-                     ! z3d(ji,jj,jk)  = ( rpot(ji,jj,jk-1) + rpot(ji,jj,jk) + rpot(ji,jj,jk+1) ) / 3._wp
                   END DO
                END DO
             ENDIF
@@ -221,13 +229,15 @@ CONTAINS
       !!------------------------ broadcast to U and W ---------------------!
       !------------------------ --------------------- ---------------------!
       rpou(:,:,:) = rpot(:,:,:) ; rpow(:,:,:) = rpot(:,:,:)
-      IF (nn_cnp == 0) THEN   ! demisomme
+
+      IF (nn_cnp == 0) THEN   ! halfsum
         DO jk = 2, jpk
            rpow(:,:,jk) = 0.5_wp * ( rpot(:,:,jk) + rpot(:,:,jk-1) )   ! sens z > 0
         END DO
         DO ji = 1, jpim1
            rpou(ji,:,:) = 0.5_wp * ( rpot(ji,:,:) + rpot(ji+1,:,:) )
         END DO
+
       ELSE IF (nn_cnp  == 1) THEN ! minimum
         DO jk = 2, jpk
           DO jj= 1, jpj
@@ -237,8 +247,9 @@ CONTAINS
             END DO
           END DO
         END DO
+
       ENDIF
-      !!------------------------ inverse ---------------------!
+      !!------------------------ compute the inverses ---------------------!
       DO jk = 1, jpk
         DO jj = 1, jpj
            DO ji = 1, jpi
@@ -250,12 +261,13 @@ CONTAINS
       END DO
     !
     !
-    !!------------------------ impermeability ---------------------!
-    !------------------------- -------------- ---------------------!
+    !!------------------------ permeability ---------------------!
+    !------------------------- ------------ ---------------------!
     !
    bmpu(:,:,:) = 1e-20 ; z3d3(:,:,:) = 1._wp
    ! indicator
-   IF      ( nn_fsp == 2  .OR. nn_fsp == 3 ) THEN
+   IF ( nn_fsp == 2 ) THEN
+
       IF (nn_wef == 1) THEN                               ! scale on rux
          DO jk = 1, jpk
             DO jj = 1, jpj

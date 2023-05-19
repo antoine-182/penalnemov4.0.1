@@ -112,7 +112,7 @@ CONTAINS
       !              !==  RHS: Leap-Frog time stepping on all trends but the vertical mixing  ==!   (put in ua,va)
 !!an
 #if defined key_bvp
-    !  Explicit
+    !  Explicit integration
     IF ( nn_fsp == 0 ) ua(:,:,:) = ua(:,:,:) - bmpu(:,:,:) * ub(:,:,:)
 #endif
 !!an porosity temporaly linear
@@ -131,17 +131,6 @@ CONTAINS
                &          + r2dt * e3v_n(:,:,jk) * va(:,:,jk)  ) / e3v_a(:,:,jk) * vmask(:,:,jk)
          END DO
       ENDIF
-!!an
-#if defined key_bvp
-   SELECT CASE( nn_fsp )
-   CASE ( 3  ) 
-      ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )   !!! Operator Splitting (1-s)r=1
-   CASE ( 31 ) 
-      bmpu(:,:,:) = friction_bmp(nn_wef)
-      ! MAX( ( 1._wp - rn_fsp * rn_dx / ( r2dt * ua(:,:,:) ) ) / r2dt, 0._wp ) ! r included in ua
-      ua(:,:,:) = ua(:,:,:) * ( 1._wp  - r2dt * bmpu(:,:,:) )
-   END SELECT
-#endif
 !!an
       !                    ! add top/bottom friction
       !     With split-explicit free surface, barotropic stress is treated explicitly Update velocities at the bottom.
@@ -305,7 +294,7 @@ CONTAINS
 #if defined key_bvp
     ! Friction de fond pour U
     ! en linssh r_vvl = 0, niveau fixe
-    IF ( nn_fsp == 2 ) THEN      ! implicit bottom friction
+    IF ( nn_fsp == 2 ) THEN      ! implicit integration (bmpu fixed)
       DO jk= 1, jpkm1
         DO jj = 2, jpjm1
             DO ji = 2, jpim1
@@ -313,7 +302,7 @@ CONTAINS
             END DO
          END DO
       END DO
-     ELSE IF ( nn_fsp == 21 ) THEN ! same bmpu as nn_fsp=1
+     ELSE IF ( nn_fsp == 21 ) THEN ! implicit integration (bmpu limited)
       !
       bmpu(:,:,:) = friction_bmp(nn_wef)
       !
