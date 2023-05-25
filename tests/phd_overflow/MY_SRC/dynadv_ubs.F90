@@ -27,8 +27,10 @@ MODULE dynadv_ubs
    PRIVATE
 #if defined key_quick
    REAL(wp), PARAMETER :: gamma1 = 1._wp/4._wp  ! =1/4 quick      ; =1/3  3rd order UBS
+   REAL(wp), PARAMETER :: gamma1v = 1._wp/40._wp  ! =1/4 quick      ; =1/3  3rd order UBS
 # else 
    REAL(wp), PARAMETER :: gamma1 = 1._wp/3._wp  ! =1/4 quick      ; =1/3  3rd order UBS
+   REAL(wp), PARAMETER :: gamma1v = 1._wp/3._wp  ! =1/4 quick      ; =1/3  3rd order UBS
 #endif
 
 # if defined key_ubsC2
@@ -572,8 +574,8 @@ CONTAINS
                ELSE                      ;    zl_v = zlv_vw( ji,jj,jk-1,1)
                ENDIF
                !                          C2 - upstream
-               zfu_uw(ji  ,jj  ,jk) = zfuk * ( un(ji,jj,jk) + un(ji,jj,jk-1) - gamma1 * zl_u ) ! UW nodes
-               zfv_vw(ji  ,jj  ,jk) = zfvk * ( vn(ji,jj,jk) + vn(ji,jj,jk-1) - gamma1 * zl_v ) ! VW nodes
+               zfu_uw(ji  ,jj  ,jk) = zfuk * ( un(ji,jj,jk) + un(ji,jj,jk-1) - gamma1v * zl_u ) ! UW nodes
+               zfv_vw(ji  ,jj  ,jk) = zfvk * ( vn(ji,jj,jk) + vn(ji,jj,jk-1) - gamma1v * zl_v ) ! VW nodes
             END DO
          END DO
       END DO
