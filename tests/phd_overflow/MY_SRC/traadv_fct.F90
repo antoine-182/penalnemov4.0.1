@@ -451,6 +451,9 @@ CONTAINS
          !
          CALL nonosc( ptb(:,:,:,jn), zwx, zwy, zwz, zwi, p2dt )
          !
+!!an
+         CALL iom_put("fctUT", zwx(:,:,:) ) ! U point
+!!an
          !        !==  final trend with corrected fluxes  ==!
          !
          DO jk = 1, jpkm1
