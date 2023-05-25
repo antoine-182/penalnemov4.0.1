@@ -33,6 +33,9 @@ MODULE dynadv_ubs
    REAL(wp), PARAMETER :: gamma1v = 1._wp/3._wp  ! =1/4 quick      ; =1/3  3rd order UBS
 #endif
 
+   WRITE(numout,*) 'gamma1',gamma1,'gamma1v',gamma1v
+
+
 # if defined key_ubsC2
    REAL(wp), PARAMETER :: gamma2 = 0.           ! =0   2nd order  ; =1/32 4th order centred
 # else 
