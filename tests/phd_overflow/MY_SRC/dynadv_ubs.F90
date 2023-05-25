@@ -25,8 +25,12 @@ MODULE dynadv_ubs
 
    IMPLICIT NONE
    PRIVATE
-
+#if defined key_quick
+   REAL(wp), PARAMETER :: gamma1 = 1._wp/4._wp  ! =1/4 quick      ; =1/3  3rd order UBS
+# else 
    REAL(wp), PARAMETER :: gamma1 = 1._wp/3._wp  ! =1/4 quick      ; =1/3  3rd order UBS
+#endif
+
 # if defined key_ubsC2
    REAL(wp), PARAMETER :: gamma2 = 0.           ! =0   2nd order  ; =1/32 4th order centred
 # else 
@@ -399,12 +403,21 @@ CONTAINS
          !
          DO jj = 2, jpjm1                          ! laplacian
             DO ji = fs_2, fs_jpim1   ! vector opt.
+#if defined key_un
+               zlu_uu(ji,jj,jk,1) = ( un (ji+1,jj  ,jk) - 2.*un (ji,jj,jk) + un (ji-1,jj  ,jk) ) * umask(ji,jj,jk)
+               zlv_vv(ji,jj,jk,1) = ( vn (ji  ,jj+1,jk) - 2.*vn (ji,jj,jk) + vn (ji  ,jj-1,jk) ) * vmask(ji,jj,jk)
+               zlu_uv(ji,jj,jk,1) = ( un (ji  ,jj+1,jk) - un (ji  ,jj  ,jk) ) * fmask(ji  ,jj  ,jk)   &
+                  &               - ( un (ji  ,jj  ,jk) - un (ji  ,jj-1,jk) ) * fmask(ji  ,jj-1,jk)
+               zlv_vu(ji,jj,jk,1) = ( vn (ji+1,jj  ,jk) - vn (ji  ,jj  ,jk) ) * fmask(ji  ,jj  ,jk)   &
+                  &               - ( vn (ji  ,jj  ,jk) - vn (ji-1,jj  ,jk) ) * fmask(ji-1,jj  ,jk)
+#else
                zlu_uu(ji,jj,jk,1) = ( ub (ji+1,jj  ,jk) - 2.*ub (ji,jj,jk) + ub (ji-1,jj  ,jk) ) * umask(ji,jj,jk)
                zlv_vv(ji,jj,jk,1) = ( vb (ji  ,jj+1,jk) - 2.*vb (ji,jj,jk) + vb (ji  ,jj-1,jk) ) * vmask(ji,jj,jk)
                zlu_uv(ji,jj,jk,1) = ( ub (ji  ,jj+1,jk) - ub (ji  ,jj  ,jk) ) * fmask(ji  ,jj  ,jk)   &
                   &               - ( ub (ji  ,jj  ,jk) - ub (ji  ,jj-1,jk) ) * fmask(ji  ,jj-1,jk)
                zlv_vu(ji,jj,jk,1) = ( vb (ji+1,jj  ,jk) - vb (ji  ,jj  ,jk) ) * fmask(ji  ,jj  ,jk)   &
                   &               - ( vb (ji  ,jj  ,jk) - vb (ji-1,jj  ,jk) ) * fmask(ji-1,jj  ,jk)
+#endif
                !
                zlu_uu(ji,jj,jk,2) = ( zfu(ji+1,jj  ,jk) - 2.*zfu(ji,jj,jk) + zfu(ji-1,jj  ,jk) ) * umask(ji,jj,jk)
                zlv_vv(ji,jj,jk,2) = ( zfv(ji  ,jj+1,jk) - 2.*zfv(ji,jj,jk) + zfv(ji  ,jj-1,jk) ) * vmask(ji,jj,jk)

@@ -133,7 +133,17 @@ CONTAINS
          WRITE(numout,*) '                           UP3 scheme                  ln_dynadv_up3  = ', ln_dynadv_up3
          WRITE(numout,*) '                 1st order UP scheme                   ln_dynadv_up1  = ', ln_dynadv_up1
       ENDIF
-
+#if defined key_un
+      WRITE(numout,*) ' key_un active'
+      IF( .NOT. ln_dynadv_up3 )   CALL ctl_stop( 'choose ln_dynadv_up3 = T with key_un' )
+#else
+      WRITE(numout,*) ' key_un inactive'
+#endif
+#if defined key_quick
+      WRITE(numout,*) ' key_quick active'
+#else
+      WRITE(numout,*) ' key_quick inactive'
+#endif
       ioptio = 0                      ! parameter control and set n_dynadv
       IF( ln_dynadv_OFF  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_LIN_dyn   ;   ENDIF
       IF( ln_dynadv_vec  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_VEC_c2    ;   ENDIF
