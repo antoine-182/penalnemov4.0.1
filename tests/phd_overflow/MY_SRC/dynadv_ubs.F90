@@ -27,10 +27,10 @@ MODULE dynadv_ubs
    PRIVATE
 #if defined key_quick
    REAL(wp), PUBLIC, PARAMETER:: gamma1 = 1._wp/4._wp  ! =1/4 quick      ; =1/3  3rd order UBS
-   REAL(wp), PUBLIC, PARAMETER:: gamma1v = 1._wp/40._wp  ! =1/4 quick      ; =1/3  3rd order UBS
+   REAL(wp), PUBLIC, PARAMETER:: gamma1v = 1._wp/4._wp  ! =1/4 quick      ; =1/3  3rd order UBS
 # else 
-   REAL(wp), PARAMETER :: gamma1 = 1._wp/3._wp  ! =1/4 quick      ; =1/3  3rd order UBS
-   REAL(wp), PARAMETER :: gamma1v = 1._wp/3._wp  ! =1/4 quick      ; =1/3  3rd order UBS
+   REAL(wp), PUBLIC, PARAMETER :: gamma1 = 1._wp/3._wp  ! =1/4 quick      ; =1/3  3rd order UBS
+   REAL(wp), PUBLIC, PARAMETER :: gamma1v = 1._wp/3._wp  ! =1/4 quick      ; =1/3  3rd order UBS
 #endif
 
 # if defined key_ubsC2
