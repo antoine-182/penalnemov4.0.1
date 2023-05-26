@@ -88,6 +88,7 @@ CONTAINS
       REAL(wp), DIMENSION(jpi,jpj)            ::   zfp_wi, zfm_wi, zC2t_w
       REAL(wp), DIMENSION(jpi,jpj,jpk)        ::   zwi, zwx, zwy, zwz, ztu, ztv, z3d, zltu, zltv, zltw, ztw
       REAL(wp), DIMENSION(:,:,:), ALLOCATABLE ::   ztrdx, ztrdy, ztrdz, zptry
+      REAL(wp), DIMENSION(jpi,jpj,jpk)        ::   zzx
       REAL(wp), DIMENSION(:,:,:), ALLOCATABLE ::   zwinf, zwdia, zwsup
       LOGICAL  ::   ll_zAimp                                 ! flag to apply adaptive implicit vertical advection
       !!----------------------------------------------------------------------
@@ -241,6 +242,10 @@ CONTAINS
             END DO
             !
          END IF
+         !
+!!an
+         zzx(:,:,:) = zwx(:,:,:) !! fctUT (partie Upstream)
+!!an
          !
          IF( l_trd .OR. l_hst )  THEN             ! trend diagnostics (contribution of upstream fluxes)
             ztrdx(:,:,:) = zwx(:,:,:)   ;   ztrdy(:,:,:) = zwy(:,:,:)   ;   ztrdz(:,:,:) = zwz(:,:,:)
@@ -452,7 +457,7 @@ CONTAINS
          CALL nonosc( ptb(:,:,:,jn), zwx, zwy, zwz, zwi, p2dt )
          !
 !!an
-         CALL iom_put("fctUT", zwx(:,:,:) ) ! U point
+         CALL iom_put("fctUT", zzx(:,:,:) + zwx(:,:,:) ) ! correction high order ! fctut
 !!an
          !        !==  final trend with corrected fluxes  ==!
          !
