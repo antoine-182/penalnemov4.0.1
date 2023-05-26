@@ -453,7 +453,6 @@ CONTAINS
          !
 !!an
          CALL iom_put("fctUT", zwx(:,:,:) ) ! U point
-         CALL iom_put("fctU",  pun(:,:,:) ) ! U point
 !!an
          !        !==  final trend with corrected fluxes  ==!
          !
