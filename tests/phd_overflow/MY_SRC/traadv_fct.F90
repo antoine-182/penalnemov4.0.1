@@ -77,7 +77,7 @@ CONTAINS
       INTEGER                              , INTENT(in   ) ::   kn_fct_h        ! order of the FCT scheme (=2 or 4)
       INTEGER                              , INTENT(in   ) ::   kn_fct_v        ! order of the FCT scheme (=2 or 4)
       REAL(wp)                             , INTENT(in   ) ::   p2dt            ! tracer time-step
-      REAL(wp), DIMENSION(jpi,jpj,jpk     ), INTENT(in   ) ::   pun, pvn, pwn   ! 3 ocean transport components   
+      REAL(wp), DIMENSION(jpi,jpj,jpk     ), INTENT(in   ) ::   pun, pvn, pwn   ! 3 ocean transport components   !!an
       REAL(wp), DIMENSION(jpi,jpj,jpk,kjpt), INTENT(in   ) ::   ptb, ptn        ! before and now tracer fields
       REAL(wp), DIMENSION(jpi,jpj,jpk,kjpt), INTENT(inout) ::   pta             ! tracer trend
       !
@@ -453,6 +453,7 @@ CONTAINS
          !
 !!an
          CALL iom_put("fctUT", zwx(:,:,:) ) ! U point
+         CALL iom_put("fctU",  pun(:,:,:) ) ! U point
 !!an
          !        !==  final trend with corrected fluxes  ==!
          !
