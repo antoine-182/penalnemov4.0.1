@@ -118,6 +118,20 @@ CONTAINS
             END DO
          END DO
       ENDIF
+      ! Smoothing of the depth profile
+      z2d (:,:) = zht(:,:)
+      DO jx = 1, nn_smo
+         IF(lwp) WRITE(numout,*) 'number of passes of Shapiro (1/4,1/2,1/4) filter (zps)',jx
+            DO ji = 2,jpim1
+               IF (glamt(ji,2) > 20._wp ) THEN  ! preserve the shelf
+                  DO jj = 1,jpj
+                  z2d (ji,jj) = 0.25_wp * zht(ji-1,jj)+ 0.5_wp * zht(ji,jj) + 0.25_wp* zht(ji+1,jj)
+                  END DO
+               ENDIF
+            END DO
+         CALL lbc_lnk( 'usrdef_zgr', z2d, 'T', 1._wp, kfillmode=jpfillcopy)
+         zht(:,:) = z2d(:,:)
+      END DO
       !
       ! u-point: averaged zht
       DO ji = 1, jpim1
@@ -151,7 +165,7 @@ CONTAINS
 
          IF ( ln_ovf ) THEN      ! Big 'steped profile' preserved
             DO ji = 1, jpi
-               IF (glamt0(ji,2) <= 17._wp) THEN 
+               IF (glamt0(ji,2) <= 20._wp) THEN 
                   WHERE ( pdept_1d(:) >= profilz(glamt0(ji,2)) ) rpot(ji,2,:) = rn_abp
                ELSE
                   DO jk = 1, jpk
@@ -164,7 +178,7 @@ CONTAINS
          ELSE                    ! usual case
 
             DO ji = 1, jpi
-               IF (glamt(ji,2) <= 17._wp) THEN   ! closest to zps initialisation
+               IF (glamt(ji,2) <= 20._wp) THEN   ! closest to zps initialisation
                   WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = rn_abp
                ELSE
                   DO jk = 1, jpk
@@ -198,9 +212,9 @@ CONTAINS
       !------------------------ ----------------- ---------------------!
       z3d (:,:,:) = rpot(:,:,:)
       DO jx = 1, nn_smo
-         IF(lwp) WRITE(numout,*) 'nth pass of Shapiro (1/4,1/2,1/4) filter ',jx
+         IF(lwp) WRITE(numout,*) 'nth pass of Shapiro (1/4,1/2,1/4) filter (bvp)',jx
             DO ji = 2,jpim1
-               IF (glamt(ji,2) > 17._wp ) THEN  ! preserve the shelf
+               IF (glamt(ji,2) > 20._wp ) THEN  ! preserve the shelf
                   DO jk = 1,jpk
                      DO jj = 1,jpj
                      z3d (ji,jj,jk) = 0.25_wp * rpot(ji-1,jj,jk)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji+1,jj,jk )
@@ -212,7 +226,7 @@ CONTAINS
          rpot(:,:,:) = z3d(:,:,:)
         !------------------------ smoothing along z ---------------------!
          DO ji = 1,jpi
-            IF (glamt(ji,2) > 17._wp ) THEN    ! preserve the shelf
+            IF (glamt(ji,2) > 20._wp ) THEN    ! preserve the shelf
                DO jk = 2,jpkm1
                   DO jj = 1,jpj
                      z3d(ji,jj,jk)  = 0.25_wp * rpot(ji,jj,jk-1)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji,jj,jk+1)

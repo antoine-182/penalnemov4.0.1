@@ -31,6 +31,7 @@ MODULE usrdef_nam
    INTEGER, PUBLIC ::   nn_ovf     ! 
    LOGICAL, PUBLIC ::   ln_ovf     ! 
 
+
    REAL(wp), PUBLIC ::   rn_dx     ! resolution in meters defining the horizontal domain size
    REAL(wp), PUBLIC ::   rn_dz     ! resolution in meters defining the vertical   domain size
    REAL(wp), PUBLIC ::   rn_T1     ! surrounding temp
@@ -42,7 +43,7 @@ MODULE usrdef_nam
    REAL(wp), PUBLIC ::   rn_fsp             ! friction parameter 1/epsilon of the permeability               [1/s]
    INTEGER, PUBLIC  ::   nn_fsp             ! friction parameter 1/epsilon of the permeability               [1/s]
    INTEGER, PUBLIC  ::   nn_wef             ! where friction is applied
-   INTEGER , PUBLIC ::   nn_smo          ! number of cell on which is smoothed the porosity (phi)         [-]
+   INTEGER , PUBLIC ::   nn_smo             ! number of passes shapiro filter
 
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
