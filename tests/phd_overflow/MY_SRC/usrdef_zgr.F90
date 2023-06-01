@@ -165,27 +165,19 @@ CONTAINS
 
          IF ( ln_ovf ) THEN      ! Big 'steped profile' preserved
             DO ji = 1, jpi
-               IF (glamt0(ji,2) <= 20._wp) THEN 
-                  WHERE ( pdept_1d(:) >= profilz(glamt0(ji,2)) ) rpot(ji,2,:) = rn_abp
-               ELSE
-                  DO jk = 1, jpk
-                     CALL zgr_pse(ji,2,jk,                 &
-                        &         glamt0,pdepw_1d,rpot, 0 )
-                  END DO
-               ENDIF
+               DO jk = 1, jpk
+                  CALL zgr_pse(ji,2,jk,                 &
+                     &         glamt0,pdepw_1d,rpot, 0 )
+               END DO
             END DO
 
-         ELSE                    ! usual case
+         ELSE                    ! usual penalisation case
 
             DO ji = 1, jpi
-               IF (glamt(ji,2) <= 20._wp) THEN   ! closest to zps initialisation
-                  WHERE ( pdept_1d(:) >= profilz(glamt(ji,2)) ) rpot(ji,2,:) = rn_abp
-               ELSE
-                  DO jk = 1, jpk
-                     CALL zgr_pse (ji,2,jk,                &
-                        &          glamt,pdepw_1d,rpot, 0 )
-                  END DO
-               ENDIF 
+               DO jk = 1, jpk
+                  CALL zgr_pse (ji,2,jk,                &
+                     &          glamt,pdepw_1d,rpot, 0 )
+               END DO
             END DO
 
          ENDIF
