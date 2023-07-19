@@ -143,7 +143,6 @@ CONTAINS
 #else
       WRITE(numout,*) ' key_un inactive'
 #endif
-   WRITE(numout,*) 'gamma1',gamma1,'gamma1v',gamma1v
 #if defined key_quick
       WRITE(numout,*) ' key_quick active'
 #else
