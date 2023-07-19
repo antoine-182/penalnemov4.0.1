@@ -24,6 +24,8 @@ MODULE dynzad
    IMPLICIT NONE
    PRIVATE
 
+   REAL(wp), PUBLIC, PARAMETER :: gamma1v = 1._wp/3._wp  ! =1/4 quick      ; =1/3  3rd order UBS
+
    PUBLIC   dyn_zad       ! routine called by dynadv.F90
    PUBLIC   dyn_zad_up3    ! routine called by dynadv.F90
 
