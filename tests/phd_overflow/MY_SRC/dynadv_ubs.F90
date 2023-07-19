@@ -286,7 +286,7 @@ CONTAINS
                IF( zfvk > 0._wp ) THEN   ;    zl_v = zlv_vw( ji,jj,jk  ,1)
                ELSE                      ;    zl_v = zlv_vw( ji,jj,jk-1,1)
                ENDIF
-               !                      UBS = [C2-(gamma2)moy(laplacien) = C4 on speeds]* (C2 - [upstream=(gamma1)up])
+               !                      UBS = [C2-(gamma2)moy(laplacien)/x or /y = C4 on speeds]* (C2 - [upstream=(gamma1)up])
                !zfu_uw(ji  ,jj  ,jk) = ( zfuk - z1d * ( zlw_uw(ji+1,jj,jk,2) + zlw_uw(ji,jj,jk,2) ) )   & ! UW nodes
                !   &                * ( un(ji,jj,jk) + un(ji,jj,jk-1) - gamma1 * zl_u )
                !zfv_vw(ji  ,jj  ,jk) = ( zfvk - z1d * ( zlw_vw(ji,jj+1,jk,2) + zlw_vw(ji,jj,jk,2) ) )   & ! VW nodes

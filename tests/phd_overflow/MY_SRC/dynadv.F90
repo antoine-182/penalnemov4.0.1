@@ -79,7 +79,11 @@ CONTAINS
       SELECT CASE( n_dynadv )    !==  compute advection trend and add it to general trend  ==!
       CASE( np_VEC_c2  )     
          CALL dyn_keg     ( kt, nn_dynkeg )    ! vector form : horizontal gradient of kinetic energy
+#if defined key_vec_ubs
+         CALL dyn_zad_up3     ( kt )            ! vector form : vertical advection
+#else
          CALL dyn_zad     ( kt )               ! vector form : vertical advection
+#endif
        CASE( np_FLX_c2  ) 
          CALL dyn_adv_cen2( kt )               ! 2nd order centered scheme
 !!an
@@ -172,6 +176,12 @@ CONTAINS
          END SELECT
       ENDIF
       !
+#if defined key_vec_ubs
+         IF( n_dynadv == np_VEC_c2  )   WRITE(numout,*) '             with vertical ubs scheme'
+#else
+         IF( n_dynadv == np_VEC_c2  )   WRITE(numout,*) '             with (default) vertical c2 scheme'
+#endif
+
    END SUBROUTINE dyn_adv_init
 
   !!======================================================================
