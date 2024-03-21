@@ -202,11 +202,10 @@ CONTAINS
       !
       !! Shapiro filter (S=1/2) 
       lp_x = .false. ; lp_z = .false. ; np_smo = 0
-      WRITE(numout,*) 'before lp_x',lp_x, 'lp_z',lp_z, 'np_smo',np_smo
-      IF(nn_smo >0) THEN ; np_smo = nn_smo  ; lp_x = .true. ; lp_z = .true. ENDIF
-      IF(nn_smoh>0) THEN ; np_smo = nn_smoh ; lp_x = .true.                 ENDIF
-      IF(nn_smoz>0) THEN ; np_smo = nn_smoz ;                 lp_z = .true. ENDIF
-      WRITE(numout,*) 'after  lp_x',lp_x, 'lp_z',lp_z, 'np_smo',np_smo
+      IF(nn_smo >0) THEN ; np_smo = nn_smo  ; lp_x = .true. ; lp_z = .true. ; ENDIF
+      IF(nn_smoh>0) THEN ; np_smo = nn_smoh ; lp_x = .true.                 ; ENDIF
+      IF(nn_smoz>0) THEN ; np_smo = nn_smoz ;                 lp_z = .true. ; ENDIF
+      WRITE(numout,*) 'lp_x',lp_x, 'lp_z',lp_z, 'np_smo',np_smo
       !------------------------ smoothing along x ---------------------!
       !------------------------ ----------------- ---------------------!
       z3d (:,:,:) = rpot(:,:,:)
