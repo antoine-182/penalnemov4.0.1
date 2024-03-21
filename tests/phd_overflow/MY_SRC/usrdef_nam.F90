@@ -121,6 +121,11 @@ CONTAINS
       WRITE(numout,*) '   Lateral boundary condition of the global domain'
       WRITE(numout,*) '      OVERFLOW : closed basin                  jperio = ', kperio
       !
+#if defined key_vec_ubs
+      WRITE(numout,*) ' key_vec_ubs active'
+#else
+      WRITE(numout,*) ' key_vec_ubs inactive'
+#endif
 #if defined key_ubs
       WRITE(numout,*) ' key_ubs active'
 #else
