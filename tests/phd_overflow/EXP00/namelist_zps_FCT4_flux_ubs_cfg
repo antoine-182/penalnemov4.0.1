@@ -44,7 +44,7 @@
    nn_cnp = 0        ! definition of rpou and rpow
                         ! 0 halfsum 
                         ! 1 minimum  
-   rn_fsp = 0.05     ! friction parameter -sU of the permeability                [1/s]
+   rn_fsp = 0.1     ! friction parameter -sU of the permeability                [1/s]
       nn_fsp = 21    ! implicit integration method (during matrix inversion)
                         ! 2  - s fixed before simulation depending on nn_wef
                         ! 21 - s adapted in function of CFL condition (nn_wef)
@@ -256,7 +256,9 @@
 !-----------------------------------------------------------------------
    ln_dynadv_OFF  = .false. !  linear dynamics (no momentum advection)
    ln_dynadv_vec  = .false. !  vector form (T) or flux form (F)
-   nn_dynkeg      = 0       ! scheme for grad(KE): =0   C2  ;  =1   Hollingsworth correction
+         nn_dynkeg      = 0 ! scheme for grad(KE): =0   C2  ;  =1   Hollingsworth correction
+         nn_zadv        = 0 ! =0 / C2  for vertical advection in vector form
+                            ! =1 / UP3 for vertical advection in vector form
    ln_dynadv_up1  = .false. !  flux form - 1st order upwind scheme
    ln_dynadv_cen2 = .false. !  flux form - 2nd order centered scheme
    ln_dynadv_ubs  = .false.  !  flux form - UP3 horiz. - C2 vert. (sensitive to key_)

@@ -33,6 +33,7 @@ MODULE dynadv
    LOGICAL, PUBLIC ::   ln_dynadv_OFF   !: linear dynamics (no momentum advection)
    LOGICAL, PUBLIC ::   ln_dynadv_vec   !: vector form
    INTEGER, PUBLIC ::      nn_dynkeg       !: scheme of grad(KE): =0 C2 ; =1 Hollingsworth
+   INTEGER, PUBLIC ::      nn_zadv         !: scheme for vertical advection in vectorform
    LOGICAL, PUBLIC ::   ln_dynadv_cen2  !: flux form - 2nd order centered scheme flag
 !!an
    LOGICAL, PUBLIC ::   ln_dynadv_ubs   !: flux form - 3rd order UBS scheme flag
@@ -42,7 +43,8 @@ MODULE dynadv
    INTEGER, PUBLIC ::   n_dynadv   !: choice of the formulation and scheme for momentum advection
    !                               !  associated indices:
    INTEGER, PUBLIC, PARAMETER ::   np_LIN_dyn = 0   ! no advection: linear dynamics
-   INTEGER, PUBLIC, PARAMETER ::   np_VEC_c2  = 1   ! vector form : 2nd order centered scheme
+   INTEGER, PUBLIC, PARAMETER ::   np_VEC_c2  = 1   ! vector form : 2nd order centered scheme / vertical
+   INTEGER, PUBLIC, PARAMETER ::   np_VEC_up3 = 12   ! vector form : Upstream 3rd order scheme /vertical
    INTEGER, PUBLIC, PARAMETER ::   np_FLX_c2  = 2   ! flux   form : 2nd order centered scheme
 !!an
    INTEGER, PUBLIC, PARAMETER ::   np_FLX_ubs = 3   ! flux   form : 3rd order Upstream Biased Scheme
@@ -79,11 +81,10 @@ CONTAINS
       SELECT CASE( n_dynadv )    !==  compute advection trend and add it to general trend  ==!
       CASE( np_VEC_c2  )     
          CALL dyn_keg     ( kt, nn_dynkeg )    ! vector form : horizontal gradient of kinetic energy
-#if defined key_vec_ubs
-         CALL dyn_zad_up3     ( kt )            ! vector form : vertical advection
-#else
-         CALL dyn_zad     ( kt )               ! vector form : vertical advection
-#endif
+         CALL dyn_zad     ( kt )               ! vector form : vertical advection with C2
+      CASE( np_VEC_up3  )     
+         CALL dyn_keg     ( kt, nn_dynkeg )    ! vector form : horizontal gradient of kinetic energy
+         CALL dyn_zad_up3 ( kt )               ! vector form : vertical advection with UP3
        CASE( np_FLX_c2  ) 
          CALL dyn_adv_cen2( kt )               ! 2nd order centered scheme
 !!an
@@ -109,7 +110,9 @@ CONTAINS
       !!----------------------------------------------------------------------
       INTEGER ::   ioptio, ios   ! Local integer
       !
-      NAMELIST/namdyn_adv/ ln_dynadv_OFF, ln_dynadv_vec, nn_dynkeg, ln_dynadv_cen2, ln_dynadv_ubs, ln_dynadv_up1, ln_dynadv_up3
+!!aan
+      NAMELIST/namdyn_adv/ ln_dynadv_OFF, ln_dynadv_vec, nn_dynkeg, ln_dynadv_cen2, ln_dynadv_ubs, ln_dynadv_up1, ln_dynadv_up3, nn_zadv
+!!aan
       !!----------------------------------------------------------------------
       !
       IF(lwp) THEN
@@ -131,6 +134,7 @@ CONTAINS
          WRITE(numout,*) '      linear dynamics : no momentum advection          ln_dynadv_OFF  = ', ln_dynadv_OFF
          WRITE(numout,*) '      Vector form: 2nd order centered scheme           ln_dynadv_vec  = ', ln_dynadv_vec
          WRITE(numout,*) '         with Hollingsworth scheme (=1) or not (=0)       nn_dynkeg   = ', nn_dynkeg
+         WRITE(numout,*) '         vertical advection scheme C2 (=0) or UP3 (=1)    nn_dynkeg   = ', nn_zadv
          WRITE(numout,*) '      flux form: 2nd order centred scheme              ln_dynadv_cen2 = ', ln_dynadv_cen2
 !!an
          WRITE(numout,*) '                           UP3 horiz. / C2 vert.       ln_dynadv_ubs  = ', ln_dynadv_ubs
@@ -153,6 +157,8 @@ CONTAINS
       IF( ln_dynadv_vec  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_VEC_c2    ;   ENDIF
       IF( ln_dynadv_cen2 ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_c2    ;   ENDIF
 !!an
+      IF( ln_dynadv_cen2 .AND. nn_zadv ==1 ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_VEC_up3    ;   ENDIF
+
       IF( ln_dynadv_ubs  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_ubs   ;   ENDIF
       IF( ln_dynadv_up3  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_up3   ;   ENDIF
       IF( ln_dynadv_up1  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_up1   ;   ENDIF
@@ -168,6 +174,11 @@ CONTAINS
          CASE( np_VEC_c2  )   ;   WRITE(numout,*) '   ==>>>   vector form : keg + zad + vor is used' 
             IF( nn_dynkeg == nkeg_C2  )   WRITE(numout,*) '              with Centered standard keg scheme'
             IF( nn_dynkeg == nkeg_HW  )   WRITE(numout,*) '              with Hollingsworth keg scheme'
+         CASE( np_VEC_up3  )   ;   WRITE(numout,*) '   ==>>>   vector form : keg + zad + vor is used' 
+            IF( nn_dynkeg == nkeg_C2  )   WRITE(numout,*) '              with Centered standard keg scheme'
+            IF( nn_dynkeg == nkeg_HW  )   WRITE(numout,*) '              with Hollingsworth keg scheme'
+            IF( nn_zadv   == 0  )   WRITE(numout,*) '              with C2  for vertical adv'
+            IF( nn_zadv   == 1  )   WRITE(numout,*) '              with UP3 for vertical adv'
          CASE( np_FLX_c2  )   ;   WRITE(numout,*) '   ==>>>   flux form   : 2nd order scheme is used'
          CASE( np_FLX_ubs )   ;   WRITE(numout,*) '   ==>>>   flux form   : UBS       scheme is used'
          CASE( np_FLX_up3 )   ;   WRITE(numout,*) '   ==>>>   flux form   : UP3       scheme is used'
@@ -175,12 +186,6 @@ CONTAINS
          END SELECT
       ENDIF
       !
-#if defined key_vec_ubs
-         IF( n_dynadv == np_VEC_c2  )   WRITE(numout,*) '             with vertical ubs scheme'
-#else
-         IF( n_dynadv == np_VEC_c2  )   WRITE(numout,*) '             with (default) vertical c2 scheme'
-#endif
-
    END SUBROUTINE dyn_adv_init
 
   !!======================================================================
