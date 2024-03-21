@@ -201,6 +201,7 @@ CONTAINS
       !
       !
       !! Shapiro filter (S=1/2) 
+      lp_x = .false. ; lp_z = .false.
       IF(nn_smo >0) np_smo = nn_smo  ; lp_x = .true. ; lp_z = .true.
       IF(nn_smoh>0) np_smo = nn_smoh ; lp_x = .true. 
       IF(nn_smoz>0) np_smo = nn_smoz ;                 lp_z = .true. 
