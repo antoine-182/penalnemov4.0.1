@@ -134,7 +134,7 @@ CONTAINS
          WRITE(numout,*) '      linear dynamics : no momentum advection          ln_dynadv_OFF  = ', ln_dynadv_OFF
          WRITE(numout,*) '      Vector form: 2nd order centered scheme           ln_dynadv_vec  = ', ln_dynadv_vec
          WRITE(numout,*) '         with Hollingsworth scheme (=1) or not (=0)       nn_dynkeg   = ', nn_dynkeg
-         WRITE(numout,*) '         vertical advection scheme C2 (=0) or UP3 (=1)    nn_dynkeg   = ', nn_zadv
+         WRITE(numout,*) '         vertical advection scheme C2 (=0) or UP3 (=1)    nn_zadv     = ', nn_zadv
          WRITE(numout,*) '      flux form: 2nd order centred scheme              ln_dynadv_cen2 = ', ln_dynadv_cen2
 !!an
          WRITE(numout,*) '                           UP3 horiz. / C2 vert.       ln_dynadv_ubs  = ', ln_dynadv_ubs
@@ -157,8 +157,7 @@ CONTAINS
       IF( ln_dynadv_vec  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_VEC_c2    ;   ENDIF
       IF( ln_dynadv_cen2 ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_c2    ;   ENDIF
 !!an
-      IF( ln_dynadv_cen2 .AND. nn_zadv ==1 ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_VEC_up3    ;   ENDIF
-
+      IF( ln_dynadv_cen2 .AND. nn_zadv > 0 ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_VEC_up3    ;   ENDIF
       IF( ln_dynadv_ubs  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_ubs   ;   ENDIF
       IF( ln_dynadv_up3  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_up3   ;   ENDIF
       IF( ln_dynadv_up1  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_up1   ;   ENDIF
@@ -174,11 +173,11 @@ CONTAINS
          CASE( np_VEC_c2  )   ;   WRITE(numout,*) '   ==>>>   vector form : keg + zad + vor is used' 
             IF( nn_dynkeg == nkeg_C2  )   WRITE(numout,*) '              with Centered standard keg scheme'
             IF( nn_dynkeg == nkeg_HW  )   WRITE(numout,*) '              with Hollingsworth keg scheme'
+                                          WRITE(numout,*) '              with C2  for vertical adv'
          CASE( np_VEC_up3  )   ;   WRITE(numout,*) '   ==>>>   vector form : keg + zad + vor is used' 
             IF( nn_dynkeg == nkeg_C2  )   WRITE(numout,*) '              with Centered standard keg scheme'
             IF( nn_dynkeg == nkeg_HW  )   WRITE(numout,*) '              with Hollingsworth keg scheme'
-            IF( nn_zadv   == 0  )   WRITE(numout,*) '              with C2  for vertical adv'
-            IF( nn_zadv   == 1  )   WRITE(numout,*) '              with UP3 for vertical adv'
+                                          WRITE(numout,*) '              with UP3 for vertical adv'
          CASE( np_FLX_c2  )   ;   WRITE(numout,*) '   ==>>>   flux form   : 2nd order scheme is used'
          CASE( np_FLX_ubs )   ;   WRITE(numout,*) '   ==>>>   flux form   : UBS       scheme is used'
          CASE( np_FLX_up3 )   ;   WRITE(numout,*) '   ==>>>   flux form   : UP3       scheme is used'
