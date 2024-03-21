@@ -201,11 +201,12 @@ CONTAINS
       !
       !
       !! Shapiro filter (S=1/2) 
-      lp_x = .false. ; lp_z = .false.
-      IF(nn_smo >0) np_smo = nn_smo  ; lp_x = .true. ; lp_z = .true.
-      IF(nn_smoh>0) np_smo = nn_smoh ; lp_x = .true. 
-      IF(nn_smoz>0) np_smo = nn_smoz ;                 lp_z = .true. 
-
+      lp_x = .false. ; lp_z = .false. ; np_smo = 0
+      WRITE(numout,*) 'before lp_x',lp_x, 'lp_z',lp_z, 'np_smo',np_smo
+      IF(nn_smo >0) THEN ; np_smo = nn_smo  ; lp_x = .true. ; lp_z = .true. ENDIF
+      IF(nn_smoh>0) THEN ; np_smo = nn_smoh ; lp_x = .true.                 ENDIF
+      IF(nn_smoz>0) THEN ; np_smo = nn_smoz ;                 lp_z = .true. ENDIF
+      WRITE(numout,*) 'after  lp_x',lp_x, 'lp_z',lp_z, 'np_smo',np_smo
       !------------------------ smoothing along x ---------------------!
       !------------------------ ----------------- ---------------------!
       z3d (:,:,:) = rpot(:,:,:)
@@ -226,7 +227,7 @@ CONTAINS
          rpot(:,:,:) = z3d(:,:,:)
         !------------------------ smoothing along z ---------------------!
          IF (lp_z) THEN
-            IF(lwp) WRITE(numout,*) 'nth vertical pass of Shapiro (1/4,1/2,1/4) filter (bvp)',jx
+            IF(lwp) WRITE(numout,*) 'nth vertical   pass of Shapiro (1/4,1/2,1/4) filter (bvp)',jx
             DO ji = 1,jpi
                IF (glamt(ji,2) > 20._wp ) THEN    ! preserve the shelf
                   DO jk = 2,jpkm1
