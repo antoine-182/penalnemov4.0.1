@@ -222,29 +222,29 @@ CONTAINS
       DO jx = 1, np_smo
          IF (lp_x) THEN
             IF(lwp) WRITE(numout,*) 'nth horizontal pass of Shapiro (1/4,1/2,1/4) filter (bvp)',jx
-               DO ji = 2,jpim1
-                  DO jk = 1,jpk
-                     DO jj = 1,jpj
+            DO ji = 2,jpim1
+               DO jk = 1,jpk
+                  DO jj = 1,jpj
                      z3d (ji,jj,jk) = 0.5_wp * zsd(ji) * rpot(ji-1,jj,jk)+ (1._wp - zsd(ji) ) * rpot(ji,jj,jk) + 0.5_wp * zsd(ji) * rpot(ji+1,jj,jk )
-                     END DO
                   END DO
                END DO
+            END DO
             CALL lbc_lnk( 'usrdef_zgr', z3d, 'T', 1._wp, kfillmode=jpfillcopy)
+            rpot(:,:,:) = z3d(:,:,:)
          ENDIF
-         rpot(:,:,:) = z3d(:,:,:)
         !------------------------ smoothing along z ---------------------!
          IF (lp_z) THEN
             IF(lwp) WRITE(numout,*) 'nth vertical   pass of Shapiro (1/4,1/2,1/4) filter (bvp)',jx
             DO ji = 1,jpi
                DO jk = 2,jpkm1
                   DO jj = 1,jpj
-                     z3d(ji,jj,jk)  = 0.5_wp * zsd(ji) * rpot(ji,jj,jk-1)+ (1._wp - zsd(ji) ) * rpot(ji,jj,jk) + 0.5_wp * zsd(ji) * rpot(ji,jj,jk+1)
+                     z3d(ji,jj,jk)  = 0.5_wp * zsd(ji) * rpot(ji,jj,jk-1) + (1._wp - zsd(ji) ) * rpot(ji,jj,jk) + 0.5_wp * zsd(ji) * rpot(ji,jj,jk+1)
                   END DO
                END DO
             END DO
             CALL lbc_lnk( 'usrdef_zgr', z3d, 'T', 1._wp, kfillmode=jpfillcopy)
+            rpot(:,:,:) = z3d(:,:,:)
          ENDIF
-         rpot(:,:,:) = z3d(:,:,:)
       END DO
       !
       ! CALL lbc_lnk( 'usrdef_zgr', rpot, 'T', 1._wp)
@@ -377,12 +377,12 @@ CONTAINS
       IF ( nn_abp >= 1) THEN 
          k_bot(:,:) = jpkm1 ! last wet cell
          DO jk = jpkm1, 1, -1
-            WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk-1,jpkm1)
+            WHERE( rpot(:,:,jk) <= 1.00001 * rn_abp )   k_bot(:,:) = MIN(jk-1,jpkm1)
          END DO
       ELSE IF ( nn_abp == 0 ) THEN
          k_bot(:,:) = jpkm1 ! last wet cell
          DO jk = jpkm1, 1, -1
-            WHERE( rpot(:,:,jk) <= rn_abp )   k_bot(:,:) = MIN(jk,jpkm1)
+            WHERE( rpot(:,:,jk) <= 1.00001 * rn_abp )   k_bot(:,:) = MIN(jk,jpkm1)
          END DO
       ENDIF
       ! 3) penalisation of the vertical scale factors (done in domain.F90)
