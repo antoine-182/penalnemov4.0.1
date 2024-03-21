@@ -201,10 +201,10 @@ CONTAINS
       !
       !
       !! Shapiro filter (S=1/2) 
-      IF(nn_smo >0) np_smo = nn_smo  ; lp_x = TRUE ; lp_z = TRUE 
-      IF(nn_smoh>0) np_smo = nn_smoh ; lp_x = TRUE 
-      IF(nn_smoz>0) np_smo = nn_smoz ;               lp_z = TRUE 
-      
+      IF(nn_smo >0) np_smo = nn_smo  ; lp_x = .true. ; lp_z = .true.
+      IF(nn_smoh>0) np_smo = nn_smoh ; lp_x = .true. 
+      IF(nn_smoz>0) np_smo = nn_smoz ;                 lp_z = .true. 
+
       !------------------------ smoothing along x ---------------------!
       !------------------------ ----------------- ---------------------!
       z3d (:,:,:) = rpot(:,:,:)
