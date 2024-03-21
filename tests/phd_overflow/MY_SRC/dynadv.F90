@@ -154,10 +154,9 @@ CONTAINS
 #endif
       ioptio = 0                      ! parameter control and set n_dynadv
       IF( ln_dynadv_OFF  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_LIN_dyn   ;   ENDIF
-      IF( ln_dynadv_vec  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_VEC_c2    ;   ENDIF
-      IF( ln_dynadv_cen2 ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_c2    ;   ENDIF
-!!an
-      IF( ln_dynadv_cen2 .AND. nn_zadv > 0 ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_VEC_up3    ;   ENDIF
+      IF( ln_dynadv_vec .AND. nn_zadv==0  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_VEC_c2    ;   ENDIF
+      IF( ln_dynadv_vec .AND. nn_zadv==1  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_VEC_up3    ;   ENDIF
+      IF( ln_dynadv_cen2  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_c2    ;   ENDIF
       IF( ln_dynadv_ubs  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_ubs   ;   ENDIF
       IF( ln_dynadv_up3  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_up3   ;   ENDIF
       IF( ln_dynadv_up1  ) THEN   ;   ioptio = ioptio + 1   ;   n_dynadv = np_FLX_up1   ;   ENDIF
