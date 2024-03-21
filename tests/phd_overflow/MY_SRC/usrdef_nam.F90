@@ -44,6 +44,8 @@ MODULE usrdef_nam
    INTEGER, PUBLIC  ::   nn_fsp             ! friction parameter 1/epsilon of the permeability               [1/s]
    INTEGER, PUBLIC  ::   nn_wef             ! where friction is applied
    INTEGER , PUBLIC ::   nn_smo             ! number of passes shapiro filter
+   INTEGER , PUBLIC ::   nn_smoh            ! number of passes shapiro filter
+   INTEGER , PUBLIC ::   nn_smoz            ! number of passes shapiro filter
 
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
@@ -73,7 +75,7 @@ CONTAINS
       !!
       NAMELIST/namusr_def/ ln_zco, ln_zps, ln_sco, rn_dx, rn_dz, rn_T1, rn_T0,      &
          &                 rn_abp, nn_abp,  nn_cnp, rn_fsp, nn_fsp, nn_wef, nn_smo, & ! penalisation parameters
-         &                 ln_ovf, nn_ovf                                             ! larger bathy
+         &                 ln_ovf, nn_ovf, nn_smoh, nn_smoz                           ! larger bathy
 
       !!----------------------------------------------------------------------
       !
@@ -141,6 +143,7 @@ CONTAINS
 #if defined key_bvp
       WRITE(numout,*) ' key_bvp active'
       IF( rn_fsp<=0 .AND. (nn_fsp == 11 .OR. nn_fsp == 21 .OR. nn_fsp == 31 ) ) CALL ctl_stop( 'usr_def_nam: friction cannot be negative or nil with this choice of nn_fsp' )
+      IF( (nn_smo > 0 .OR. nn_smoh > 0) .AND. (nn_smo > 0 .OR. nn_smoz > 0) .AND. (nn_smoh > 0 .OR. nn_smoz > 0) ) CALL ctl_stop( 'usr_def_nam: choose one smoothing' )
       !
       IF( .NOT. ln_zco .AND. nn_abp <  0 ) CALL ctl_stop( 'usr_def_nam: choose nn_abp accordingly to ln_zco' )
       IF( .NOT. ln_zps .AND. nn_abp >= 0 ) CALL ctl_stop( 'usr_def_nam: choose nn_abp accordingly to ln_zps' )
@@ -155,6 +158,8 @@ CONTAINS
       WRITE(numout,*) '                                              nn_fsp = ', nn_fsp
       WRITE(numout,*) '                                              nn_wef = ', nn_wef
       WRITE(numout,*) '                                              nn_smo = ', nn_smo
+      WRITE(numout,*) '                                              nn_smoh = ', nn_smoh
+      WRITE(numout,*) '                                              nn_smoz = ', nn_smoz
       WRITE(numout,*) '                                                       '
       WRITE(numout,*) '                                              ln_ovf = ', ln_ovf
       WRITE(numout,*) '                                              nn_ovf = ', nn_ovf

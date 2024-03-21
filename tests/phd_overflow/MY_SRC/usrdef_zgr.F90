@@ -66,13 +66,14 @@ CONTAINS
       REAL(wp), DIMENSION(:,:,:), INTENT(  out) ::   pe3w , pe3uw, pe3vw         ! i-scale factors
       INTEGER , DIMENSION(:,:)  , INTENT(  out) ::   k_top, k_bot                ! first & last ocean level
       !
-      INTEGER  ::   ji, jj, jk,jx,jz         ! dummy indices
+      INTEGER  ::   ji, jj, jk,jx,jz, np_smo         ! dummy indices
       INTEGER  ::   ik                ! local integers
       REAL(wp) ::   zfact, z1_jpkm1   ! local scalar
       REAL(wp) ::   ze3min            ! local scalar
       REAL(wp) ::   z1d, zrpostar,zr1,zr2     ! local scalar
       REAL(wp), DIMENSION(jpi,jpj)      ::   zht, zhu, z2d   ! 2D workspace
       REAL(wp), DIMENSION(jpi,jpj,jpk)  ::   z3d, z3du,z3d3         ! 3D workspace
+      LOGICAL  ::   lp_x, lp_z
 
       !!----------------------------------------------------------------------
       !
@@ -200,33 +201,42 @@ CONTAINS
       !
       !
       !! Shapiro filter (S=1/2) 
+      IF(nn_smo >0) np_smo = nn_smo  ; lp_x = TRUE ; lp_z = TRUE 
+      IF(nn_smoh>0) np_smo = nn_smoh ; lp_x = TRUE 
+      IF(nn_smoz>0) np_smo = nn_smoz ;               lp_z = TRUE 
+      
       !------------------------ smoothing along x ---------------------!
       !------------------------ ----------------- ---------------------!
       z3d (:,:,:) = rpot(:,:,:)
-      DO jx = 1, nn_smo
-         IF(lwp) WRITE(numout,*) 'nth pass of Shapiro (1/4,1/2,1/4) filter (bvp)',jx
-            DO ji = 2,jpim1
-               IF (glamt(ji,2) > 20._wp ) THEN  ! preserve the shelf
-                  DO jk = 1,jpk
+      DO jx = 1, np_smo
+         IF (lp_x) THEN
+            IF(lwp) WRITE(numout,*) 'nth horizontal pass of Shapiro (1/4,1/2,1/4) filter (bvp)',jx
+               DO ji = 2,jpim1
+                  IF (glamt(ji,2) > 20._wp ) THEN  ! preserve the shelf
+                     DO jk = 1,jpk
+                        DO jj = 1,jpj
+                        z3d (ji,jj,jk) = 0.25_wp * rpot(ji-1,jj,jk)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji+1,jj,jk )
+                        END DO
+                     END DO
+                  ENDIF
+               END DO
+            CALL lbc_lnk( 'usrdef_zgr', z3d, 'T', 1._wp, kfillmode=jpfillcopy)
+         ENDIF
+         rpot(:,:,:) = z3d(:,:,:)
+        !------------------------ smoothing along z ---------------------!
+         IF (lp_z) THEN
+            IF(lwp) WRITE(numout,*) 'nth vertical pass of Shapiro (1/4,1/2,1/4) filter (bvp)',jx
+            DO ji = 1,jpi
+               IF (glamt(ji,2) > 20._wp ) THEN    ! preserve the shelf
+                  DO jk = 2,jpkm1
                      DO jj = 1,jpj
-                     z3d (ji,jj,jk) = 0.25_wp * rpot(ji-1,jj,jk)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji+1,jj,jk )
+                        z3d(ji,jj,jk)  = 0.25_wp * rpot(ji,jj,jk-1)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji,jj,jk+1)
                      END DO
                   END DO
                ENDIF
-         END DO
-         CALL lbc_lnk( 'usrdef_zgr', z3d, 'T', 1._wp, kfillmode=jpfillcopy)
-         rpot(:,:,:) = z3d(:,:,:)
-        !------------------------ smoothing along z ---------------------!
-         DO ji = 1,jpi
-            IF (glamt(ji,2) > 20._wp ) THEN    ! preserve the shelf
-               DO jk = 2,jpkm1
-                  DO jj = 1,jpj
-                     z3d(ji,jj,jk)  = 0.25_wp * rpot(ji,jj,jk-1)+ 0.5_wp * rpot(ji,jj,jk) + 0.25_wp* rpot(ji,jj,jk+1)
-                  END DO
-               END DO
-            ENDIF
-         END DO
-         CALL lbc_lnk( 'usrdef_zgr', z3d, 'T', 1._wp, kfillmode=jpfillcopy)
+            END DO
+            CALL lbc_lnk( 'usrdef_zgr', z3d, 'T', 1._wp, kfillmode=jpfillcopy)
+         ENDIF
          rpot(:,:,:) = z3d(:,:,:)
       END DO
       !

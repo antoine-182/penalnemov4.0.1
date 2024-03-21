@@ -37,7 +37,10 @@
                         ! (-)             =  0  last wet cell of the sill is porous (rn_abp) - masked under
                         ! (-)             =  1  penalised partial cells (rn_abp min)
                         ! (-)             =  2  penalised shaved cells (piecewise linear)
-   nn_smo = 0        ! smoothing of porosity 
+   nn_smo  = 0        ! shapiro smoothing, if bvp porosity field else depth profile
+   nn_smoh = 0        ! shapiro smoothing / horizontal
+   nn_smoz = 0        ! shapiro smoothing / vertical
+
    nn_cnp = 0        ! definition of rpou and rpow
                         ! 0 halfsum 
                         ! 1 minimum  
