@@ -46,6 +46,7 @@ MODULE usrdef_nam
    INTEGER , PUBLIC ::   nn_smo             ! number of passes shapiro filter
    INTEGER , PUBLIC ::   nn_smoh            ! number of passes shapiro filter
    INTEGER , PUBLIC ::   nn_smoz            ! number of passes shapiro filter
+   LOGICAL , PUBLIC ::   ln_smooth          ! number of passes shapiro filter
 
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
@@ -75,7 +76,7 @@ CONTAINS
       !!
       NAMELIST/namusr_def/ ln_zco, ln_zps, ln_sco, rn_dx, rn_dz, rn_T1, rn_T0,      &
          &                 rn_abp, nn_abp,  nn_cnp, rn_fsp, nn_fsp, nn_wef, nn_smo, & ! penalisation parameters
-         &                 ln_ovf, nn_ovf, nn_smoh, nn_smoz                           ! larger bathy
+         &                 ln_ovf, nn_ovf, nn_smoh, nn_smoz, ln_smooth                           ! larger bathy
 
       !!----------------------------------------------------------------------
       !
@@ -155,9 +156,10 @@ CONTAINS
       WRITE(numout,*) '                                              nn_smo = ', nn_smo
       WRITE(numout,*) '                                              nn_smoh = ', nn_smoh
       WRITE(numout,*) '                                              nn_smoz = ', nn_smoz
-      WRITE(numout,*) '                                                       '
-      WRITE(numout,*) '                                              ln_ovf = ', ln_ovf
-      WRITE(numout,*) '                                              nn_ovf = ', nn_ovf
+      WRITE(numout,*) '                                            ln_smooth = ', ln_smooth
+      WRITE(numout,*) '                                                        '
+      WRITE(numout,*) '                                               ln_ovf = ', ln_ovf
+      WRITE(numout,*) '                                               nn_ovf = ', nn_ovf
       !
       !
    END SUBROUTINE usr_def_nam

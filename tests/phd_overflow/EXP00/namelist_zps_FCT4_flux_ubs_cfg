@@ -38,6 +38,7 @@
                         ! (-)             =  1  penalised partial cells (rn_abp min)
                         ! (-)             =  2  penalised shaved cells (piecewise linear)
    nn_smo  = 0        ! shapiro smoothing, if bvp porosity field else depth profile
+      ln_smooth = .false. ! if true gradually varying shapiro filter
    nn_smoh = 0        ! shapiro smoothing / horizontal
    nn_smoz = 0        ! shapiro smoothing / vertical
 
